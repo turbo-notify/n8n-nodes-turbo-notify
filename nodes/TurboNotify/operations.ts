@@ -171,8 +171,11 @@ const editCaption: Handler = async (context, i, ref, s) => {
 	return (await apiRequest(context, { method: 'POST', path: `${path}/edit`, body: { caption }, itemIndex: i })) as IDataObject;
 };
 
-const remove: Handler = async (context, i, ref, s) =>
-	(await apiRequest(context, { method: 'POST', path: `${messagePath(context, i, ref, s)}/delete`, itemIndex: i })) as IDataObject;
+const remove: Handler = async (context, i, ref, s) => {
+	const accepted = (await apiRequest(context, { method: 'POST', path: `${messagePath(context, i, ref, s)}/delete`, itemIndex: i })) as IDataObject;
+	// The API accepts the deletion and WhatsApp finishes it a moment later: `deleted: true` means "accepted".
+	return { ...accepted, deleted: true };
+};
 
 const getStatus: Handler = async (context, i, ref, s) =>
 	(await apiRequest(context, { method: 'GET', path: `${messagePath(context, i, ref, s)}/status`, itemIndex: i })) as IDataObject;

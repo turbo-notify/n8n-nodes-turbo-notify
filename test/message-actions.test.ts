@@ -57,10 +57,11 @@ describe('Message actions', () => {
 		});
 	});
 
-	it('delete posts to the delete route without a body', async () => {
-		const { calls } = await run({ operation: 'delete' });
+	it('delete posts to the delete route without a body and reports deleted: true', async () => {
+		const { calls, result } = await run({ operation: 'delete' }, [ACCEPTED]);
 		expect(calls[0]).toMatchObject({ method: 'POST', url: `${API}/numbers/main/messages/${MSG}/delete` });
 		expect(calls[0]?.body).toBeUndefined();
+		expect(result[0]?.[0]?.json).toEqual({ ...ACCEPTED, deleted: true });
 	});
 
 	it('getStatus reads the status route', async () => {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Message Delete now reports `deleted: true` next to what the API returned, so the next step of a workflow can check it. The package publishes through the npm Trusted Publisher (no token) from this release on.
+
 ## 0.1.0
 
 First release.

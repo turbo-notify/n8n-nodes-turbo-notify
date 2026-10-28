@@ -64,7 +64,7 @@ Every operation has a **Number** field. Pick the number from the list, or type i
 | Reply | Replies to an earlier message, quoting it. To answer the message that just arrived, use Send Text. |
 | React | Reacts with an emoji. An empty reaction removes yours. |
 | Edit Text, Edit Caption | Changes a message you sent, within 15 minutes of sending. |
-| Delete | Deletes a message you sent. |
+| Delete | Deletes a message you sent. The output has `deleted: true`, which means Turbo Notify accepted the request. WhatsApp finishes the deletion a moment later. |
 | Get Status | Returns `pending`, `sent`, `delivered`, `read` or `failed`, with the reason when it failed. |
 | Get, Get Many | Reads messages. Get Many filters by group, contact and direction. |
 
