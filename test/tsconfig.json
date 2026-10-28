@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"incremental": false,
+		"rootDir": "..",
+		"types": ["jest", "node"],
+		"lib": ["es2019", "es2020", "es2022.error"]
+	},
+	"include": ["../credentials/**/*", "../nodes/**/*", "./**/*"]
+}

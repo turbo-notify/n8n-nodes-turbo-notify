@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-turbo-notify.turboNotifyTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Communication"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#credentials"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#trigger"
+			}
+		]
+	}
+}

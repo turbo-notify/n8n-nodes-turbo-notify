@@ -1,0 +1,48 @@
+{
+	"name": "Answer every WhatsApp message that arrives",
+	"nodes": [
+		{
+			"parameters": {
+				"events": ["message.received"],
+				"options": {},
+				"pollTimes": { "item": [{ "mode": "everyMinute" }] }
+			},
+			"id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c03",
+			"name": "Turbo Notify Trigger",
+			"type": "n8n-nodes-turbo-notify.turboNotifyTrigger",
+			"typeVersion": 1,
+			"position": [0, 0],
+			"credentials": {
+				"turboNotifyApi": { "id": "REPLACE_WITH_YOUR_CREDENTIAL", "name": "Turbo Notify API" }
+			}
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": { "__rl": true, "mode": "id", "value": "={{ $json.number_alias }}" },
+				"recipientType": "phone",
+				"phoneNumber": "={{ '+' + $json.data.from.number }}",
+				"text": "Thanks for your message. We will answer during business hours.",
+				"options": {
+					"idempotencyKey": "={{ 'auto-' + $json.id }}"
+				}
+			},
+			"id": "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d04",
+			"name": "Send WhatsApp text",
+			"type": "n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [260, 0],
+			"credentials": {
+				"turboNotifyApi": { "id": "REPLACE_WITH_YOUR_CREDENTIAL", "name": "Turbo Notify API" }
+			}
+		}
+	],
+	"connections": {
+		"Turbo Notify Trigger": {
+			"main": [[{ "node": "Send WhatsApp text", "type": "main", "index": 0 }]]
+		}
+	},
+	"pinData": {},
+	"settings": { "executionOrder": "v1" }
+}
