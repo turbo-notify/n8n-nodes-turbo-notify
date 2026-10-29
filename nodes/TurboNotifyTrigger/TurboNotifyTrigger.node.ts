@@ -44,8 +44,10 @@ export class TurboNotifyTrigger implements INodeType {
 		version: 1,
 		subtitle:
 			'={{ Array.isArray($parameter["events"]) && !$parameter["events"].includes("*") ? $parameter["events"].join(", ") : "any event" }}',
-		description:
-			'Starts a workflow the moment Turbo Notify records a WhatsApp event, such as a received message',
+		// n8n groups this trigger with the Turbo Notify node (the name without "Trigger" is the same) and
+		// gives the group the trigger's description: the node panel for "Turbo Notify" shows this text above
+		// the list of actions. So it describes the whole app, and a test keeps it that way.
+		description: 'Send, track and receive WhatsApp messages from your workflows',
 		defaults: { name: 'Turbo Notify Trigger' },
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],

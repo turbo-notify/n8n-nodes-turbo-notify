@@ -5,6 +5,7 @@ import type {
 	Icon,
 	INodeProperties,
 } from 'n8n-workflow';
+import { USER_AGENT } from '../nodes/TurboNotify/transport/version';
 
 export class TurboNotifyApi implements ICredentialType {
 	name = 'turboNotifyApi';
@@ -16,9 +17,17 @@ export class TurboNotifyApi implements ICredentialType {
 		dark: 'file:../nodes/TurboNotify/turboNotify.svg',
 	};
 
-	documentationUrl = 'https://docs.turbonotify.com/en/general/access-key/';
+	documentationUrl = 'https://docs.turbonotify.com/en/guides/n8n/';
 
 	properties: INodeProperties[] = [
+		{
+			// n8n keeps links in a notice and drops other tags. Everything here is fixed text.
+			displayName:
+				'Before you start you need a Turbo Notify account, your WhatsApp number connected under Numbers, and an API key from API keys. A new number sends 50 messages on its first day, 200 on the second, 500 on the third, 1,000 on the fourth and 2,000 a day until the seventh. The Free plan covers 300 messages and 2 contacts per billing cycle, enough to try the node. <a href="https://docs.turbonotify.com/en/guides/n8n/" target="_blank">Open the setup guide</a>.',
+			name: 'notice',
+			type: 'notice',
+			default: '',
+		},
 		{
 			displayName: 'API Key',
 			name: 'apiKey',
@@ -27,7 +36,7 @@ export class TurboNotifyApi implements ICredentialType {
 			required: true,
 			default: '',
 			description:
-				'Create it in the Turbo Notify dashboard, under API keys. The value is shown only once.',
+				'Create it in the Turbo Notify dashboard, under API keys (https://dashboard.turbonotify.com/api-keys). The value is shown only once.',
 		},
 		{
 			displayName: 'Base URL',
@@ -62,6 +71,7 @@ export class TurboNotifyApi implements ICredentialType {
 			baseURL: '={{$credentials.baseUrl.replace(/\\/+$/, "").replace(/\\/v1$/, "")}}',
 			url: '/v1/usage',
 			method: 'GET',
+			headers: { 'User-Agent': USER_AGENT },
 		},
 	};
 }

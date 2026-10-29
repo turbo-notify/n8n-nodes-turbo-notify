@@ -7,12 +7,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#credentials"
+				"url": "https://docs.turbonotify.com/en/guides/n8n/"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#readme"
+				"url": "https://docs.turbonotify.com/en/guides/n8n/"
 			}
 		]
 	}

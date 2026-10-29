@@ -60,15 +60,30 @@ export function headerOf(error: unknown, name: string): string | undefined {
 	return value === undefined ? undefined : String(value);
 }
 
+const DASHBOARD = 'https://dashboard.turbonotify.com';
+const DOCS = 'https://docs.turbonotify.com/en';
+
+/** "2 hours 42 minutes", "35 minutes", "less than a minute": how long until a limit renews. */
+export function untilText(seconds: number): string {
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.round((seconds % 3600) / 60);
+	const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+	if (hours > 0)
+		return minutes > 0
+			? `${plural(hours, 'hour')} ${plural(minutes, 'minute')}`
+			: plural(hours, 'hour');
+	return minutes > 0 ? plural(minutes, 'minute') : 'less than a minute';
+}
+
 const KNOWN: Record<string, Described> = {
 	not_authenticated: {
 		message: 'The API key was not accepted',
 		description:
-			"Check the 'API Key' in the Turbo Notify API credential. A revoked or expired key never works again: create a new one in the dashboard under API keys.",
+			`Check the 'API Key' in the Turbo Notify API credential. A revoked or expired key never works again: create a new one under API keys in the dashboard (${DASHBOARD}/api-keys).`,
 	},
 	number_not_connected: {
 		message: 'The number is not connected to WhatsApp',
-		description: 'Reconnect the number in the Turbo Notify dashboard, then run the node again.',
+		description: `Reconnect the number under Numbers in the Turbo Notify dashboard (${DASHBOARD}/numbers), then run the node again.`,
 	},
 	number_not_found: {
 		message: 'The number was not found',
@@ -83,22 +98,20 @@ const KNOWN: Record<string, Described> = {
 	feature_not_available: {
 		message: 'The current plan does not include this feature',
 		description:
-			'Sending to groups and the typing indicator, for example, need a higher plan. Compare plans under Billing in the dashboard.',
+			`Sending to groups and the typing indicator, for example, need a higher plan. Compare plans under Billing in the dashboard (${DASHBOARD}/billing).`,
 	},
 	subscription_inactive: {
 		message: 'The subscription is not active',
 		description:
-			'Sort out the payment under Billing in the Turbo Notify dashboard. Sends resume when the subscription is active.',
+			`Sort out the payment under Billing in the Turbo Notify dashboard (${DASHBOARD}/billing). Sends resume when the subscription is active.`,
 	},
 	messages_quota_exceeded: {
 		message: "The number's message allowance is used up",
-		description:
-			'The allowance resets when the billing cycle turns, or when the plan changes. Retrying now gives the same answer.',
+		description: `The allowance resets when the billing cycle turns. To send more now, change the plan under Billing in the dashboard (${DASHBOARD}/billing). Retrying now gives the same answer.`,
 	},
 	contact_quota_exceeded: {
 		message: "The number's contact allowance is used up",
-		description:
-			'The allowance resets when the billing cycle turns, or when the plan changes. Retrying now gives the same answer.',
+		description: `Each number can message a limited number of different contacts in a billing cycle, and a contact already messaged in this cycle can still receive messages. The allowance resets when the cycle turns. To message more people now, change the plan under Billing in the dashboard (${DASHBOARD}/billing). Retrying now gives the same answer.`,
 	},
 	edit_window_expired: {
 		message: 'This message can no longer be edited',
@@ -122,8 +135,7 @@ const KNOWN: Record<string, Described> = {
 	},
 	warmup_limit_exceeded: {
 		message: "This number's daily volume is still being released",
-		description:
-			'A number connected a few days ago can send a limited volume per day. The limit renews at midnight UTC.',
+		description: `A new number sends a limited volume a day in its first week: 50 messages on the first day, 200 on the second, 500 on the third, 1,000 on the fourth and 2,000 a day until the seventh. After that only your plan limits apply. The schedule is at ${DOCS}/messages/rate-limits/.`,
 	},
 	recipients_per_day_limit_exceeded: {
 		message: 'This recipient already received the daily maximum from this number',
@@ -157,6 +169,18 @@ function describe(status: number | undefined, body: IDataObject, error: unknown)
 	const known = code ? KNOWN[code] : undefined;
 	let message = known?.message ?? (typeof body.message === 'string' ? body.message : undefined);
 	let description = known?.description ?? (typeof body.hint === 'string' ? body.hint : '');
+
+	if (code === 'warmup_limit_exceeded') {
+		// The wait is the time left until the daily count starts again at midnight UTC.
+		const wait = Number(headerOf(error, 'retry-after'));
+		description = `${description} The count starts again at midnight UTC${
+			Number.isFinite(wait) && wait > 0 ? `, in about ${untilText(wait)}` : ''
+		}.`;
+	} else if (code === 'messages_quota_exceeded' || code === 'contact_quota_exceeded') {
+		const resets = Date.parse(String(pick(body, 'details', 'resets_at') ?? ''));
+		if (!Number.isNaN(resets))
+			description = `${description} It resets on ${new Date(resets).toISOString().slice(0, 10)} (UTC).`;
+	}
 
 	if (code === 'insufficient_scope') {
 		const scope = typeof body.required_scope === 'string' ? body.required_scope : 'the required';

@@ -14,6 +14,42 @@ function walk(dir, out = []) {
 	return out;
 }
 
+describe('package documentation stays in step', () => {
+	const CHANGELOG = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+	const README = readFileSync(join(root, 'README.md'), 'utf8');
+
+	it('sends the version of package.json as the User-Agent', () => {
+		const { PACKAGE_VERSION } = require('../nodes/TurboNotify/transport/version');
+		expect(PACKAGE_VERSION).toBe(pkg.version);
+	});
+
+	it('has a changelog entry for the version, newest first', () => {
+		expect(CHANGELOG).toMatch(new RegExp(`^# Changelog\\n\\n## ${pkg.version.replace(/\./g, '\\.')}\\n`));
+	});
+
+	it('sends the credential and every node to the same documentation page', () => {
+		const { TurboNotifyApi } = require('../credentials/TurboNotifyApi.credentials');
+		const page = new TurboNotifyApi().documentationUrl;
+		for (const entry of pkg.n8n.nodes) {
+			const codex = JSON.parse(
+				readFileSync(join(root, entry.replace(/^dist\//, '').replace(/\.js$/, '.json')), 'utf8'),
+			);
+			expect(codex.resources.credentialDocumentation[0].url).toBe(page);
+		}
+	});
+
+	it('opens the README with what is needed before the first message', () => {
+		const before = README.indexOf('## Before you start');
+		expect(before).toBeGreaterThan(0);
+		expect(before).toBeLessThan(README.indexOf('## Install'));
+		const section = README.slice(before, README.indexOf('## Install'));
+		for (const volume of ['50', '200', '500', '1,000', '2,000', '300', '6 seconds']) {
+			expect(section).toContain(volume);
+		}
+		expect(section).toMatch(/Polling Trigger/);
+	});
+});
+
 describe('package contract for verified community nodes', () => {
 	it('is named n8n-nodes-*', () =>
 		expect(pkg.name).toMatch(/^(@[a-z0-9-]+\/)?n8n-nodes-[a-z0-9-]+$/));

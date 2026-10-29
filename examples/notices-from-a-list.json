@@ -54,6 +54,21 @@
 				}
 			},
 			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"content": "**On the Free plan**\nA number can message 2 different contacts per billing cycle, so the third row stops with `contact_quota_exceeded`. Sends go out one every 6 seconds. Test with two rows, or use a paid plan for a real list.",
+				"height": 200,
+				"width": 360
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e9b0",
+			"name": "Note b0",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				520,
+				-280
+			]
 		}
 	],
 	"connections": {

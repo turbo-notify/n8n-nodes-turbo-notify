@@ -168,6 +168,21 @@
 					"name": "Turbo Notify API"
 				}
 			}
+		},
+		{
+			"parameters": {
+				"content": "**On the Free plan**\nThe typing step needs the Lone Wolf plan: on the Free plan it fails and the workflow goes on. A new number sends 50 messages on its first day, so test with a few chats first.",
+				"height": 200,
+				"width": 360
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e9b2",
+			"name": "Note b2",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				-280
+			]
 		}
 	],
 	"connections": {

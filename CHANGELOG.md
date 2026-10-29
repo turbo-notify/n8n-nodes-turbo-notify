@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1
+
+What a person meets on the first day, found by using the node against the production API.
+
+- **The credential says what you need.** A notice at the top lists the account, the connected number and the API key, with the page that goes through it step by step, the volume a new number can send in its first week and the Free plan allowance. The credential and all three nodes now open the same documentation page.
+- **Errors that stop a new user say what to do next.** `warmup_limit_exceeded` gives the day-by-day volume (50, 200, 500, 1,000 and 2,000) and how long until the count starts again at midnight UTC. `messages_quota_exceeded` and `contact_quota_exceeded` link to the plan page and give the reset date when the answer has one. `number_not_connected` and `not_authenticated` link to Numbers and API keys.
+- **The node panel reads as the node.** n8n shows the description of the instant trigger above the list of actions of the grouped Turbo Notify node, so that description now describes the whole node.
+- **`User-Agent: turbo-notify-n8n/<version>`** on every request, including the credential test, so Turbo Notify can tell n8n traffic apart.
+- **A first workflow to import** (`send-first-message.json`) and notes about the Free plan in the other examples.
+- README opens with what to do before the first message and the limits of the first day.
+
 ## 0.3.0
 
 A breaking release: nobody had built on 0.2.x, so the nodes were redesigned instead of kept compatible. Re-add the nodes in workflows that used 0.2.x.

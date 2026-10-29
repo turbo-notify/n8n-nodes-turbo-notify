@@ -2,6 +2,7 @@ import type { IDataObject, IHttpRequestMethods, IHttpRequestOptions } from 'n8n-
 import { NodeOperationError, sleep } from 'n8n-workflow';
 import { CREDENTIAL, type TurboNotifyContext } from './context';
 import { RETRY_CODES, bodyOf, headerOf, statusOf, toApiError } from './errors';
+import { USER_AGENT } from './version';
 
 export const PAGE_SIZE = 200;
 
@@ -73,7 +74,7 @@ export async function apiRequest<T = IDataObject>(
 	if (input.qs && Object.keys(input.qs).length > 0) options.qs = input.qs;
 	if (input.body) options.body = input.body;
 	if (input.arrayFormat) options.arrayFormat = input.arrayFormat;
-	if (input.headers && Object.keys(input.headers).length > 0) options.headers = input.headers;
+	options.headers = { 'User-Agent': USER_AGENT, ...input.headers };
 
 	for (let attempt = 0; ; attempt++) {
 		try {

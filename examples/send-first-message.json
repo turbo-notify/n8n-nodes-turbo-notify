@@ -1,0 +1,77 @@
+{
+	"name": "Send your first WhatsApp message",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e900",
+			"name": "When clicking Test workflow",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "+5511977770001",
+				"text": "Hello from n8n, sent with Turbo Notify."
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e901",
+			"name": "Send WhatsApp text",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				260,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"content": "**Before you run this**\n1. Create the Turbo Notify API credential: https://docs.turbonotify.com/en/guides/n8n/\n2. Replace the phone number with your own: country code, with a +.\n3. Select **Test workflow**. The answer says `pending`, which means Turbo Notify accepted the message.\n\nA new number sends 50 messages on its first day.",
+				"height": 230,
+				"width": 520
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e9a0",
+			"name": "Note a0",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				-280
+			]
+		}
+	],
+	"connections": {
+		"When clicking Test workflow": {
+			"main": [
+				[
+					{
+						"node": "Send WhatsApp text",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

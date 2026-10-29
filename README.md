@@ -8,6 +8,7 @@ Turbo Notify connects a WhatsApp number to your account and gives you an API for
 
 Turbo Notify links your own WhatsApp number to your account as a linked device, the same way WhatsApp Web does. It is an independent service, not affiliated with Meta, and it does not use the WhatsApp Business Platform API. Messages follow your WhatsApp account's own rules, so read the [WhatsApp business policy](https://www.whatsapp.com/legal/business-policy/) and the [good practices](https://docs.turbonotify.com/en/general/abuse/) before you send in bulk.
 
+- [Before you start](#before-you-start)
 - [Install](#install)
 - [Credentials](#credentials)
 - [Your first message](#your-first-message)
@@ -17,6 +18,24 @@ Turbo Notify links your own WhatsApp number to your account as a linked device, 
 - [Using Turbo Notify from n8n AI agents](#using-turbo-notify-from-n8n-ai-agents)
 - [Errors](#errors)
 - [Development](#development)
+
+## Before you start
+
+The node needs three things, and none of them is in n8n:
+
+1. A Turbo Notify account. [Create one](https://dashboard.turbonotify.com/auth/signup).
+2. Your WhatsApp number, connected under **Numbers** in the dashboard. You link it from the phone, in WhatsApp under **Linked devices**, so keep the phone at hand.
+3. An API key, created under **API keys**. See [Credentials](#credentials).
+
+The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) goes through all of it. Test with a few messages first: a new account has limits that a real list reaches quickly.
+
+| Limit | Value |
+|---|---|
+| A number connected today, per day | 50 messages on its first day, then 200, 500, 1,000 and 2,000 a day until the seventh day. After that only your plan limits apply. The count starts again at midnight UTC. |
+| Free plan, per number and billing cycle | 300 messages to 2 different contacts |
+| Free plan, pace | one message every 6 seconds |
+| Polling Trigger | every plan; it checks once a minute at the shortest, which is the least n8n allows |
+| Turbo Notify Trigger (instant) | Lone Wolf plan or higher, and an address n8n can be reached on from the internet |
 
 ## Install
 
@@ -34,7 +53,7 @@ Restart n8n afterwards. See n8n's guide to [installing community nodes](https://
 
 Before you use the node you need a Turbo Notify account with your WhatsApp number connected, and an API key.
 
-1. Sign in to the [dashboard](https://dashboard.turbonotify.com). Under **Numbers**, connect your main number if you have not yet. Without a connected number every send is refused with `number_not_connected`.
+1. Sign in to the [dashboard](https://dashboard.turbonotify.com). Under **Numbers**, connect your main number if you have not yet: with the phone at hand, choose **QR code** or **Pairing code** and enter it in WhatsApp under **Linked devices**. Without a connected number every send is refused with `number_not_connected`.
 2. Under **API keys**, create a key. Use the template **AI agent (MCP)**. The name refers to the MCP server, but the scopes it selects are exactly the ones this package uses: `messages:send`, `messages:read`, `contacts:read`, `groups:read`, `numbers:read` and `events:read`. A workflow that only sends can use the **Transactional notifications** template instead. **Full access** also works, but gives the workflow more than it needs. The key value is shown once: copy it.
 3. In n8n, create a **Turbo Notify API** credential and paste the key into **API Key**. Leave **Base URL** as it is. Select **Save**: n8n tests the key by calling `GET /v1/usage`, which works with any valid key.
 
@@ -195,7 +214,8 @@ When Turbo Notify refuses a request, the node stops with the reason and what to 
 | `not_authenticated` | The API key is wrong, revoked or expired. Create a new one. |
 | `insufficient_scope` | The key lacks a scope. The message names it. |
 | `number_not_connected` | The number is not connected to WhatsApp. Reconnect it in the dashboard. |
-| `messages_quota_exceeded`, `contact_quota_exceeded` | The allowance for the billing cycle is used up. It resets when the cycle turns. |
+| `messages_quota_exceeded`, `contact_quota_exceeded` | The allowance for the billing cycle is used up. It resets when the cycle turns, or when you change the plan under **Billing** in the dashboard. |
+| `warmup_limit_exceeded` | A number connected a few days ago has a daily limit that grows by the day: 50, 200, 500, 1,000 and 2,000 messages a day until the seventh day. The message says how long until the count starts again at midnight UTC. |
 | `feature_not_available` | The plan does not include it, for example sending to groups or the typing indicator. |
 | `edit_window_expired` | A text or caption can be edited only within 15 minutes. |
 | `send_rate_spacing`, `rate_limit_exceeded` | Too fast for the plan. The node waits and tries again up to 3 times before it stops. |
@@ -213,7 +233,7 @@ npm run lint    # n8n community node lint
 npm run build
 ```
 
-The package has no runtime dependencies. It reads no files and no environment variables, and talks only to the address in the credential. The signature of a webhook delivery is checked with the Web Crypto API that Node.js provides.
+The package has no runtime dependencies. It reads no files and no environment variables, and talks only to the address in the credential. Every request it makes carries the header `User-Agent: turbo-notify-n8n/<version>`, so Turbo Notify can tell traffic from n8n apart for support. The signature of a webhook delivery is checked with the Web Crypto API that Node.js provides.
 
 Releases are published to npm from GitHub Actions with a provenance statement (`.github/workflows/publish.yml`). Run `npm run release` to tag a version.
 
