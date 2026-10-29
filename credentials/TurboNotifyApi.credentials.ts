@@ -34,7 +34,17 @@ export class TurboNotifyApi implements ICredentialType {
 			name: 'baseUrl',
 			type: 'string',
 			default: 'https://api.turbonotify.com',
-			description: 'Address of the Turbo Notify API. Change it only if support gave you another one.',
+			description:
+				'Address of the Turbo Notify API. Change it only if support gave you another one.',
+		},
+		{
+			displayName: 'Webhook Signing Secret',
+			name: 'webhookSecret',
+			type: 'string',
+			typeOptions: { password: true },
+			default: '',
+			description:
+				'Only for the Turbo Notify Trigger. The secret you type next to the webhook address in the Turbo Notify dashboard: Turbo Notify does not generate one, so pick a long random value and enter it on both sides.',
 		},
 	];
 
@@ -49,7 +59,7 @@ export class TurboNotifyApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: '={{$credentials.baseUrl}}',
+			baseURL: '={{$credentials.baseUrl.replace(/\\/+$/, "").replace(/\\/v1$/, "")}}',
 			url: '/v1/usage',
 			method: 'GET',
 		},

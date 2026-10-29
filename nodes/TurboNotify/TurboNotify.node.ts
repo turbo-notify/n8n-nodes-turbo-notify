@@ -1,23 +1,15 @@
 import type {
 	IExecuteFunctions,
-	ILoadOptionsFunctions,
 	INodeExecutionData,
-	INodeListSearchResult,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { apiRequest } from './GenericFunctions';
+import { handlers, type Run } from './actions';
 import { properties } from './descriptions';
-import { handlers } from './operations';
-import { requireText } from './validation';
-
-interface NumberSummary {
-	type?: string;
-	alias?: string;
-	number?: string;
-	name?: string | null;
-}
+import { searchContacts, searchGroups, searchNumbers } from './methods/listSearch';
+import { CREDENTIAL } from './transport/context';
+import { requireText, type Scope } from './validation';
 
 export class TurboNotify implements INodeType {
 	description: INodeTypeDescription = {
@@ -26,67 +18,97 @@ export class TurboNotify implements INodeType {
 		icon: { light: 'file:turboNotify.svg', dark: 'file:turboNotify.svg' },
 		group: ['output'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Send WhatsApp messages and read contacts, groups and numbers with Turbo Notify',
+		subtitle:
+			'={{ $parameter["operation"].replace(/([A-Z])/g, " $1").toLowerCase() + ": " + $parameter["resource"] }}',
+		description:
+			'Send WhatsApp messages and read contacts, groups, numbers and events with Turbo Notify',
 		defaults: { name: 'Turbo Notify' },
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'turboNotifyApi', required: true }],
+		credentials: [{ name: CREDENTIAL, required: true }],
 		properties,
 	};
 
-	methods = {
-		listSearch: {
-			async searchNumbers(this: ILoadOptionsFunctions): Promise<INodeListSearchResult> {
-				const page = (await apiRequest(this, { method: 'GET', path: '/numbers' })) as { data?: NumberSummary[] };
-				return {
-					results: (page.data ?? []).map((n) => {
-						const alias = n.alias ?? 'main';
-						const label = `${alias} (+${n.number ?? ''})`;
-						return { name: n.name ? `${n.name}: ${label}` : label, value: alias };
-					}),
-				};
-			},
-		},
-	};
+	methods = { listSearch: { searchNumbers, searchContacts, searchGroups } };
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
+		// Keys typed in this run, shared by every item, so one key cannot stand for two messages.
+		const keys = new Map<string, string>();
 
-		for (let i = 0; i < items.length; i++) {
-			try {
-				const resource = this.getNodeParameter('resource', i) as string;
-				const operation = this.getNodeParameter('operation', i) as string;
-				const handler = handlers[resource]?.[operation];
-				if (!handler) {
-					throw new NodeOperationError(this.getNode(), `'${operation}' is not available for '${resource}'`, { itemIndex: i });
-				}
-				const scope = { node: this.getNode(), itemIndex: i, items: items.length };
-				const ref =
-					resource === 'number'
-						? 'main'
-						: requireText(scope, this.getNodeParameter('number', i, 'main', { extractValue: true }), 'Number', 100);
-				const output = await handler(this, i, ref, scope);
-				for (const json of Array.isArray(output) ? output : [output]) {
+		// What went wrong is already a NodeApiError or NodeOperationError with the item index and a hint.
+		// Anything else gets wrapped.
+		const asNodeError = (caught: unknown, i: number) =>
+			caught instanceof NodeApiError || caught instanceof NodeOperationError
+				? caught
+				: new NodeOperationError(this.getNode(), caught as Error, { itemIndex: i });
+
+		const prepare = (i: number): Run => {
+			const resource = this.getNodeParameter('resource', i) as string;
+			const operation = this.getNodeParameter('operation', i) as string;
+			const handler = handlers[resource]?.[operation];
+			if (!handler) {
+				throw new NodeOperationError(
+					this.getNode(),
+					`'${operation}' is not available for '${resource}'`,
+					{ itemIndex: i },
+				);
+			}
+			const scope: Scope = { node: this.getNode(), itemIndex: i, items: items.length, keys };
+			const needsNumber =
+				resource !== 'event' && !(resource === 'number' && operation === 'getMany');
+			const ref = needsNumber
+				? requireText(
+						scope,
+						this.getNodeParameter('number', i, 'main', { extractValue: true }),
+						'Number',
+						100,
+					)
+				: 'main';
+			return handler(this, i, ref, scope);
+		};
+
+		const collect = async (run: Run, i: number) => {
+			const output = await run();
+			for (const json of Array.isArray(output) ? output : [output]) {
+				returnData.push({ json, pairedItem: { item: i } });
+			}
+		};
+
+		if (this.continueOnFail()) {
+			for (let i = 0; i < items.length; i++) {
+				try {
+					await collect(prepare(i), i);
+				} catch (caught) {
+					const failure = asNodeError(caught, i);
+					const json = failure.description
+						? { error: failure.message, hint: failure.description }
+						: { error: failure.message };
 					returnData.push({ json, pairedItem: { item: i } });
 				}
-			} catch (caught) {
-				// Everything the node raises is already a NodeApiError or NodeOperationError
-				// with the item index and a description. Anything else gets wrapped.
-				const failure =
-					caught instanceof NodeApiError || caught instanceof NodeOperationError
-						? caught
-						: new NodeOperationError(this.getNode(), caught as Error, { itemIndex: i });
-				if (this.continueOnFail()) {
-					returnData.push({ json: { error: failure.message }, pairedItem: { item: i } });
-					continue;
-				}
-				throw failure;
 			}
+			return [returnData];
 		}
 
+		// Every item is read and checked before the first request leaves, so one bad row
+		// stops the run before any message is sent.
+		const runs: Run[] = [];
+		for (let i = 0; i < items.length; i++) {
+			try {
+				runs.push(prepare(i));
+			} catch (caught) {
+				throw asNodeError(caught, i);
+			}
+		}
+		for (let i = 0; i < runs.length; i++) {
+			try {
+				await collect(runs[i] as Run, i);
+			} catch (caught) {
+				throw asNodeError(caught, i);
+			}
+		}
 		return [returnData];
 	}
 }

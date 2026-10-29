@@ -1,0 +1,19 @@
+{
+	"node": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Communication"],
+	"alias": ["whatsapp", "turbo notify", "wa", "notify", "incoming message", "polling"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#credentials"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#turbo-notify-polling-trigger"
+			}
+		]
+	}
+}

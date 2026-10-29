@@ -15,8 +15,10 @@ function walk(dir, out = []) {
 }
 
 describe('package contract for verified community nodes', () => {
-	it('is named n8n-nodes-*', () => expect(pkg.name).toMatch(/^(@[a-z0-9-]+\/)?n8n-nodes-[a-z0-9-]+$/));
-	it('has the community package keyword', () => expect(pkg.keywords).toContain('n8n-community-node-package'));
+	it('is named n8n-nodes-*', () =>
+		expect(pkg.name).toMatch(/^(@[a-z0-9-]+\/)?n8n-nodes-[a-z0-9-]+$/));
+	it('has the community package keyword', () =>
+		expect(pkg.keywords).toContain('n8n-community-node-package'));
 	it('is MIT licensed', () => {
 		expect(pkg.license).toBe('MIT');
 		expect(readFileSync(join(root, 'LICENSE'), 'utf8')).toMatch(/MIT License/);
@@ -38,7 +40,7 @@ describe('package contract for verified community nodes', () => {
 	});
 	it('lists every node and credential source file', () => {
 		const entries = [...pkg.n8n.nodes, ...pkg.n8n.credentials];
-		expect(entries).toHaveLength(3);
+		expect(entries).toHaveLength(4);
 		for (const entry of entries) {
 			const source = entry.replace(/^dist\//, '').replace(/\.js$/, '.ts');
 			expect(existsSync(join(root, source))).toBe(true);
@@ -52,35 +54,53 @@ describe('package contract for verified community nodes', () => {
 });
 
 describe('source rules from the verification guidelines', () => {
-	const sources = [...walk(join(root, 'nodes')), ...walk(join(root, 'credentials'))].filter((f) => f.endsWith('.ts'));
+	const sources = [...walk(join(root, 'nodes')), ...walk(join(root, 'credentials'))].filter((f) =>
+		f.endsWith('.ts'),
+	);
 
 	it('finds the sources', () => expect(sources.length).toBeGreaterThan(5));
 
-	it.each(sources.map((f) => [f.replace(root + '/', ''), f]))('%s has no env, file system or raw network access', (_n, file) => {
-		const text = readFileSync(file, 'utf8');
-		expect(text).not.toMatch(/process\.env|\bfrom\s+['"](node:)?(fs|http|https|net|child_process|os|path)['"]|require\(/);
-		expect(text).not.toMatch(/\bfetch\(|XMLHttpRequest|axios/);
-	});
+	it.each(sources.map((f) => [f.replace(root + '/', ''), f]))(
+		'%s has no env, file system or raw network access',
+		(_n, file) => {
+			const text = readFileSync(file, 'utf8');
+			expect(text).not.toMatch(
+				/process\.env|\bfrom\s+['"](node:)?(fs|http|https|net|child_process|os|path)['"]|require\(/,
+			);
+			expect(text).not.toMatch(/\bfetch\(|XMLHttpRequest|axios/);
+		},
+	);
 
 	it('only mentions turbonotify.com hosts as URLs', () => {
 		for (const file of sources) {
 			const urls = readFileSync(file, 'utf8').match(/https?:\/\/[^\s'"`)<>]+/g) ?? [];
 			for (const url of urls) {
-				expect(url).toMatch(/^https?:\/\/([a-z.]*turbonotify\.com|([a-z]+\.)?example\.com|api\.example\.test)/);
+				expect(url).toMatch(
+					/^https?:\/\/([a-z.]*turbonotify\.com|([a-z]+\.)?example\.com|api\.example\.test)/,
+				);
 			}
 		}
 	});
 
 	it('every file of the package avoids em and en dashes', () => {
-		const files = walk(root).filter((f) => !f.endsWith('package-lock.json') && !/\.(png|ico)$/.test(f));
+		const files = walk(root).filter(
+			(f) => !f.endsWith('package-lock.json') && !/\.(png|ico)$/.test(f),
+		);
 		for (const file of files) {
 			const text = readFileSync(file, 'utf8');
 			expect({ file, bad: /[\u2013\u2014]/.test(text) }).toEqual({ file, bad: false });
 		}
 	});
 
-	it('has an icon next to each node', () => {
+	it('has the one icon every node and the credential point at', () => {
 		expect(existsSync(join(root, 'nodes/TurboNotify/turboNotify.svg'))).toBe(true);
-		expect(existsSync(join(root, 'nodes/TurboNotifyTrigger/turboNotify.svg'))).toBe(true);
+	});
+
+	it('has a codex file next to each node', () => {
+		for (const entry of pkg.n8n.nodes) {
+			expect(existsSync(join(root, entry.replace(/^dist\//, '').replace(/\.js$/, '.json')))).toBe(
+				true,
+			);
+		}
 	});
 });

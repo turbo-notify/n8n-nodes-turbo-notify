@@ -3,54 +3,78 @@
 	"nodes": [
 		{
 			"parameters": {
-				"formTitle": "Request a call back",
-				"formDescription": "Leave your WhatsApp number and we will message you.",
+				"formTitle": "Contact me",
 				"formFields": {
 					"values": [
-						{ "fieldLabel": "Name", "requiredField": true },
 						{
 							"fieldLabel": "WhatsApp number",
 							"placeholder": "+5511977770001",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Message",
+							"fieldType": "textarea",
 							"requiredField": true
 						}
 					]
 				},
 				"options": {}
 			},
-			"id": "7b4f3b0e-0f6a-4a53-9a0f-6d2f5a4c1a01",
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4ea00",
 			"name": "On form submission",
 			"type": "n8n-nodes-base.formTrigger",
 			"typeVersion": 2.2,
-			"position": [0, 0],
-			"webhookId": "6f2c7b1e-3a5d-4e8b-9c0a-1d2e3f4a5b6c"
+			"position": [
+				0,
+				0
+			],
+			"webhookId": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4eaff"
 		},
 		{
 			"parameters": {
 				"resource": "message",
 				"operation": "sendText",
-				"number": { "__rl": true, "mode": "id", "value": "main" },
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
 				"recipientType": "phone",
 				"phoneNumber": "={{ $json['WhatsApp number'] }}",
-				"text": "=Hi {{ $json.Name }}, we received your request and will write back here soon.",
-				"options": {
-					"idempotencyKey": "={{ 'form-' + $execution.id }}"
-				}
+				"text": "={{ 'Thanks! We received: ' + $json.Message }}"
 			},
-			"id": "0c9d8e7f-6a5b-4c3d-8e2f-1a0b9c8d7e02",
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e501",
 			"name": "Send WhatsApp text",
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
-			"position": [260, 0],
+			"position": [
+				260,
+				0
+			],
 			"credentials": {
-				"turboNotifyApi": { "id": "REPLACE_WITH_YOUR_CREDENTIAL", "name": "Turbo Notify API" }
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
 			}
 		}
 	],
 	"connections": {
 		"On form submission": {
-			"main": [[{ "node": "Send WhatsApp text", "type": "main", "index": 0 }]]
+			"main": [
+				[
+					{
+						"node": "Send WhatsApp text",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
 		}
 	},
 	"pinData": {},
-	"settings": { "executionOrder": "v1" }
+	"settings": {
+		"executionOrder": "v1"
+	}
 }

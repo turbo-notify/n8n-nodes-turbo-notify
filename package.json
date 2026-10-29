@@ -1,6 +1,6 @@
 {
 	"name": "@turbo-notify/n8n-nodes-turbo-notify",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"description": "Send and receive WhatsApp messages, read contacts and groups, and react to events with Turbo Notify.",
 	"license": "MIT",
 	"homepage": "https://docs.turbonotify.com",
@@ -31,13 +31,13 @@
 	},
 	"scripts": {
 		"build": "n8n-node build",
-		"build:watch": "tsc --watch",
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
 		"test": "jest",
 		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
+		"prepublishOnly": "n8n-node prerelease",
+		"format": "prettier nodes credentials test --write"
 	},
 	"files": [
 		"dist"
@@ -50,7 +50,8 @@
 		],
 		"nodes": [
 			"dist/nodes/TurboNotify/TurboNotify.node.js",
-			"dist/nodes/TurboNotifyTrigger/TurboNotifyTrigger.node.js"
+			"dist/nodes/TurboNotifyTrigger/TurboNotifyTrigger.node.js",
+			"dist/nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node.js"
 		]
 	},
 	"devDependencies": {

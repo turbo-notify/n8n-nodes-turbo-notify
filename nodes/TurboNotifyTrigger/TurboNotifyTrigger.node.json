@@ -2,16 +2,8 @@
 	"node": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyTrigger",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": [
-		"Communication"
-	],
-	"alias": [
-		"whatsapp",
-		"turbo notify",
-		"wa",
-		"notify",
-		"incoming message"
-	],
+	"categories": ["Communication"],
+	"alias": ["whatsapp", "turbo notify", "wa", "notify", "incoming message", "webhook", "instant"],
 	"resources": {
 		"credentialDocumentation": [
 			{
@@ -20,7 +12,7 @@
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#trigger"
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#turbo-notify-trigger-instant"
 			}
 		]
 	}

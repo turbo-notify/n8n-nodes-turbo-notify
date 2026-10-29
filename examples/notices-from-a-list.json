@@ -1,0 +1,87 @@
+{
+	"name": "Send a notice to every row of a list",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e800",
+			"name": "When clicking Test workflow",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Three made-up rows. Replace this node with your sheet, database or CRM.\nreturn [\n  { json: { name: 'Ana', phone: '5511977770001', order: '4711' } },\n  { json: { name: 'Bruno', phone: '5511977770002', order: '4712' } },\n  { json: { name: 'Carla', phone: '5511977770003', order: '4713' } },\n];"
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e801",
+			"name": "Rows",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				260,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ '+' + $json.phone }}",
+				"text": "={{ 'Hello ' + $json.name + ', your order ' + $json.order + ' is ready.' }}"
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e502",
+			"name": "Send the notice",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				520,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		}
+	],
+	"connections": {
+		"When clicking Test workflow": {
+			"main": [
+				[
+					{
+						"node": "Rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Rows": {
+			"main": [
+				[
+					{
+						"node": "Send the notice",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

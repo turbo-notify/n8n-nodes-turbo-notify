@@ -1,0 +1,209 @@
+{
+	"name": "Send a message and check that it arrived",
+	"nodes": [
+		{
+			"parameters": {},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e900",
+			"name": "When clicking Test workflow",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "+5511977770001",
+				"text": "Your order is on its way."
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e501",
+			"name": "Send the message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				260,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"amount": 30,
+				"unit": "seconds"
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e902",
+			"name": "Wait",
+			"type": "n8n-nodes-base.wait",
+			"typeVersion": 1.1,
+			"position": [
+				520,
+				0
+			],
+			"webhookId": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e9ff"
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "getStatus",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Send the message').item.json.number_alias }}"
+				},
+				"messageId": "={{ $('Send the message').item.json.id }}"
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e503",
+			"name": "Get the status",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				780,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "loose",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "cond-4",
+							"leftValue": "={{ $json.status.state }}",
+							"rightValue": "failed",
+							"operator": {
+								"type": "string",
+								"operation": "equals"
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e604",
+			"name": "Did it fail?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				1040,
+				0
+			]
+		},
+		{
+			"parameters": {},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e905",
+			"name": "Handle the failure here",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				1300,
+				-100
+			]
+		},
+		{
+			"parameters": {},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e906",
+			"name": "Delivered or on its way",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				1300,
+				100
+			]
+		}
+	],
+	"connections": {
+		"When clicking Test workflow": {
+			"main": [
+				[
+					{
+						"node": "Send the message",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the message": {
+			"main": [
+				[
+					{
+						"node": "Wait",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Wait": {
+			"main": [
+				[
+					{
+						"node": "Get the status",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Get the status": {
+			"main": [
+				[
+					{
+						"node": "Did it fail?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Did it fail?": {
+			"main": [
+				[
+					{
+						"node": "Handle the failure here",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Delivered or on its way",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

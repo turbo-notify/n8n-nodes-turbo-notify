@@ -25,10 +25,16 @@ describe('TurboNotifyApi credential', () => {
 
 	it('tests the key with GET /v1/usage (no scope needed)', () => {
 		expect(credential.test.request).toMatchObject({
-			baseURL: '={{$credentials.baseUrl}}',
+			baseURL: '={{$credentials.baseUrl.replace(/\\/+$/, "").replace(/\\/v1$/, "")}}',
 			url: '/v1/usage',
 			method: 'GET',
 		});
+	});
+
+	it('also keeps the webhook signing secret, as a password the Trigger reads', () => {
+		const secret = credential.properties.find((p) => p.name === 'webhookSecret');
+		expect(secret?.typeOptions?.password).toBe(true);
+		expect(secret?.required).toBeFalsy();
 	});
 
 	it('links to the API key documentation', () => {

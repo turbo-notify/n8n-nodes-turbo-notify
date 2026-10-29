@@ -1,0 +1,235 @@
+{
+	"name": "Answer WhatsApp messages with an AI step",
+	"nodes": [
+		{
+			"parameters": {
+				"events": [
+					"message.received"
+				],
+				"pollTimes": {
+					"item": [
+						{
+							"mode": "everyMinute"
+						}
+					]
+				}
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e500",
+			"name": "Turbo Notify Polling Trigger",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "loose",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "cond-1",
+							"leftValue": "={{ $json.data.to.group_id }}",
+							"rightValue": "",
+							"operator": {
+								"type": "string",
+								"operation": "empty",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e601",
+			"name": "Private chat only",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				260,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "get",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $json.number_id }}"
+				},
+				"messageId": "={{ $json.data.id }}",
+				"simplify": true
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e502",
+			"name": "Read the whole message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				520,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "answer-1",
+							"name": "answer",
+							"value": "={{ 'You wrote: ' + $json.text }}",
+							"type": "string"
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e703",
+			"name": "Your AI step: write the answer here",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				780,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendTypingIndicator",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Read the whole message').item.json.number_id }}"
+				},
+				"recipientType": "auto",
+				"recipient": "={{ '+' + $('Read the whole message').item.json.from.number }}",
+				"isTyping": true
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e504",
+			"name": "Show typing",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1040,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "reply",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Read the whole message').item.json.number_id }}"
+				},
+				"messageId": "={{ $('Read the whole message').item.json.id }}",
+				"text": "={{ $('Your AI step: write the answer here').item.json.answer }}"
+			},
+			"id": "7a1c0e2f-3b4d-4c5e-8f60-a1b2c3d4e505",
+			"name": "Reply with the answer",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1300,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Turbo Notify Polling Trigger": {
+			"main": [
+				[
+					{
+						"node": "Private chat only",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Private chat only": {
+			"main": [
+				[
+					{
+						"node": "Read the whole message",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[]
+			]
+		},
+		"Read the whole message": {
+			"main": [
+				[
+					{
+						"node": "Your AI step: write the answer here",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Your AI step: write the answer here": {
+			"main": [
+				[
+					{
+						"node": "Show typing",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Show typing": {
+			"main": [
+				[
+					{
+						"node": "Reply with the answer",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}
