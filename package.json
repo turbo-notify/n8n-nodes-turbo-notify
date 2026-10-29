@@ -1,16 +1,21 @@
 {
-	"name": "n8n-nodes-turbo-notify",
-	"version": "0.1.1",
-	"description": "n8n community node for Turbo Notify: send and receive WhatsApp messages, read contacts and groups, and follow events.",
+	"name": "@turbo-notify/n8n-nodes-turbo-notify",
+	"version": "0.2.0",
+	"description": "Send and receive WhatsApp messages, read contacts and groups, and react to events with Turbo Notify.",
 	"license": "MIT",
 	"homepage": "https://docs.turbonotify.com",
 	"keywords": [
 		"n8n-community-node-package",
 		"n8n",
 		"whatsapp",
+		"whatsapp-api",
+		"whatsapp-automation",
+		"whatsapp-business",
 		"turbo-notify",
+		"turbonotify",
 		"messaging",
-		"notifications"
+		"notifications",
+		"mcp"
 	],
 	"author": {
 		"name": "Turbo Notify",

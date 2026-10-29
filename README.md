@@ -1,4 +1,4 @@
-# n8n-nodes-turbo-notify
+# @turbo-notify/n8n-nodes-turbo-notify
 
 Turbo Notify connects a WhatsApp number to your account and gives you an API for it. This package adds Turbo Notify to n8n:
 
@@ -18,12 +18,12 @@ Turbo Notify links your own WhatsApp number to your account as a linked device, 
 
 ## Install
 
-In n8n, open **Settings > Community Nodes**, choose **Install** and enter `n8n-nodes-turbo-notify`. On n8n Cloud the node is listed in the nodes panel once n8n has verified the package.
+In n8n, open **Settings > Community Nodes**, choose **Install** and enter `@turbo-notify/n8n-nodes-turbo-notify`. On n8n Cloud the node is listed in the nodes panel once n8n has verified the package.
 
 On a self-hosted n8n you can also install it from the command line, in the folder n8n uses for community nodes (`~/.n8n/nodes` by default):
 
 ```bash
-npm i n8n-nodes-turbo-notify
+npm i @turbo-notify/n8n-nodes-turbo-notify
 ```
 
 Restart n8n afterwards. See n8n's guide to [installing community nodes](https://docs.n8n.io/integrations/community-nodes/installation/).

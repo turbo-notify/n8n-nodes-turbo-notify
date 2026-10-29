@@ -17,7 +17,7 @@ describe('example workflows use real parameters of the nodes', () => {
 	it.each(files)('%s', (file) => {
 		const workflow = JSON.parse(readFileSync(join(dir, file), 'utf8'));
 		for (const node of workflow.nodes) {
-			if (node.type === 'n8n-nodes-turbo-notify.turboNotify') {
+			if (node.type === '@turbo-notify/n8n-nodes-turbo-notify.turboNotify') {
 				const known = names(action);
 				for (const key of Object.keys(node.parameters)) expect(known).toContain(key);
 				const resource = action.find((p) => p.name === 'resource');
@@ -27,7 +27,7 @@ describe('example workflows use real parameters of the nodes', () => {
 					.flatMap((p) => (p.options ?? []).map((o) => o.value));
 				expect(operations).toContain(node.parameters.operation);
 			}
-			if (node.type === 'n8n-nodes-turbo-notify.turboNotifyTrigger') {
+			if (node.type === '@turbo-notify/n8n-nodes-turbo-notify.turboNotifyTrigger') {
 				const known = names(trigger);
 				for (const key of Object.keys(node.parameters)) {
 					if (key !== 'pollTimes') expect(known).toContain(key);

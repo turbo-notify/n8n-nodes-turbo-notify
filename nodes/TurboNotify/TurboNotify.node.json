@@ -1,8 +1,17 @@
 {
-	"node": "n8n-nodes-turbo-notify.turboNotify",
+	"node": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Communication"],
+	"categories": [
+		"Communication"
+	],
+	"alias": [
+		"whatsapp",
+		"turbo notify",
+		"wa",
+		"notify",
+		"send message"
+	],
 	"resources": {
 		"credentialDocumentation": [
 			{

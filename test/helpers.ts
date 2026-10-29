@@ -12,7 +12,7 @@ export const API = `${BASE}/v1`;
 export const NODE: INode = {
 	id: 'node-1',
 	name: 'Turbo Notify',
-	type: 'n8n-nodes-turbo-notify.turboNotify',
+	type: '@turbo-notify/n8n-nodes-turbo-notify.turboNotify',
 	typeVersion: 1,
 	position: [0, 0],
 	parameters: {},

@@ -38,7 +38,7 @@
 			},
 			"id": "0c9d8e7f-6a5b-4c3d-8e2f-1a0b9c8d7e02",
 			"name": "Send WhatsApp text",
-			"type": "n8n-nodes-turbo-notify.turboNotify",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [260, 0],
 			"credentials": {
