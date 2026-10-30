@@ -26,9 +26,10 @@ describe('what a new user needs to know before the first send', () => {
 		expect(text).toMatch(/account/);
 		expect(text).toMatch(/connected under Numbers/);
 		expect(text).toMatch(/API key from API keys/);
-		expect(text).toMatch(/<a href="https:\/\/docs\.turbonotify\.com\/en\/guides\/n8n\/" target="_blank">/);
+		// a link in a notice is drawn like plain text, so the notice points at the underlined docs link instead
+		expect(text).toMatch(/step by step is in the docs linked above/);
+		expect(text).not.toMatch(/<a /);
 		expect(text).not.toMatch(/<b>/);
-		expect(text).toContain('https://docs.turbonotify.com/en/guides/n8n/');
 	});
 
 	it('gives the first-week volume of a new number and the Free plan in the notice', () => {
