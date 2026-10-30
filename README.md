@@ -77,7 +77,7 @@ Keys are not tied to one number: within its scopes, a key reaches your main numb
 1. Add a **Turbo Notify** node and choose the credential.
 2. Keep **Resource** on Message and **Operation** on Send Text. **Number** is `main`.
 3. Under **Phone Number** type your own number with the country code and a `+`, for example `+5511977770001`. Write something under **Text**.
-4. Select **Test step**. The output looks like this:
+4. Select **Execute step**. The output looks like this:
 
 ```json
 {
@@ -120,7 +120,7 @@ The recipient of a send is a **Phone Number** (with country code and a leading `
 **Sending many messages.**
 
 - **Spacing.** Each number has a minimum gap between sends that depends on the plan. When Turbo Notify answers that a message came too early, the node waits the time it asks for and tries again, up to 3 times. A quota that is used up is never retried.
-- **No double sends.** **Retry On Fail** in the node settings re-runs the whole node, so on real runs (not when you click Test step) the node sets an Idempotency Key by itself. It is the same when n8n repeats an item and different for every item, so a repeat inside the same run never sends a message twice. When the node is a tool of an AI Agent, each call counts as a new run: give the agent a key of your own, for example the ID of the customer's order.
+- **No double sends.** **Retry On Fail** in the node settings re-runs the whole node, so on real runs (not when you click Execute step) the node sets an Idempotency Key by itself. It is the same when n8n repeats an item and different for every item, so a repeat inside the same run never sends a message twice. When the node is a tool of an AI Agent, each call counts as a new run: give the agent a key of your own, for example the ID of the customer's order.
 - **Your own key.** Under **Options**, **Idempotency Key** should differ for every item, such as the order number from an earlier node. One fixed value sends only the first message, and the node refuses a key that is repeated for a different message in the same run.
 - **Checked first.** The node reads and checks every item before it sends the first one, so one invalid row stops the run with nothing sent. With **Continue On Fail** the other rows still go out and the invalid one reports what to fix.
 - **Retry execution.** Retrying an execution from the editor creates a new execution and sends the items that already went out again.
@@ -166,7 +166,7 @@ Checks for new events at the interval you set under **Poll Times** and starts th
 
 - The first time the workflow is activated the trigger starts from now and does not run for past events. If you change the events or the number afterwards, it starts from now again.
 - It reads the last two minutes again on every check and skips what it already handed on, so an event that becomes visible a moment late is not lost.
-- Use **Test step** to see the most recent matching event as sample data.
+- Use **Execute step** to see the most recent matching event as sample data.
 
 Polling means a delay of up to the interval (one minute at the shortest).
 
