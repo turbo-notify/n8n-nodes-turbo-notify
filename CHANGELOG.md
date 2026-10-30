@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.2
 
 - The credential notice no longer ends with a link that n8n draws like plain text ("Open the setup guide"). It now points at the underlined **docs** link n8n shows above the form, which opens the same page. README: the button is **Execute step**, as n8n names it.
 
