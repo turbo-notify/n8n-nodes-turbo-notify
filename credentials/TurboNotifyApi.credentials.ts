@@ -24,7 +24,7 @@ export class TurboNotifyApi implements ICredentialType {
 			// n8n draws a link inside a notice in the text colour with no underline, so it reads as plain text.
 			// The step by step is reached through the underlined docs link n8n shows above the form (documentationUrl).
 			displayName:
-				'Before you start you need a Turbo Notify account, your WhatsApp number connected under Numbers, and an API key from API keys. A new number sends 50 messages on its first day, 200 on the second, 500 on the third, 1,000 on the fourth and 2,000 a day until the seventh. The Free plan covers 300 messages and 2 contacts per billing cycle, enough to try the node. The step by step is in the docs linked above.',
+				'Before you start you need a Turbo Notify account, your WhatsApp number connected under Numbers, and an API key from API keys. A new number sends 50 messages on its first day, 200 on the second, 500 on the third, 1,000 on the fourth and 2,000 a day until the seventh. Your plan sets its own allowance of messages and contacts per billing cycle, shown under Billing in the dashboard. The step by step is in the docs linked above.',
 			name: 'notice',
 			type: 'notice',
 			default: '',

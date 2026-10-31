@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+- **A larger icon.** The mark is drawn in a square box and without the three thin accent arcs, so the bubble fills the slot n8n gives every node icon and reads about 15% larger next to the icons around it. The artwork is the same bubble and bolt.
+- **The credential notice no longer quotes one plan's allowance as if it were everyone's.** It keeps the day-by-day volume of a new number (every plan) and sends the reader to Billing for the allowance of their own plan. The README table follows.
+- **The Turbo Notify Trigger notice says where the address is.** n8n keeps **Webhook URLs** closed at the top of the step; the notice tells you to open it.
+
 ## 0.3.2
 
 - The credential notice no longer ends with a link that n8n draws like plain text ("Open the setup guide"). It now points at the underlined **docs** link n8n shows above the form, which opens the same page. README: the button is **Execute step**, as n8n names it.

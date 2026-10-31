@@ -58,7 +58,7 @@ export class TurboNotifyTrigger implements INodeType {
 		properties: [
 			{
 				displayName:
-					'Paste the Production URL under Webhooks in the Turbo Notify dashboard, with the secret from the credential. To try it first, paste the Test URL, select Listen for test event and send a message, then put the Production URL back and activate the workflow. The dashboard holds one address, so the other URL stops receiving while you test. Needs the Lone Wolf plan or higher. On the Free plan, use the Turbo Notify Polling Trigger.',
+					'Open Webhook URLs at the top of this step to see the Test URL and the Production URL. Paste the Production URL under Webhooks in the Turbo Notify dashboard, with the secret from the credential. To try it first, paste the Test URL, select Listen for test event and send a message, then put the Production URL back and activate the workflow. The dashboard holds one address, so the other URL stops receiving while you test. Needs the Lone Wolf plan or higher. On the Free plan, use the Turbo Notify Polling Trigger.',
 				name: 'notice',
 				type: 'notice',
 				default: '',

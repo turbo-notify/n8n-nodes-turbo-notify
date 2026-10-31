@@ -32,10 +32,14 @@ describe('what a new user needs to know before the first send', () => {
 		expect(text).not.toMatch(/<b>/);
 	});
 
-	it('gives the first-week volume of a new number and the Free plan in the notice', () => {
+	it('gives the first-week volume of a new number and sends the plan allowance to Billing', () => {
 		const text = String(credential.properties[0]?.displayName);
 		for (const volume of ['50 messages', '200', '500', '1,000', '2,000']) expect(text).toContain(volume);
-		expect(text).toMatch(/Free plan/);
+		// the allowance belongs to the plan of the reader: the notice never quotes one plan as if it were everyone's
+		expect(text).toMatch(/your plan/i);
+		expect(text).toMatch(/Billing/);
+		expect(text).not.toMatch(/Free plan/);
+		expect(text).not.toMatch(/\b300\b/);
 	});
 
 	it('points the credential and every node at the same page', () => {
@@ -45,6 +49,14 @@ describe('what a new user needs to know before the first send', () => {
 	it('names where the API key is created', () => {
 		const apiKey = credential.properties.find((p) => p.name === 'apiKey');
 		expect(apiKey?.description).toContain('https://dashboard.turbonotify.com/api-keys');
+	});
+});
+
+describe('the instant trigger tells where n8n keeps its address', () => {
+	it('says that Webhook URLs is closed at the top of the step and opens it', () => {
+		const notice = new TurboNotifyTrigger().description.properties[0];
+		expect(notice?.type).toBe('notice');
+		expect(String(notice?.displayName)).toMatch(/Open Webhook URLs at the top of this step/);
 	});
 });
 

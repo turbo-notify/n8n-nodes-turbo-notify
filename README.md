@@ -27,13 +27,12 @@ The node needs three things, and none of them is in n8n:
 2. Your WhatsApp number, connected under **Numbers** in the dashboard. You link it from the phone, in WhatsApp under **Linked devices**, so keep the phone at hand.
 3. An API key, created under **API keys**. See [Credentials](#credentials).
 
-The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) goes through all of it. Test with a few messages first: a new account has limits that a real list reaches quickly.
+The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) goes through all of it. Test with a few messages first: a new number and a small plan have limits that a real list reaches quickly. Two limits apply to every send, and the smaller one stops you:
 
 | Limit | Value |
 |---|---|
 | A number connected today, per day | 50 messages on its first day, then 200, 500, 1,000 and 2,000 a day until the seventh day. After that only your plan limits apply. The count starts again at midnight UTC. |
-| Free plan, per number and billing cycle | 300 messages to 2 different contacts |
-| Free plan, pace | one message every 6 seconds |
+| Your plan | its own allowance of messages and contacts per billing cycle, and its own pace between sends. The table is in [Quota and usage](https://docs.turbonotify.com/en/usage/quota/#plan-table-per-number-per-cycle) and yours is under **Billing** in the dashboard. **Message > Get Quota** reads what the number can still send in this cycle. |
 | Polling Trigger | every plan; it checks once a minute at the shortest, which is the least n8n allows |
 | Turbo Notify Trigger (instant) | Lone Wolf plan or higher, and an address n8n can be reached on from the internet |
 

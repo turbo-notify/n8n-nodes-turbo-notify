@@ -43,10 +43,25 @@ describe('package documentation stays in step', () => {
 		expect(before).toBeGreaterThan(0);
 		expect(before).toBeLessThan(README.indexOf('## Install'));
 		const section = README.slice(before, README.indexOf('## Install'));
-		for (const volume of ['50', '200', '500', '1,000', '2,000', '300', '6 seconds']) {
+		for (const volume of ['50', '200', '500', '1,000', '2,000', 'Billing']) {
 			expect(section).toContain(volume);
 		}
 		expect(section).toMatch(/Polling Trigger/);
+	});
+});
+
+describe('the node icon', () => {
+	const svg = readFileSync(join(root, 'nodes/TurboNotify/turboNotify.svg'), 'utf8');
+
+	it('is drawn in a square box, the shape of the slot n8n gives every icon', () => {
+		const [, , width, height] = (svg.match(/^<svg[^>]*\sviewBox="([^"]+)"/)?.[1] ?? '').split(/\s+/).map(Number);
+		expect(width).toBeGreaterThan(0);
+		expect(width).toBe(height);
+	});
+
+	it('keeps the bubble and the bolt and leaves the accent arcs out, so the mark fills the slot', () => {
+		// one filled path for the bubble (gradient group) and one for the bolt (white group)
+		expect(svg.match(/<path /g)).toHaveLength(2);
 	});
 });
 
