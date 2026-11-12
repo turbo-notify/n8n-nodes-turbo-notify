@@ -204,7 +204,7 @@ export const messageDescription: INodeProperties[] = [
 		type: 'boolean',
 		default: true,
 		description: 'Whether to show the typing indicator. Turn it off to clear it.',
-		hint: 'Needs the Lone Wolf plan or higher. Showing it also marks the unread messages of that chat as read.',
+		hint: 'Showing it also marks the unread messages of that chat as read.',
 		displayOptions: message(['sendTypingIndicator']),
 	},
 

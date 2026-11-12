@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.5
+
+Two more places where the form carried text that belongs in the README, found before the review reached them.
+
+- **The credential notice is one sentence.** It says what you need (an account, a connected number, an API key) and points at the docs link. The first-week volume of a new number and the plan allowances are in the README, and in the error that names them when a send is refused.
+- **The Typing field no longer states a plan.** The Lone Wolf requirement is in the README, next to Send Typing Indicator.
+- The Polling Trigger error for too many events now says to choose Any Event, which is how to listen to every event.
+
 ## 0.3.4
 
 Changes the n8n review asked for. Optional fields move inside a collection, and the trigger form no longer carries setup text.

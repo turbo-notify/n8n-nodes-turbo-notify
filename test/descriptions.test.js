@@ -92,3 +92,29 @@ describe('the setup text left the trigger form and lives in the README (n8n revi
 		}
 	});
 });
+
+describe('no form text states a plan requirement (n8n review, 2026-11-12)', () => {
+	const { TurboNotifyTrigger } = require('../nodes/TurboNotifyTrigger/TurboNotifyTrigger.node');
+	const {
+		TurboNotifyPollingTrigger,
+	} = require('../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node');
+	const { TurboNotifyApi } = require('../credentials/TurboNotifyApi.credentials');
+
+	const texts = (props) =>
+		props.flatMap((p) => [p.displayName, p.description, p.hint, ...texts(p.options ?? [])]);
+
+	it('the Turbo Notify node, both triggers and the credential never say "Lone Wolf" or "Free plan"', () => {
+		const all = [
+			...texts(properties),
+			...texts(new TurboNotifyTrigger().description.properties),
+			...texts(new TurboNotifyPollingTrigger().description.properties),
+			...texts(new TurboNotifyApi().properties),
+		].filter((t) => typeof t === 'string');
+		for (const text of all) expect(text).not.toMatch(/Lone Wolf|Free plan/);
+	});
+
+	it('the README keeps the typing indicator requirement', () => {
+		const readme = readFileSync(join(__dirname, '..', 'README.md'), 'utf8');
+		expect(readme).toMatch(/Send Typing Indicator \|[^|]*Needs the Lone Wolf plan or higher/);
+	});
+});

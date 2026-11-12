@@ -77,7 +77,7 @@ export class TurboNotifyPollingTrigger implements INodeType {
 		const types = chosenEventTypes(chosen);
 		if (types.length > MAX_EVENT_TYPES) {
 			throw new NodeOperationError(this.getNode(), "'Events' accepts up to 20 event types", {
-				description: 'Choose fewer events, or leave the field empty to listen to every event.',
+				description: 'Choose fewer events, or choose Any Event to listen to every event.',
 			});
 		}
 		const options = this.getNodeParameter('options', {}) as { number?: unknown };

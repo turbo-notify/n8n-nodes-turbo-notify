@@ -43,15 +43,11 @@ describe('what a new user needs to know before the first send', () => {
 		expect(text).not.toMatch(/<b>/);
 	});
 
-	it('gives the first-week volume of a new number and sends the plan allowance to Billing', () => {
+	it('keeps volumes and plan allowances out of the form: they live in the README (n8n review)', () => {
 		const text = String(credential.properties[0]?.displayName);
-		for (const volume of ['50 messages', '200', '500', '1,000', '2,000'])
-			expect(text).toContain(volume);
-		// the allowance belongs to the plan of the reader: the notice never quotes one plan as if it were everyone's
-		expect(text).toMatch(/your plan/i);
-		expect(text).toMatch(/Billing/);
-		expect(text).not.toMatch(/Free plan/);
-		expect(text).not.toMatch(/\b300\b/);
+		expect(text).not.toMatch(/\b(50|200|500|2,000)\b/);
+		expect(text).not.toMatch(/plan/i);
+		expect(text.length).toBeLessThan(260);
 	});
 
 	it('points the credential and every node at the same page', () => {
