@@ -75,7 +75,7 @@ const sendText = send((context, i, _extras, s) => ({
 	text: v.requireText(s, param(context, 'text', i, ''), 'Text', 4096),
 }));
 
-const sendMedia = send((context, i, _extras, s) => {
+const sendMedia = send((context, i, extras, s) => {
 	const type = param(context, 'mediaType', i, 'image');
 	if (!isMediaType(type)) {
 		v.fail(
@@ -88,14 +88,10 @@ const sendMedia = send((context, i, _extras, s) => {
 		[MEDIA_FIELD[type]]: v.requireHttpUrl(s, param(context, 'mediaUrl', i, ''), 'Media URL'),
 	};
 	if (type === 'image' || type === 'video' || type === 'document') {
-		setIf(content, 'caption', v.optionalText(s, param(context, 'caption', i, ''), 'Caption', 1024));
+		setIf(content, 'caption', v.optionalText(s, extras.caption, 'Caption', 1024));
 	}
 	if (type === 'document') {
-		setIf(
-			content,
-			'filename',
-			v.optionalText(s, param(context, 'fileName', i, ''), 'File Name', 255),
-		);
+		setIf(content, 'filename', v.optionalText(s, extras.fileName, 'File Name', 255));
 	}
 	return content;
 });

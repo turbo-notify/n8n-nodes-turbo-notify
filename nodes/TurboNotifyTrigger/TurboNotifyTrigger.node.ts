@@ -7,13 +7,19 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { optionalNumberProperty } from '../TurboNotify/descriptions/shared';
-import { TRIGGER_EVENT_OPTIONS, chosenEventTypes } from '../TurboNotify/events';
+import { TRIGGER_EVENT_OPTIONS, chosenEventTypes, chosenNumber } from '../TurboNotify/events';
 import { searchNumbers } from '../TurboNotify/methods/listSearch';
 import { CREDENTIAL } from '../TurboNotify/transport/context';
 import { isGenuine } from './signature';
 
 /** Event IDs kept to recognise a delivery that arrives twice (the API delivers at least once). */
 const MAX_REMEMBERED = 500;
+
+/** Deliveries are checked unless Verify Signature is turned off under Options. */
+function verifies(context: IHookFunctions | IWebhookFunctions): boolean {
+	const options = context.getNodeParameter('options', {}) as { verifySignature?: boolean };
+	return options.verifySignature !== false;
+}
 
 /** The secret is typed in the credential and in the dashboard; without it no delivery can be trusted. */
 async function requireSecret(context: IHookFunctions | IWebhookFunctions): Promise<string> {
@@ -25,7 +31,7 @@ async function requireSecret(context: IHookFunctions | IWebhookFunctions): Promi
 			"'Webhook Signing Secret' in the Turbo Notify API credential is empty",
 			{
 				description:
-					'Type the secret you entered next to the webhook address in the Turbo Notify dashboard, or turn off Verify Signature to try things out.',
+					'Type the secret you entered next to the webhook address in the Turbo Notify dashboard, or turn off Verify Signature under Options to try things out.',
 			},
 		);
 	}
@@ -57,13 +63,6 @@ export class TurboNotifyTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName:
-					'Open Webhook URLs at the top of this step to see the Test URL and the Production URL. Paste the Production URL under Webhooks in the Turbo Notify dashboard, with the secret from the credential. To try it first, paste the Test URL, select Listen for test event and send a message, then put the Production URL back and activate the workflow. The dashboard holds one address, so the other URL stops receiving while you test. Needs the Lone Wolf plan or higher. On the Free plan, use the Turbo Notify Polling Trigger.',
-				name: 'notice',
-				type: 'notice',
-				default: '',
-			},
-			{
 				displayName: 'Events',
 				name: 'events',
 				type: 'multiOptions',
@@ -71,15 +70,6 @@ export class TurboNotifyTrigger implements INodeType {
 				options: TRIGGER_EVENT_OPTIONS,
 				default: ['message.received'],
 				description: 'Which events start the workflow',
-			},
-			optionalNumberProperty('Only the events of this number. Leave empty for every number.'),
-			{
-				displayName: 'Verify Signature',
-				name: 'verifySignature',
-				type: 'boolean',
-				default: true,
-				description:
-					'Whether to accept only deliveries signed with your secret. Turn it off only to try things out.',
 			},
 			{
 				displayName: 'Options',
@@ -96,6 +86,15 @@ export class TurboNotifyTrigger implements INodeType {
 						description:
 							'Whether to skip an event that was already received. Turbo Notify delivers each event at least once, so one can arrive twice.',
 					},
+					optionalNumberProperty('Only the events of this number. Leave empty for every number.'),
+					{
+						displayName: 'Verify Signature',
+						name: 'verifySignature',
+						type: 'boolean',
+						default: true,
+						description:
+							'Whether to accept only deliveries signed with your secret. Turn it off only to try things out.',
+					},
 				],
 			},
 		],
@@ -110,7 +109,7 @@ export class TurboNotifyTrigger implements INodeType {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				if (this.getNodeParameter('verifySignature', true) as boolean) await requireSecret(this);
+				if (verifies(this)) await requireSecret(this);
 				return true;
 			},
 			async create(): Promise<boolean> {
@@ -127,7 +126,7 @@ export class TurboNotifyTrigger implements INodeType {
 		const response = this.getResponseObject();
 		const body = this.getBodyData();
 
-		if (this.getNodeParameter('verifySignature', true) as boolean) {
+		if (verifies(this)) {
 			const secret = await requireSecret(this);
 			const headers = this.getHeaderData();
 			const raw = (request as { rawBody?: Buffer | string }).rawBody;
@@ -139,7 +138,7 @@ export class TurboNotifyTrigger implements INodeType {
 					'n8n did not keep the raw body of the delivery',
 					{
 						description:
-							'The signature cannot be checked without it. Turn off Verify Signature to try things out.',
+							'The signature cannot be checked without it. Turn off Verify Signature under Options to try things out.',
 					},
 				);
 			}
@@ -164,13 +163,15 @@ export class TurboNotifyTrigger implements INodeType {
 			if (chosen.length > 0 && !chosen.includes(String(body.type))) {
 				return { webhookResponse: 'Event ignored' };
 			}
-			const picked = this.getNodeParameter('number', '', { extractValue: true });
-			const number = typeof picked === 'string' ? picked.trim() : '';
+			const options = this.getNodeParameter('options', {}) as {
+				ignoreDuplicates?: boolean;
+				number?: unknown;
+			};
+			const number = chosenNumber(options.number);
 			if (number !== '' && body.number_alias !== number && body.number_id !== number) {
 				return { webhookResponse: 'Event ignored' };
 			}
 
-			const options = this.getNodeParameter('options', {}) as { ignoreDuplicates?: boolean };
 			if (options.ignoreDuplicates !== false && typeof body.id === 'string') {
 				const memory = this.getWorkflowStaticData('node') as { received?: string[] };
 				const received = memory.received ?? [];

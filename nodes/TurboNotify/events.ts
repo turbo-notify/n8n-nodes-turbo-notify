@@ -216,3 +216,15 @@ export function chosenEventTypes(value: unknown): string[] {
 	const types = list.map((type) => String(type).trim()).filter((type) => type !== '');
 	return types.includes(ANY_EVENT) ? [] : types;
 }
+
+/**
+ * The number a trigger is limited to, read from its Options. The picker hands over a resource locator
+ * (`{ __rl, mode, value }`); an expression can give the alias or the ID as plain text. Empty means every number.
+ */
+export function chosenNumber(option: unknown): string {
+	const value =
+		option !== null && typeof option === 'object' && 'value' in option
+			? (option as { value: unknown }).value
+			: option;
+	return typeof value === 'string' ? value.trim() : '';
+}

@@ -46,3 +46,49 @@ describe('the editor and the code describe the same node', () => {
 		for (const p of properties) expect(p.name).toMatch(/^[a-z][A-Za-z]*$/);
 	});
 });
+
+describe('optional fields are not at the top level of a node (n8n review, 2026-11-12)', () => {
+	const { TurboNotifyTrigger } = require('../nodes/TurboNotifyTrigger/TurboNotifyTrigger.node');
+	const {
+		TurboNotifyPollingTrigger,
+	} = require('../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node');
+	const names = (props) => props.map((p) => p.name);
+	const inOptions = (props) => props.find((p) => p.name === 'options').options.map((o) => o.name);
+
+	it('Send Media: Caption and File Name sit in Additional Fields', () => {
+		const forMedia = (p) => p.displayOptions?.show?.operation?.includes('sendMedia');
+		const topLevel = properties.filter(
+			(p) => forMedia(p) && p.type !== 'collection' && ['caption', 'fileName'].includes(p.name),
+		);
+		expect(topLevel).toEqual([]);
+		const fields = properties.find((p) => p.name === 'additionalFields' && forMedia(p));
+		expect(fields.options.map((o) => o.name)).toEqual(['caption', 'fileName', 'quotedMessageId']);
+	});
+
+	it('the webhook trigger: Number and Verify Signature sit in Options', () => {
+		const props = new TurboNotifyTrigger().description.properties;
+		expect(names(props)).toEqual(['events', 'options']);
+		expect(inOptions(props)).toEqual(['ignoreDuplicates', 'number', 'verifySignature']);
+	});
+
+	it('the polling trigger: Number sits in Options', () => {
+		const props = new TurboNotifyPollingTrigger().description.properties;
+		expect(names(props)).toEqual(['events', 'options']);
+		expect(inOptions(props)).toEqual(['number']);
+	});
+});
+
+describe('the setup text left the trigger form and lives in the README (n8n review, 2026-11-12)', () => {
+	it('holds the steps, the Webhook URLs hint and the plan requirement', () => {
+		const readme = readFileSync(join(__dirname, '..', 'README.md'), 'utf8');
+		for (const text of [
+			'Production URL',
+			'Test URL',
+			'Webhook URLs',
+			'Lone Wolf plan or higher',
+			'Free plan',
+		]) {
+			expect(readme).toContain(text);
+		}
+	});
+});

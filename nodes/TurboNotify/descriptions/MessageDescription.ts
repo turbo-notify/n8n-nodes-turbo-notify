@@ -270,20 +270,6 @@ export const messageDescription: INodeProperties[] = [
 		displayOptions: message(['sendMedia']),
 	},
 	{
-		displayName: 'Caption',
-		name: 'caption',
-		type: 'string',
-		default: '',
-		description: 'Text shown under the file, up to 1024 characters',
-		displayOptions: {
-			show: {
-				resource: ['message'],
-				operation: ['sendMedia'],
-				mediaType: ['image', 'video', 'document'],
-			},
-		},
-	},
-	{
 		displayName: 'New Caption',
 		name: 'caption',
 		type: 'string',
@@ -291,17 +277,6 @@ export const messageDescription: INodeProperties[] = [
 		default: '',
 		description: 'The caption that replaces the old one, up to 1024 characters',
 		displayOptions: message(['editCaption']),
-	},
-	{
-		displayName: 'File Name',
-		name: 'fileName',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. Invoice-April.pdf',
-		description: 'Name shown on the attachment in the chat',
-		displayOptions: {
-			show: { resource: ['message'], operation: ['sendMedia'], mediaType: ['document'] },
-		},
 	},
 
 	// ---- Location
@@ -512,7 +487,25 @@ export const messageDescription: INodeProperties[] = [
 		placeholder: 'Add Field',
 		default: {},
 		displayOptions: message(['sendMedia']),
-		options: [quotedMessageId],
+		options: [
+			{
+				displayName: 'Caption',
+				name: 'caption',
+				type: 'string',
+				default: '',
+				description:
+					'Text shown under an image, video or document, up to 1024 characters. Audio and stickers have no caption.',
+			},
+			{
+				displayName: 'File Name',
+				name: 'fileName',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. Invoice-April.pdf',
+				description: 'Name shown on a document in the chat. Used for documents only.',
+			},
+			quotedMessageId,
+		],
 	},
 	{
 		displayName: 'Additional Fields',

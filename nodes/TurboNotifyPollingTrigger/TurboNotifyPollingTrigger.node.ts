@@ -7,7 +7,12 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { optionalNumberProperty } from '../TurboNotify/descriptions/shared';
-import { MAX_EVENT_TYPES, TRIGGER_EVENT_OPTIONS, chosenEventTypes } from '../TurboNotify/events';
+import {
+	MAX_EVENT_TYPES,
+	TRIGGER_EVENT_OPTIONS,
+	chosenEventTypes,
+	chosenNumber,
+} from '../TurboNotify/events';
 import { searchNumbers } from '../TurboNotify/methods/listSearch';
 import { CREDENTIAL } from '../TurboNotify/transport/context';
 import { apiRequest } from '../TurboNotify/transport/request';
@@ -51,7 +56,16 @@ export class TurboNotifyPollingTrigger implements INodeType {
 				description:
 					"Which events start the workflow. Set 'Poll Times' below to choose how often n8n checks.",
 			},
-			optionalNumberProperty('Only the events of this number. Leave empty for every number.'),
+			{
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
+				options: [
+					optionalNumberProperty('Only the events of this number. Leave empty for every number.'),
+				],
+			},
 		],
 	};
 
@@ -66,8 +80,8 @@ export class TurboNotifyPollingTrigger implements INodeType {
 				description: 'Choose fewer events, or leave the field empty to listen to every event.',
 			});
 		}
-		const picked = this.getNodeParameter('number', '', { extractValue: true });
-		const number = typeof picked === 'string' ? picked.trim() : '';
+		const options = this.getNodeParameter('options', {}) as { number?: unknown };
+		const number = chosenNumber(options.number);
 
 		const filter: IDataObject = {};
 		if (types.length > 0) filter.types = types;

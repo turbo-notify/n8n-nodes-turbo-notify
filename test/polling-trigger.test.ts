@@ -166,7 +166,7 @@ describe('Turbo Notify Trigger (polling)', () => {
 
 	it('sends several event types and the number alias', async () => {
 		const { context, request } = makePollContext({
-			params: { events: ['message.received', 'message.read'], number: 'vendas-sp' },
+			params: { events: ['message.received', 'message.read'], options: { number: 'vendas-sp' } },
 			responses: [list([])],
 		});
 		await trigger.poll.call(context);
@@ -180,7 +180,10 @@ describe('Turbo Notify Trigger (polling)', () => {
 	it('uses number_id when the option holds a num_ ID', async () => {
 		const id = 'num_0a1b2c3d4e5f60718293a4b5c6d7e8f9';
 		const { context, request } = makePollContext({
-			params: { events: ['message.received'], number: { __rl: true, mode: 'list', value: id } },
+			params: {
+				events: ['message.received'],
+				options: { number: { __rl: true, mode: 'list', value: id } },
+			},
 			responses: [list([])],
 		});
 		await trigger.poll.call(context);
@@ -193,7 +196,7 @@ describe('Turbo Notify Trigger (polling)', () => {
 
 	it('listens to every event and every number when both fields are empty', async () => {
 		const { context, request } = makePollContext({
-			params: { events: [], number: { __rl: true, mode: 'list', value: '' } },
+			params: { events: [], options: { number: { __rl: true, mode: 'list', value: '' } } },
 			responses: [list([])],
 		});
 		await trigger.poll.call(context);

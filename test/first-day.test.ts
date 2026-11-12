@@ -4,12 +4,23 @@ import { TurboNotifyTrigger } from '../nodes/TurboNotifyTrigger/TurboNotifyTrigg
 import { TurboNotifyPollingTrigger } from '../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node';
 import { untilText } from '../nodes/TurboNotify/transport/errors';
 import { USER_AGENT } from '../nodes/TurboNotify/transport/version';
-import { ACCEPTED, MESSAGE, apiError, makeExecuteContext, makePollContext, node, run } from './helpers';
+import {
+	ACCEPTED,
+	MESSAGE,
+	apiError,
+	makeExecuteContext,
+	makePollContext,
+	node,
+	run,
+} from './helpers';
 
 const TEXT: IDataObject = { ...MESSAGE, operation: 'sendText', text: 'Hi' };
 
 async function refused(status: number, body: IDataObject, headers: IDataObject = {}) {
-	const { context } = makeExecuteContext({ params: TEXT, failWith: apiError(status, body, headers) });
+	const { context } = makeExecuteContext({
+		params: TEXT,
+		failWith: apiError(status, body, headers),
+	});
 	return (await node.execute.call(context).catch((e: unknown) => e)) as {
 		message: string;
 		description: string;
@@ -34,7 +45,8 @@ describe('what a new user needs to know before the first send', () => {
 
 	it('gives the first-week volume of a new number and sends the plan allowance to Billing', () => {
 		const text = String(credential.properties[0]?.displayName);
-		for (const volume of ['50 messages', '200', '500', '1,000', '2,000']) expect(text).toContain(volume);
+		for (const volume of ['50 messages', '200', '500', '1,000', '2,000'])
+			expect(text).toContain(volume);
 		// the allowance belongs to the plan of the reader: the notice never quotes one plan as if it were everyone's
 		expect(text).toMatch(/your plan/i);
 		expect(text).toMatch(/Billing/);
@@ -52,11 +64,12 @@ describe('what a new user needs to know before the first send', () => {
 	});
 });
 
-describe('the instant trigger tells where n8n keeps its address', () => {
-	it('says that Webhook URLs is closed at the top of the step and opens it', () => {
-		const notice = new TurboNotifyTrigger().description.properties[0];
-		expect(notice?.type).toBe('notice');
-		expect(String(notice?.displayName)).toMatch(/Open Webhook URLs at the top of this step/);
+describe('the triggers keep setup out of the node form', () => {
+	// n8n review (2026-11-12): setup steps and the plan requirement belong in the README, not in a notice
+	it('the instant trigger has no notice: its first field is Events', () => {
+		const properties = new TurboNotifyTrigger().description.properties;
+		expect(properties.some((p) => p.type === 'notice')).toBe(false);
+		expect(properties[0]?.name).toBe('events');
 	});
 });
 
@@ -79,7 +92,10 @@ describe('the answers that stop a new user say what to do next', () => {
 	it.each(['messages_quota_exceeded', 'contact_quota_exceeded'])(
 		'sends %s to the plan page and says when it resets',
 		async (code) => {
-			const error = await refused(402, { error: code, details: { resets_at: '2026-11-29T10:52:10Z' } });
+			const error = await refused(402, {
+				error: code,
+				details: { resets_at: '2026-11-29T10:52:10Z' },
+			});
 			expect(error.description).toContain('https://dashboard.turbonotify.com/billing');
 			expect(error.description).toMatch(/billing cycle/);
 			expect(error.description).toContain('It resets on 2026-11-29 (UTC).');
@@ -138,7 +154,10 @@ describe('traffic from n8n can be told apart', () => {
 	it('sends it from the polling trigger as well', async () => {
 		const { context, request } = makePollContext({
 			params: { events: ['message.received'] },
-			responses: [{ object: 'list', data: [], has_more: false }, { object: 'list', data: [], has_more: false }],
+			responses: [
+				{ object: 'list', data: [], has_more: false },
+				{ object: 'list', data: [], has_more: false },
+			],
 		});
 		await new TurboNotifyPollingTrigger().poll.call(context);
 		expect(request.mock.calls[0]?.[1].headers).toMatchObject({ 'User-Agent': USER_AGENT });

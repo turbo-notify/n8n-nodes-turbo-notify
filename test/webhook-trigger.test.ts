@@ -38,7 +38,6 @@ function delivery(input: {
 	const status = jest.fn().mockReturnValue({ json });
 	const staticData = input.staticData ?? {};
 	const params: IDataObject = {
-		verifySignature: true,
 		events: ['message.received'],
 		options: {},
 		...input.params,
@@ -111,7 +110,7 @@ describe('Turbo Notify Trigger (webhook)', () => {
 			const activation = (secret: string, verify = true) =>
 				({
 					getNode: () => NODE,
-					getNodeParameter: () => verify,
+					getNodeParameter: () => ({ verifySignature: verify }),
 					getCredentials: async () => ({ webhookSecret: secret }),
 				}) as unknown as IHookFunctions;
 			await expect(trigger.webhookMethods.default.checkExists.call(activation(''))).rejects.toThrow(
@@ -128,7 +127,7 @@ describe('Turbo Notify Trigger (webhook)', () => {
 		it('can be turned off to try things out', async () => {
 			const { context } = delivery({
 				body: event('evt_1'),
-				params: { verifySignature: false },
+				params: { options: { verifySignature: false } },
 				headers: {},
 			});
 			expect((await trigger.webhook.call(context)).workflowData).toBeDefined();
@@ -154,8 +153,10 @@ describe('Turbo Notify Trigger (webhook)', () => {
 			const delivered = async (extra: IDataObject, number: IDataObject[string]) =>
 				(
 					await trigger.webhook.call(
-						delivery({ body: event('evt_1', 'message.received', extra), params: { number } })
-							.context,
+						delivery({
+							body: event('evt_1', 'message.received', extra),
+							params: { options: { number } },
+						}).context,
 					)
 				).workflowData;
 			expect(await delivered({}, 'sales-sp')).toBeUndefined();
@@ -180,7 +181,7 @@ describe('Turbo Notify Trigger (webhook)', () => {
 			const { context } = delivery({
 				body: event('evt_1', 'message.sent'),
 				mode: 'manual',
-				params: { number: 'sales-sp' },
+				params: { options: { number: 'sales-sp' } },
 			});
 			expect((await trigger.webhook.call(context)).workflowData).toBeDefined();
 		});

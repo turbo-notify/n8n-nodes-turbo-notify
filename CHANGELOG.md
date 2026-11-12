@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.4
+
+Changes the n8n review asked for. Optional fields move inside a collection, and the trigger form no longer carries setup text.
+
+- **Send Media: Caption and File Name are under Additional Fields**, next to Quoted Message ID. Audio and stickers have no caption, so it is ignored for them as before.
+- **Turbo Notify Trigger: Number and Verify Signature are under Options**, beside Ignore Duplicates. Verify Signature is still on by default.
+- **Turbo Notify Polling Trigger: Number is under a new Options collection.**
+- **The notice on the Turbo Notify Trigger is gone.** The steps (where to paste the Production URL, how to try it with the Test URL), the hint to open **Webhook URLs** and the plan requirement are in the README.
+- If a workflow already used one of these fields, set it again under the collection that now holds it.
+
 ## 0.3.3
 
 - **A larger icon.** The mark is drawn in a square box and without the three thin accent arcs, so the bubble fills the slot n8n gives every node icon and reads about 15% larger next to the icons around it. The artwork is the same bubble and bolt.

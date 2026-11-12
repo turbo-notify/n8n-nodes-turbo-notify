@@ -98,7 +98,7 @@ Every field takes a fixed value, a value mapped from an earlier node (`{{ $json.
 | Operation | What it does |
 |---|---|
 | Send Text | Sends a text of up to 4096 characters. `@5511977770001` (digits, no +) mentions that person. |
-| Send Media | Sends an image, video, audio, document or sticker from a public web address. Caption for image, video and document, file name for document. |
+| Send Media | Sends an image, video, audio, document or sticker from a public web address. Under **Additional Fields**: caption for image, video and document, file name for document. |
 | Send Location | Sends a map location. |
 | Send Contact Card | Sends a contact card with 1 to 10 phone numbers and optional emails. Set **Phones Input** to JSON to give the phones as a list from an earlier node, such as `{{ $json.phones }}`. |
 | Send Calendar Event | Sends an event invitation. WhatsApp shows the time only on WhatsApp Business accounts. Add **Remind Before (Minutes)** for a reminder. |
@@ -149,11 +149,11 @@ Both triggers hand on the whole event: `id`, `type`, `organization_id`, `number_
 
 A webhook: Turbo Notify calls n8n the moment the event happens.
 
-1. Add the trigger. Copy its **Production URL**. To try it first, copy the **Test URL**, select **Listen for test event** and send a message, then put the Production URL back and activate the workflow: the dashboard holds one address, and n8n answers 404 on a URL that is not listening.
+1. Add the trigger and open **Webhook URLs** at the top of the step (n8n keeps it closed). Copy the **Production URL**. To try it first, copy the **Test URL**, select **Listen for test event** and send a message, then put the Production URL back and activate the workflow: the dashboard holds one address, and n8n answers 404 on a URL that is not listening.
 2. In the [dashboard](https://dashboard.turbonotify.com), under **Webhooks**, paste the URL and type a secret: a long random value (Turbo Notify does not generate one). Select **Save settings**. Only an owner or an admin can save. The address must be public HTTPS: a local n8n needs a tunnel.
 3. In the n8n credential, put the same value under **Webhook Signing Secret**. The trigger refuses to start without it.
 
-Every delivery is checked against the secret (the signature header) and refused when the signature is wrong or the delivery is more than five minutes old. **Verify Signature** can be turned off to try things out. Under **Options**, **Ignore Duplicates** (on by default) skips an event that arrives twice, because Turbo Notify delivers each event at least once, and **Number** limits the trigger to one number.
+Every delivery is checked against the secret (the signature header) and refused when the signature is wrong or the delivery is more than five minutes old. Under **Options**, **Verify Signature** (on by default) can be turned off to try things out, **Ignore Duplicates** (on by default) skips an event that arrives twice, because Turbo Notify delivers each event at least once, and **Number** limits the trigger to one number.
 
 A Turbo Notify organization has **one** webhook address. If you already receive webhooks somewhere else, use the Polling Trigger, or forward the events from there. Webhook delivery needs the Lone Wolf plan or higher. On Lone Wolf an event gets exactly one attempt, so one that finds n8n down is not delivered again: catch up with **Event > Get Many** (**Created After**), or use the Polling Trigger. Business and above retry up to six times.
 
@@ -165,6 +165,7 @@ Checks for new events at the interval you set under **Poll Times** and starts th
 
 - The first time the workflow is activated the trigger starts from now and does not run for past events. If you change the events or the number afterwards, it starts from now again.
 - It reads the last two minutes again on every check and skips what it already handed on, so an event that becomes visible a moment late is not lost.
+- **Options > Number** limits the trigger to one number.
 - Use **Execute step** to see the most recent matching event as sample data.
 
 Polling means a delay of up to the interval (one minute at the shortest).
