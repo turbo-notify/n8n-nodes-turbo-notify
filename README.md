@@ -155,13 +155,13 @@ A webhook: Turbo Notify calls n8n the moment the event happens.
 
 Every delivery is checked against the secret (the signature header) and refused when the signature is wrong or the delivery is more than five minutes old. Under **Options**, **Verify Signature** (on by default) can be turned off to try things out, **Ignore Duplicates** (on by default) skips an event that arrives twice, because Turbo Notify delivers each event at least once, and **Number** limits the trigger to one number.
 
-A Turbo Notify organization has **one** webhook address. If you already receive webhooks somewhere else, use the Polling Trigger, or forward the events from there. Webhook delivery needs the Lone Wolf plan or higher. On Lone Wolf an event gets exactly one attempt, so one that finds n8n down is not delivered again: catch up with **Event > Get Many** (**Created After**), or use the Polling Trigger. Business and above retry up to six times.
+A Turbo Notify organization has **one** webhook address. If you already receive webhooks somewhere else, use the Polling Trigger, or forward the events from there. Webhook delivery needs the Lone Wolf plan or higher. On Lone Wolf an event gets exactly one attempt, so one that finds n8n down is not delivered again: catch up with **Event > Get Many** (**Created After**), or use the Polling Trigger. Business and above make up to six attempts.
 
 A test run (**Listen for test event**) shows the first delivery whatever the filters say, because n8n stops listening after one.
 
 ### Turbo Notify Polling Trigger
 
-Checks for new events at the interval you set under **Poll Times** and starts the workflow once per event, oldest first. It reads `GET /v1/events`, so it works on every plan, needs no public address and no webhook setup. Use it on the Free plan, behind a firewall, or when the organization's webhook address is taken.
+Checks for new events at the interval you set under **Poll Times** and each check that finds new events starts the workflow once, with one item per event, oldest first. It reads `GET /v1/events`, so it works on every plan, needs no public address and no webhook setup. Use it on the Free plan, behind a firewall, or when the organization's webhook address is taken.
 
 - The first time the workflow is activated the trigger starts from now and does not run for past events. If you change the events or the number afterwards, it starts from now again.
 - It reads the last two minutes again on every check and skips what it already handed on, so an event that becomes visible a moment late is not lost.

@@ -185,7 +185,7 @@ function describe(status: number | undefined, body: IDataObject, error: unknown)
 	if (code === 'insufficient_scope') {
 		const scope = typeof body.required_scope === 'string' ? body.required_scope : 'the required';
 		message = 'The API key cannot do this';
-		description = `Add the '${scope}' scope to the key, or create a key from a template that includes it.`;
+		description = `The key lacks the '${scope}' scope, and the scopes of a key cannot be changed afterwards: create a new key that has it, for example from the AI agent (MCP) template.`;
 	} else if (code === 'validation_error') {
 		const errors = pick(body, 'details', 'errors');
 		const fields = Array.isArray(errors)
