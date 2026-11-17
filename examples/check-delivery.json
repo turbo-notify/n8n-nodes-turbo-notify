@@ -1,5 +1,5 @@
 {
-	"name": "Send a message and check that it arrived",
+	"name": "Send a WhatsApp message and check that it arrived with Turbo Notify",
 	"nodes": [
 		{
 			"parameters": {},

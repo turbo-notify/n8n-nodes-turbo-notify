@@ -6,7 +6,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 function walk(dir, out = []) {
 	for (const name of readdirSync(dir)) {
-		if (name === 'node_modules' || name === 'dist' || name === '.git') continue;
+		if (['node_modules', 'dist', '.git', 'graphify-out'].includes(name)) continue;
 		const full = join(dir, name);
 		if (statSync(full).isDirectory()) walk(full, out);
 		else out.push(full);

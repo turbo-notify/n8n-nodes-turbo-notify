@@ -118,3 +118,34 @@ describe('no form text states a plan requirement (n8n review, 2026-11-12)', () =
 		expect(readme).toMatch(/Send Typing Indicator \|[^|]*Needs the Lone Wolf plan or higher/);
 	});
 });
+
+describe('the nodes are found by searching for WhatsApp', () => {
+	const { TurboNotify } = require('../nodes/TurboNotify/TurboNotify.node');
+	const { TurboNotifyTrigger } = require('../nodes/TurboNotifyTrigger/TurboNotifyTrigger.node');
+	const {
+		TurboNotifyPollingTrigger,
+	} = require('../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node');
+
+	const nodes = [
+		[new TurboNotify().description, 'Turbo Notify WhatsApp'],
+		[new TurboNotifyTrigger().description, 'Turbo Notify WhatsApp Trigger'],
+		[new TurboNotifyPollingTrigger().description, 'Turbo Notify WhatsApp Polling Trigger'],
+	];
+
+	it.each(nodes)('%# says WhatsApp in its name, the catalog label n8n.io searches', (d, name) => {
+		expect(d.displayName).toBe(name);
+		expect(d.defaults.name).toBe(name);
+	});
+
+	it('keeps the node types, so a workflow that already uses them keeps working', () => {
+		expect(nodes.map(([d]) => d.name)).toEqual([
+			'turboNotify',
+			'turboNotifyTrigger',
+			'turboNotifyPollingTrigger',
+		]);
+	});
+
+	it('keeps the instant trigger grouped with the action node (same label without "Trigger")', () => {
+		expect(nodes[1][0].displayName.replace(/ Trigger$/, '')).toBe(nodes[0][0].displayName);
+	});
+});

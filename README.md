@@ -2,9 +2,9 @@
 
 Turbo Notify connects a WhatsApp number to your account and gives you an API for it. This package adds Turbo Notify to n8n:
 
-- **Turbo Notify** node: send text, images, video, audio, documents, stickers, locations, contact cards, calendar events and link buttons; reply, react, edit and delete messages; show typing; check delivery status; read messages, contacts, groups, numbers and events. It also works as a tool for an AI Agent.
-- **Turbo Notify Trigger** node: starts a workflow the moment something happens (a message arrives, a message is delivered or read, a number disconnects, a quota runs low). It is a webhook, so it is instant.
-- **Turbo Notify Polling Trigger** node: the same events, checked at the interval you choose. It works on every plan and needs no public address.
+- **Turbo Notify WhatsApp** node: send text, images, video, audio, documents, stickers, locations, contact cards, calendar events and link buttons; reply, react, edit and delete messages; show typing; check delivery status; read messages, contacts, groups, numbers and events. It also works as a tool for an AI Agent.
+- **Turbo Notify WhatsApp Trigger** node: starts a workflow the moment something happens (a message arrives, a message is delivered or read, a number disconnects, a quota runs low). It is a webhook, so it is instant.
+- **Turbo Notify WhatsApp Polling Trigger** node: the same events, checked at the interval you choose. It works on every plan and needs no public address.
 
 Turbo Notify links your own WhatsApp number to your account as a linked device, the same way WhatsApp Web does. It is an independent service, not affiliated with Meta, and it does not use the WhatsApp Business Platform API. Messages follow your WhatsApp account's own rules, so read the [WhatsApp business policy](https://www.whatsapp.com/legal/business-policy/) and the [good practices](https://docs.turbonotify.com/en/general/abuse/) before you send in bulk.
 
@@ -12,7 +12,7 @@ Turbo Notify links your own WhatsApp number to your account as a linked device, 
 - [Install](#install)
 - [Credentials](#credentials)
 - [Your first message](#your-first-message)
-- [Turbo Notify node](#turbo-notify-node)
+- [Turbo Notify WhatsApp node](#turbo-notify-whatsapp-node)
 - [Triggers](#triggers)
 - [Example workflows](#example-workflows)
 - [Using Turbo Notify from n8n AI agents](#using-turbo-notify-from-n8n-ai-agents)
@@ -34,7 +34,7 @@ The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) 
 | A number connected today, per day | 50 messages on its first day, then 200, 500, 1,000 and 2,000 a day until the seventh day. After that only your plan limits apply. The count starts again at midnight UTC. |
 | Your plan | its own allowance of messages and contacts per billing cycle, and its own pace between sends. The table is in [Quota and usage](https://docs.turbonotify.com/en/usage/quota/#plan-table-per-number-per-cycle) and yours is under **Billing** in the dashboard. **Message > Get Quota** reads what the number can still send in this cycle. |
 | Polling Trigger | every plan; it checks once a minute at the shortest, which is the least n8n allows |
-| Turbo Notify Trigger (instant) | Lone Wolf plan or higher, and an address n8n can be reached on from the internet |
+| Turbo Notify WhatsApp Trigger (instant) | Lone Wolf plan or higher, and an address n8n can be reached on from the internet |
 
 ## Install
 
@@ -56,7 +56,7 @@ Before you use the node you need a Turbo Notify account with your WhatsApp numbe
 2. Under **API keys**, create a key. Use the template **AI agent (MCP)**. The name refers to the MCP server, but the scopes it selects are exactly the ones this package uses: `messages:send`, `messages:read`, `contacts:read`, `groups:read`, `numbers:read` and `events:read`. A workflow that only sends can use the **Transactional notifications** template instead. **Full access** also works, but gives the workflow more than it needs. The key value is shown once: copy it.
 3. In n8n, create a **Turbo Notify API** credential and paste the key into **API Key**. Leave **Base URL** as it is. Select **Save**: n8n tests the key by calling `GET /v1/usage`, which works with any valid key.
 
-**Webhook Signing Secret** is only for the instant trigger: see [Turbo Notify Trigger](#turbo-notify-trigger-instant).
+**Webhook Signing Secret** is only for the instant trigger: see [Turbo Notify WhatsApp Trigger](#turbo-notify-whatsapp-trigger-instant).
 
 | Operation | Scope the key needs |
 |---|---|
@@ -73,7 +73,7 @@ Keys are not tied to one number: within its scopes, a key reaches your main numb
 
 ## Your first message
 
-1. Add a **Turbo Notify** node and choose the credential.
+1. Add a **Turbo Notify WhatsApp** node and choose the credential.
 2. Keep **Resource** on Message and **Operation** on Send Text. **Number** is `main`.
 3. Under **Phone Number** type your own number with the country code and a `+`, for example `+5511977770001`. Write something under **Text**.
 4. Select **Execute step**. The output looks like this:
@@ -89,7 +89,7 @@ Keys are not tied to one number: within its scopes, a key reaches your main numb
 
 `pending` means Turbo Notify accepted the message. Whether it was delivered or read arrives later: see [Get Status](#message) and the [triggers](#triggers).
 
-## Turbo Notify node
+## Turbo Notify WhatsApp node
 
 Every field takes a fixed value, a value mapped from an earlier node (`{{ $json.phone }}`) or any other n8n expression. The node runs once for each input item, so with 200 incoming rows it sends 200 messages, each with its own recipient and text. **Number** is the number to use: pick it from the list, or choose **By Alias or ID** and type its alias (`main` for the main number) or its `num_...` ID, or map it.
 
@@ -145,7 +145,7 @@ Both triggers hand on the whole event: `id`, `type`, `organization_id`, `number_
 - For several events, add a **Switch** on `{{ $json.type }}`.
 - The event `id` is stable if you want your own deduplication.
 
-### Turbo Notify Trigger (instant)
+### Turbo Notify WhatsApp Trigger (instant)
 
 A webhook: Turbo Notify calls n8n the moment the event happens.
 
@@ -159,7 +159,7 @@ A Turbo Notify organization has **one** webhook address. If you already receive 
 
 A test run (**Listen for test event**) shows the first delivery whatever the filters say, because n8n stops listening after one.
 
-### Turbo Notify Polling Trigger
+### Turbo Notify WhatsApp Polling Trigger
 
 Checks for new events at the interval you set under **Poll Times** and each check that finds new events starts the workflow once, with one item per event, oldest first. It reads `GET /v1/events`, so it works on every plan, needs no public address and no webhook setup. Use it on the Free plan, behind a firewall, or when the organization's webhook address is taken.
 
@@ -172,7 +172,7 @@ Polling means a delay of up to the interval (one minute at the shortest).
 
 ## Example workflows
 
-Import a file from [`examples/`](examples) with **Import from File** in the workflow menu, then choose your credential in each Turbo Notify node. The phone numbers in the examples are made up. Use your own.
+Import a file from [`examples/`](examples) with **Import from File** in the workflow menu, then choose your credential in each Turbo Notify WhatsApp node. The phone numbers in the examples are made up. Use your own.
 
 - [`answer-private-messages.json`](examples/answer-private-messages.json): the Polling Trigger starts on every received message, skips groups, shows typing and answers with Reply. The typing step needs the Lone Wolf plan: on the Free plan it fails and the workflow goes on.
 - [`answer-with-ai.json`](examples/answer-with-ai.json): the same, but it first reads the whole message with Get and passes it through a step where you plug in your AI model, then replies with its answer.
@@ -189,7 +189,7 @@ Import a file from [`examples/`](examples) with **Import from File** in the work
 
 There are two ways to give an n8n AI Agent access to your WhatsApp.
 
-**1. This node as a tool.** Connect the Turbo Notify node to the **Tools** input of an AI Agent node.
+**1. This node as a tool.** Connect the Turbo Notify WhatsApp node to the **Tools** input of an AI Agent node.
 
 - Use one tool node per job and rename it (for example `send_whatsapp_text`). Set its description yourself, because every Turbo Notify tool otherwise shares the same text.
 - Set **Recipient Type** to Auto-Detect and let the agent fill **To** and **Text** with `$fromAI('to', ...)` and `$fromAI('text', ...)`.

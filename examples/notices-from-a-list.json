@@ -1,5 +1,5 @@
 {
-	"name": "Send a notice to every row of a list",
+	"name": "Send a WhatsApp notice to every row of a list with Turbo Notify",
 	"nodes": [
 		{
 			"parameters": {},

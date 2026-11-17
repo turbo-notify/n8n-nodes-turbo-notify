@@ -47,4 +47,26 @@ describe('example workflows use real parameters of the nodes', () => {
 		const nodeNames = workflow.nodes.map((n) => n.name);
 		for (const from of Object.keys(workflow.connections)) expect(nodeNames).toContain(from);
 	});
+
+	it.each(files)('%s names WhatsApp and Turbo Notify in its title, for the template search', (file) => {
+		const { name } = JSON.parse(readFileSync(join(dir, file), 'utf8'));
+		expect(name).toMatch(/WhatsApp/);
+		expect(name).toMatch(/Turbo Notify/);
+	});
+
+	it.each(files)('%s refers only to nodes it has, and its Turbo Notify nodes carry the new names', (file) => {
+		const raw = readFileSync(join(dir, file), 'utf8');
+		const workflow = JSON.parse(raw);
+		const nodeNames = new Set(workflow.nodes.map((n) => n.name));
+		for (const [, ref] of raw.matchAll(/\$\('([^']+)'\)/g)) expect(nodeNames).toContain(ref);
+		const defaults = {
+			[`${TYPE}.turboNotify`]: 'Turbo Notify WhatsApp',
+			[`${TYPE}.turboNotifyTrigger`]: 'Turbo Notify WhatsApp Trigger',
+			[`${TYPE}.turboNotifyPollingTrigger`]: 'Turbo Notify WhatsApp Polling Trigger',
+		};
+		for (const node of workflow.nodes) {
+			if (defaults[node.type] && /^Turbo Notify/.test(node.name)) expect(node.name).toBe(defaults[node.type]);
+		}
+		expect(raw).not.toMatch(/Turbo Notify (Polling )?Trigger/);
+	});
 });

@@ -3,7 +3,7 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
-	"alias": ["whatsapp", "turbo notify", "wa", "notify", "incoming message", "webhook", "instant"],
+	"alias": ["whatsapp", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "incoming message", "webhook", "instant"],
 	"resources": {
 		"credentialDocumentation": [
 			{

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.13
+
+The nodes now carry the word WhatsApp in their name, so a search for WhatsApp in n8n and on n8n.io finds them.
+
+- **Turbo Notify WhatsApp**, **Turbo Notify WhatsApp Trigger** and **Turbo Notify WhatsApp Polling Trigger** are the new names shown in the node panel and on the canvas. Nothing else changes: the node types, the parameters and the credential are the same, so a workflow that already uses them keeps working, and a node you already placed keeps the name it had.
+- The six example workflows use the new node names and say WhatsApp in their title.
+- The version is 1.5.13 from this release on.
+
 ## 0.3.5
 
 Two more places where the form carried text that belongs in the README, found before the review reached them.

@@ -1,5 +1,5 @@
 {
-	"name": "Send a WhatsApp text when a form is submitted",
+	"name": "Send a WhatsApp text when a form is submitted with Turbo Notify",
 	"nodes": [
 		{
 			"parameters": {

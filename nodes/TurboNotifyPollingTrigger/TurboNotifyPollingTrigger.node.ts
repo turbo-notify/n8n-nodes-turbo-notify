@@ -28,7 +28,7 @@ const MAX_PAGES = 50;
 
 export class TurboNotifyPollingTrigger implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Turbo Notify Polling Trigger',
+		displayName: 'Turbo Notify WhatsApp Polling Trigger',
 		name: 'turboNotifyPollingTrigger',
 		icon: {
 			light: 'file:../TurboNotify/turboNotify.svg',
@@ -40,7 +40,7 @@ export class TurboNotifyPollingTrigger implements INodeType {
 			'={{ Array.isArray($parameter["events"]) && !$parameter["events"].includes("*") ? $parameter["events"].join(", ") : "any event" }}',
 		description:
 			'Starts a workflow when Turbo Notify records a WhatsApp event, checking at the interval you set, on every plan',
-		defaults: { name: 'Turbo Notify Polling Trigger' },
+		defaults: { name: 'Turbo Notify WhatsApp Polling Trigger' },
 		polling: true,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
