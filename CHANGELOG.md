@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.15
+
+- **The README says the package is verified by n8n.** The Install section no longer says the node appears on n8n Cloud "once n8n has verified the package".
+
 ## 1.5.14
 
 Follows the new node names in the places 1.5.13 left behind.

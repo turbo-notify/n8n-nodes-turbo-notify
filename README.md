@@ -38,7 +38,7 @@ The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) 
 
 ## Install
 
-In n8n, open **Settings > Community Nodes**, choose **Install** and enter `@turbo-notify/n8n-nodes-turbo-notify`. On n8n Cloud the node is listed in the nodes panel once n8n has verified the package.
+In n8n, open **Settings > Community Nodes**, choose **Install** and enter `@turbo-notify/n8n-nodes-turbo-notify`. n8n has verified the package, so on n8n Cloud the node is listed in the nodes panel.
 
 On a self-hosted n8n you can also install it from the command line, in the folder n8n uses for community nodes (`~/.n8n/nodes` by default):
 
