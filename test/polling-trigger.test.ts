@@ -30,7 +30,7 @@ const seen = (...events: Array<{ id: string }>) => events.map((e) => e.id);
 const params = { events: ['message.received'] };
 const READY = { initialized: true, filterKey: 'message.received|' };
 
-describe('Turbo Notify Trigger (polling)', () => {
+describe('Turbo Notify WhatsApp Polling Trigger', () => {
 	it('is a polling trigger with no inputs', () => {
 		expect(trigger.description.polling).toBe(true);
 		expect(trigger.description.inputs).toEqual([]);

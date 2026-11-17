@@ -38,6 +38,28 @@ describe('package documentation stays in step', () => {
 		}
 	});
 
+	it('every README fragment linked from a node codex file or from the README itself is a real heading', () => {
+		const slug = (h) =>
+			h
+				.toLowerCase()
+				.replace(/[^a-z0-9 _-]/g, '')
+				.trim()
+				.replace(/ /g, '-');
+		const headings = new Set(
+			[...README.matchAll(/^#{1,6} (.+)$/gm)].map((m) => slug(m[1])),
+		);
+		const links = [...README.matchAll(/\]\(#([^)]+)\)/g)].map((m) => m[1]);
+		for (const entry of pkg.n8n.nodes) {
+			const codex = readFileSync(
+				join(root, entry.replace(/^dist\//, '').replace(/\.js$/, '.json')),
+				'utf8',
+			);
+			for (const m of codex.matchAll(/n8n-nodes-turbo-notify#([a-z0-9-]+)/g)) links.push(m[1]);
+		}
+		expect(links.length).toBeGreaterThan(5);
+		for (const fragment of links) expect(headings).toContain(fragment);
+	});
+
 	it('opens the README with what is needed before the first message', () => {
 		const before = README.indexOf('## Before you start');
 		expect(before).toBeGreaterThan(0);

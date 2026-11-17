@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.14
+
+Follows the new node names in the places 1.5.13 left behind.
+
+- **The Docs link of the two triggers opens their section of the README.** The README headings carry the new names, and the two links still pointed at the old anchors, so they opened the top of the page.
+- **The Webhook Signing Secret field says "Turbo Notify WhatsApp Trigger".**
+- A test keeps every README link and every Docs link of a node on a real heading.
+
 ## 1.5.13
 
 The nodes now carry the word WhatsApp in their name, so a search for WhatsApp in n8n and on n8n.io finds them.

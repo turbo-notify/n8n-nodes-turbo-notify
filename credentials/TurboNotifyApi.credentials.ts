@@ -54,7 +54,7 @@ export class TurboNotifyApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 			description:
-				'Only for the Turbo Notify Trigger. The secret you type next to the webhook address in the Turbo Notify dashboard: Turbo Notify does not generate one, so pick a long random value and enter it on both sides.',
+				'Only for the Turbo Notify WhatsApp Trigger. The secret you type next to the webhook address in the Turbo Notify dashboard: Turbo Notify does not generate one, so pick a long random value and enter it on both sides.',
 		},
 	];
 

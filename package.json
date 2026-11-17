@@ -1,6 +1,6 @@
 {
 	"name": "@turbo-notify/n8n-nodes-turbo-notify",
-	"version": "1.5.13",
+	"version": "1.5.14",
 	"description": "Send and receive WhatsApp messages, read contacts and groups, and react to events with Turbo Notify.",
 	"license": "MIT",
 	"homepage": "https://docs.turbonotify.com",

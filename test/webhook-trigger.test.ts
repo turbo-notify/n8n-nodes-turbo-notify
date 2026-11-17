@@ -66,7 +66,7 @@ function delivery(input: {
 	return { context: context as unknown as IWebhookFunctions, status, json, staticData };
 }
 
-describe('Turbo Notify Trigger (webhook)', () => {
+describe('Turbo Notify WhatsApp Trigger (webhook)', () => {
 	it('is a webhook trigger without polling, listening for POST', () => {
 		expect(trigger.description.webhooks?.[0]).toMatchObject({
 			httpMethod: 'POST',
