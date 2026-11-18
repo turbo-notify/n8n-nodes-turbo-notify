@@ -135,6 +135,15 @@ describe('workflow templates follow the n8n library rules', () => {
 			}
 		});
 
+		it('never leaves a public webhook that sends WhatsApp messages without authentication', () => {
+			for (const node of nodes.filter((n) => n.type === 'n8n-nodes-base.webhook')) {
+				expect({ name: node.name, authentication: node.parameters.authentication }).toEqual({
+					name: node.name,
+					authentication: expect.stringMatching(/^(headerAuth|basicAuth)$/),
+				});
+			}
+		});
+
 		it('has no em or en dash', () => {
 			for (const file of ['workflow.json', 'README.md']) {
 				expect(readFileSync(join(dir, file), 'utf8')).not.toMatch(new RegExp('[\\u2013\\u2014]'));

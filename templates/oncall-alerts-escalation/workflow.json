@@ -1,0 +1,1466 @@
+{
+	"name": "Page your on-call team on WhatsApp until someone answers with Turbo Notify",
+	"nodes": [
+		{
+			"parameters": {
+				"httpMethod": "POST",
+				"path": "5d1f7a3c-8e24-4b6a-9c07-e3a41b9d6f58",
+				"authentication": "headerAuth",
+				"responseMode": "onReceived",
+				"options": {}
+			},
+			"id": "a7ae6c60-5f7e-4f1f-a7ae-d9e4d25ccd5d",
+			"name": "Receive an alert",
+			"type": "n8n-nodes-base.webhook",
+			"typeVersion": 2.1,
+			"webhookId": "5d1f7a3c-8e24-4b6a-9c07-e3a41b9d6f58",
+			"credentials": {
+				"httpHeaderAuth": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Alert access (Header Auth)"
+				}
+			},
+			"notes": "Needs Header Auth: a request without the right header is refused and never reaches the workflow. n8n normally assigns a new address to an imported copy: use the Production URL shown in this node. Share it and the header value only with your monitoring tool, over HTTPS.",
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"events": [
+					"message.received",
+					"message.replied"
+				],
+				"pollTimes": {
+					"item": [
+						{
+							"mode": "everyMinute"
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "e5977e5d-a5bb-43e0-a4d9-23f0cebde17c",
+			"name": "Poll WhatsApp replies",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"notes": "Reads the replies of your on-call people once a minute. Works on every plan. A reply written while n8n was off is read at the next poll.",
+			"position": [
+				0,
+				200
+			]
+		},
+		{
+			"parameters": {
+				"rule": {
+					"interval": [
+						{
+							"field": "minutes",
+							"minutesInterval": 1
+						}
+					]
+				}
+			},
+			"id": "6c1d2b19-63bb-4a27-a93d-98852e6a7305",
+			"name": "Every minute: look for unanswered alerts",
+			"type": "n8n-nodes-base.scheduleTrigger",
+			"typeVersion": 1.2,
+			"notes": "Every minute it pages the next level of any alert that was not taken in time. It does nothing when no alert is open. It counts as one n8n execution a minute: see the README before you keep it on n8n Cloud, and set 2 or 5 minutes if you prefer.",
+			"position": [
+				0,
+				400
+			]
+		},
+		{
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "a20c043d-cad2-4da6-a4f8-ca269e245e93",
+							"name": "oncall_phone_1",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "f37b6643-b1b1-49e1-a482-ca732c3e1795",
+							"name": "oncall_phone_2",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "601e1531-a2e2-453a-a395-6d4410a0aff8",
+							"name": "oncall_phone_3",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"id": "5ee015b7-ef48-486f-a16d-daf83f193eb8",
+							"name": "owner_phone",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "f4bb4af7-2e09-44ae-ae16-dde7e9ee859f",
+							"name": "ack_minutes",
+							"value": 5,
+							"type": "number"
+						},
+						{
+							"id": "ef277b89-1be6-426d-aeb2-7104db99092a",
+							"name": "ack_words",
+							"value": "ok, ack, got it, visto, ciente",
+							"type": "string"
+						},
+						{
+							"id": "9e41ca58-328f-4b7f-a5b1-987a714d57a8",
+							"name": "min_severity",
+							"value": "warning",
+							"type": "string"
+						},
+						{
+							"id": "c96aba68-3676-493d-ad54-41d085fbe6cd",
+							"name": "severity_order",
+							"value": "info, warning, critical",
+							"type": "string"
+						},
+						{
+							"id": "facd8241-d038-41b1-aaec-d6cbc7b1adcb",
+							"name": "max_new_alerts_per_hour",
+							"value": 10,
+							"type": "number"
+						},
+						{
+							"id": "467cf437-76ab-4230-abbd-f0eb24a70807",
+							"name": "reopen_minutes",
+							"value": 2,
+							"type": "number"
+						},
+						{
+							"id": "6c8ca17b-ab9f-4c49-a3b5-426e5af137fc",
+							"name": "rearm_hours",
+							"value": 12,
+							"type": "number"
+						},
+						{
+							"id": "b07bcada-8a9d-4bb1-a2d8-b84e24f223e9",
+							"name": "max_text_length",
+							"value": 300,
+							"type": "number"
+						},
+						{
+							"id": "5ee2717c-243d-48b5-a846-190b941c449e",
+							"name": "field_alert_id",
+							"value": "alert_id",
+							"type": "string"
+						},
+						{
+							"id": "3befacfb-7caa-4fae-a49c-bec1d884f229",
+							"name": "field_service",
+							"value": "service",
+							"type": "string"
+						},
+						{
+							"id": "a2e38555-20d8-4a4e-abdc-cae0924bf94d",
+							"name": "field_severity",
+							"value": "severity",
+							"type": "string"
+						},
+						{
+							"id": "21afcbcc-2246-4409-a245-fd2c99f95580",
+							"name": "field_status",
+							"value": "status",
+							"type": "string"
+						},
+						{
+							"id": "3065f13a-499a-4906-a207-b911b9bbe96e",
+							"name": "field_message",
+							"value": "message",
+							"type": "string"
+						},
+						{
+							"id": "1479d655-31de-458b-a921-a4f44d303e42",
+							"name": "field_runbook_url",
+							"value": "runbook_url",
+							"type": "string"
+						},
+						{
+							"id": "5bcb884b-f214-42c5-af99-909d8eedddfb",
+							"name": "runbook_button_text",
+							"value": "Open runbook",
+							"type": "string"
+						},
+						{
+							"id": "20dbf6b7-1f18-4e17-aced-f3b4ba2d2b50",
+							"name": "msg_page",
+							"value": "ALERT [{severity}] {service}: {message}\\nReply OK {code} to take it.",
+							"type": "string"
+						},
+						{
+							"id": "03894b21-909c-4024-a004-0ea7f37dc288",
+							"name": "msg_escalated",
+							"value": "ESCALATED, nobody answered level {previous_level}. [{severity}] {service}: {message}\\nReply OK {code} to take it.",
+							"type": "string"
+						},
+						{
+							"id": "ad39b877-11bf-423b-a50f-d0f8d1434e9d",
+							"name": "msg_ack_confirm",
+							"value": "Acknowledged, you own {service} ({code}).",
+							"type": "string"
+						},
+						{
+							"id": "f9298f33-c0ac-4ea9-a153-17075bdda75e",
+							"name": "msg_ack_note",
+							"value": "{name} took {service} ({code}). You do not need to act.",
+							"type": "string"
+						},
+						{
+							"id": "872d39bf-f0a2-435f-aff1-09e6e6409bd7",
+							"name": "msg_final",
+							"value": "Nobody acknowledged {service} ({code}): {message}\\nNo more messages will follow for this alert. Check it now.",
+							"type": "string"
+						},
+						{
+							"id": "9fe71ab1-f9bc-473b-a212-2a47f6b9c787",
+							"name": "msg_resolved",
+							"value": "Resolved: {service} ({code}).",
+							"type": "string"
+						}
+					]
+				},
+				"includeOtherFields": false,
+				"options": {}
+			},
+			"id": "a51fc7b0-841f-4c6a-af57-8473a89f0234",
+			"name": "Your settings",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"notes": "oncall_phone_1: level 1, paged first. With + and country code. NEVER the phone linked to Turbo Notify: it cannot page itself. Replace it: the workflow stops while it is a placeholder\noncall_phone_2: level 2, paged when level 1 does not answer. Another person's real number, never the linked phone. Empty it to use fewer levels. On Free, at most two different phones in all: set owner_phone equal to this one, or empty this\noncall_phone_3: level 3, optional. Leave empty for two levels. Not the linked phone\nowner_phone: gets the final message when nobody answers. Not the linked phone either. May be the same number as a level, which on Free keeps you at two phones\nack_minutes: minutes a level has to answer. The timer adds one minute of grace and runs every minute, so the next level is paged ack_minutes + 1 to + 2 minutes after the page. With a slower Schedule Trigger use a multiple of its interval\nack_words: a reply that starts with one of these takes the alert, optionally followed by its code (OK 7K2F). Comma separated, capitals and accents do not matter\nmin_severity: alerts below this severity are ignored. An unknown or missing severity is never ignored\nseverity_order: your severities from the lowest to the highest, comma separated. The highest one is never held back by max_new_alerts_per_hour\nmax_new_alerts_per_hour: more new alerts than this in the last 60 minutes are not paged and the run fails, so a flood is seen. The block is rolling: it lifts as alerts age past the hour\nreopen_minutes: an alert that fires again less than this long after it was resolved is ignored (a monitor that flaps). At least 1 minute. If your tool only reports changes, a second outage inside this time is not paged: set 0 or 1\nrearm_hours: an alert that was taken or that nobody took pages again if it fires again after this many hours\nmax_text_length: longest alert message accepted. Longer text is cut. Service names are cut at 80\nfield_alert_id: name of the field in your alert that holds a unique id or fingerprint. Without one the same service and text count as the same alert\nfield_service: name of the field with the service or host\nfield_severity: name of the field with the severity\nfield_status: name of the field with firing or resolved (empty or any other word means firing)\nfield_message: name of the field with the text of the alert. Do not put secrets or customer data in it\nfield_runbook_url: name of the field with a link to the runbook, optional. It is added to the page text and gives the page a button\nrunbook_button_text: text on the runbook button, at most 20 characters\nmsg_page: the first page. {service} {severity} {message} {code} {alert_id} {minutes}. \\n is a line break. The runbook link is added at the end\nmsg_escalated: the page of the next level. Same placeholders, plus {previous_level} and {level}\nmsg_ack_confirm: sent to the person who took the alert. Same placeholders as msg_page\nmsg_ack_note: sent to the other levels already paged. Same placeholders, plus {name}: the name WhatsApp shows, or the number\nmsg_final: sent once to every level and to the owner after the last level did not answer. Same placeholders as msg_page\nmsg_resolved: sent to the people who were paged when the monitoring tool reports the alert resolved. Same placeholders as msg_page",
+			"notesInFlow": true,
+			"position": [
+				560,
+				200
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Stops the run while a setting is still a placeholder or makes no sense, then hands on the items of the\n// trigger that started this run, each marked with where it came from. Nothing is sent or saved here.\nconst cfg = $('Your settings').first().json;\nconst problems = [];\nconst E164 = /^\\+[1-9]\\d{7,14}$/;\nconst text = (name) => String(cfg[name] ?? '').trim();\n\n// Level 1 is required. Levels 2 and 3 may be empty: the ladder is then shorter.\nconst phones = [];\nfor (const name of ['oncall_phone_1', 'oncall_phone_2', 'oncall_phone_3']) {\n  const value = text(name);\n  if (!value) {\n    if (name === 'oncall_phone_1') problems.push('oncall_phone_1 is empty: level 1 needs a number');\n    continue;\n  }\n  if (!E164.test(value)) {\n    problems.push(name + ' is not a real number yet (type it with + and the country code' + (name === 'oncall_phone_1' ? '' : ', or empty the field to use fewer levels') + ')');\n  } else {\n    phones.push(value);\n  }\n}\nif (new Set(phones).size !== phones.length) problems.push('two on-call levels hold the same number');\nif (!E164.test(text('owner_phone'))) problems.push('owner_phone is not a real number yet (the person who is told when nobody answers, with + and the country code)');\n\nconst positive = (name, whole) => {\n  const value = Number(cfg[name]);\n  if (!Number.isFinite(value) || value <= 0 || (whole && !Number.isInteger(value))) {\n    problems.push(name + ' must be a ' + (whole ? 'whole ' : '') + 'number above 0');\n  }\n};\npositive('ack_minutes', false);\npositive('max_new_alerts_per_hour', true);\npositive('rearm_hours', false);\npositive('max_text_length', true);\nconst reopen = Number(cfg.reopen_minutes);\nif (!Number.isFinite(reopen) || reopen < 0) problems.push('reopen_minutes must be a number of 0 or more');\n\nconst list = (name) => text(name).split(',').map((word) => word.trim().toLowerCase()).filter(Boolean);\nif (list('ack_words').length === 0) problems.push('ack_words is empty: nobody could take an alert');\nconst order = list('severity_order');\nif (!order.includes(text('min_severity').toLowerCase())) problems.push('min_severity must be one of severity_order (' + order.join(', ') + ')');\nfor (const name of ['field_alert_id', 'field_service', 'field_severity', 'field_status', 'field_message', 'field_runbook_url']) {\n  if (!text(name)) problems.push(name + ' is empty: name the field of your alert that holds it');\n}\nfor (const name of ['msg_page', 'msg_escalated', 'msg_final', 'msg_ack_confirm', 'msg_ack_note', 'msg_resolved']) {\n  if (!text(name)) problems.push(name + ' is empty');\n}\nconst button = text('runbook_button_text');\nif (!button || button.length > 20) problems.push('runbook_button_text must be 1 to 20 characters');\n\nif (problems.length > 0) {\n  throw new Error('Not ready to page anybody: ' + problems.join('; ') + '. Fix Your settings, then the workflow runs.');\n}\n\nconst source = $('Receive an alert').isExecuted ? 'alert' : $('Poll WhatsApp replies').isExecuted ? 'reply' : 'timer';\nconst items = source === 'alert' ? $('Receive an alert').all() : source === 'reply' ? $('Poll WhatsApp replies').all() : [{ json: {} }];\nreturn items.map((item) => ({ json: { ...item.json, source } }));"
+			},
+			"id": "a71ff109-67c5-4a57-aa63-7d2e7abc6dfa",
+			"name": "Check the settings",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "Stops the run while a phone is a placeholder or a setting makes no sense. Then it hands on what the trigger delivered.",
+			"position": [
+				1020,
+				200
+			]
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "6823b355-949b-4a08-a8ef-bf51782bb287",
+							"leftValue": "={{ $json.source === 'alert' }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"id": "62d1d92f-381b-4fa8-a24f-7ca7b8def98b",
+			"name": "Webhook alert, or replies and timer?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"notes": "True: an alert from your monitoring tool. False: replies from the poll, or the minute timer.",
+			"position": [
+				1280,
+				200
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "oncall_alerts"
+				},
+				"matchType": "anyCondition",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "alert_id",
+							"condition": "eq",
+							"keyValue": "={{ String(($json.body || {})[$('Your settings').first().json.field_alert_id] ?? '').replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\uFEFF]/g, '').trim().slice(0, 101) }}"
+						},
+						{
+							"keyName": "opened_at",
+							"condition": "gte",
+							"keyValue": "={{ new Date(Date.now() - 3600000).toISOString() }}"
+						}
+					]
+				},
+				"returnAll": true,
+				"options": {}
+			},
+			"id": "72769b8a-39f9-4511-a8c3-2710f9508bf1",
+			"name": "Find the alert in the table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"notes": "Reads the row of this alert and the alerts opened in the last hour (to count a flood).",
+			"position": [
+				1580,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Reads the alert the monitoring tool sent, checks it, and decides: open a new incident, close one, or do nothing.\n// The input is the rows of the table found for this alert id (and the alerts opened in the last hour).\n// Nothing is sent or saved here. An alert is never refused for its looks: only a body that is not a JSON object\n// or an id longer than 100 characters is rejected. A missing id gets one built from the service and the text.\nconst cfg = $('Your settings').first().json;\nconst hook = $('Receive an alert').first().json;\nconst body = hook && typeof hook.body === 'object' && hook.body !== null && !Array.isArray(hook.body) ? hook.body : null;\nif (!body) throw new Error('Alert rejected: the request has no JSON object in its body.');\n\n// Zero-width and direction-control characters are removed from every text that will be forwarded to a phone.\nconst clean = (value, max) =>\n  String(value ?? '')\n    .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\uFEFF]/g, '')\n    .trim()\n    .slice(0, max);\nconst field = (setting) => body[String(cfg[setting]).trim()];\n// A small, stable hash: the same text always gives the same number, so no randomness is needed.\nconst hash = (value) => {\n  let h = 5381;\n  for (const char of String(value)) h = (Math.imul(h, 33) + char.codePointAt(0)) >>> 0;\n  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;\n  return (h ^ (h >>> 12)) >>> 0;\n};\n\nconst maxText = Math.floor(Number(cfg.max_text_length));\nconst service = clean(field('field_service'), Math.min(80, maxText)) || 'unknown service';\nconst severity = clean(field('field_severity'), 40).toLowerCase();\nconst message = clean(field('field_message'), maxText) || '(no message)';\n// Only the word resolved closes an alert. Anything else, also a word this workflow does not know, is a firing alert.\nconst status = clean(field('field_status'), 20).toLowerCase() === 'resolved' ? 'resolved' : 'firing';\nlet alertId = clean(field('field_alert_id'), 101);\nif (alertId.length > 100) {\n  throw new Error('Alert rejected: the field \"' + cfg.field_alert_id + '\" holds an id longer than 100 characters.');\n}\nif (!alertId) alertId = 'auto-' + hash(service + '|' + message).toString(36); // no id: the same service and text count as the same alert\nconst runbook = clean(field('field_runbook_url'), 501);\nconst runbookUrl = runbook.length <= 500 && /^https?:\\/\\/\\S+$/i.test(runbook) ? runbook : ''; // anything else is dropped, the page then has no button\n\nconst COLUMNS = ['alert_id', 'service', 'severity', 'message', 'status', 'level', 'notified_phone', 'message_id', 'notified_at', 'acknowledged_by', 'acknowledged_at', 'resolved_at', 'runbook_url', 'short_code', 'opened_at', 'pages', 'paged_phones', 'last_error'];\nconst pick = (row) => Object.fromEntries(COLUMNS.map((name) => [name, row[name] ?? (name === 'level' || name === 'pages' ? 0 : '')]));\n\nconst rows = $input.all().map((item) => item.json).filter((row) => row && row.alert_id);\nconst row = rows.find((candidate) => candidate.alert_id === alertId);\nconst now = Date.now();\nconst nowIso = new Date(now).toISOString();\nconst ageMs = (iso) => (Date.parse(iso) ? now - Date.parse(iso) : Infinity);\n\nif (status === 'resolved') {\n  // An open, a taken and a never-taken alert are all closed. The \"Resolved\" message goes to the people who were paged.\n  if (row && ['open', 'acknowledged', 'unacknowledged'].includes(row.status)) {\n    return [{ json: { action: 'resolve', row: { ...pick(row), status: 'resolved', resolved_at: nowIso } } }];\n  }\n  return []; // nothing to close\n}\n\n// Below the lowest severity that should page: ignore. An unknown or missing severity is NOT ignored.\nconst order = String(cfg.severity_order).split(',').map((word) => word.trim().toLowerCase()).filter(Boolean);\nconst rank = order.indexOf(severity);\nif (rank !== -1 && rank < order.indexOf(String(cfg.min_severity).trim().toLowerCase())) return [];\n\n// The same alert firing again. A resolved alert is a new incident after reopen_minutes (never less than one minute).\nif (row) {\n  const hours = Number(cfg.rearm_hours) * 3600000;\n  if (row.status === 'open') return [];\n  if (row.status === 'acknowledged' && ageMs(row.acknowledged_at) < hours) return [];\n  if (row.status === 'unacknowledged' && ageMs(row.notified_at) < hours) return [];\n  if (row.status === 'resolved' && ageMs(row.resolved_at) < Math.max(1, Number(cfg.reopen_minutes)) * 60000) return [];\n}\n\n// A new incident. Too many new alerts in one hour: nobody is paged, the run fails so that it is seen.\n// The highest severity is never held back: a flood of noise must not hide the alert that matters.\nconst recent = rows.filter((candidate) => candidate.alert_id !== alertId && ageMs(candidate.opened_at) < 3600000).length;\nif (rank !== order.length - 1 && recent >= Number(cfg.max_new_alerts_per_hour)) {\n  throw new Error('Alert ' + alertId + ' (' + service + ') was NOT paged: ' + recent + ' other alerts were opened in the last hour and the limit is ' + cfg.max_new_alerts_per_hour + ' (max_new_alerts_per_hour). Look at your monitoring tool.');\n}\n\n// A short code that no open alert uses, without the characters people confuse (0 O 1 I L). It comes from the id and\n// the minute, never from chance, so two identical requests at the same moment write the same text and the same key.\nconst ALPHABET = '23456ABCDEFGHJKMNPQRSTUVWXYZ789';\nconst codeFor = (seed) => {\n  let n = hash(seed) % (ALPHABET.length ** 4);\n  return Array.from({ length: 4 }, () => {\n    const char = ALPHABET[n % ALPHABET.length];\n    n = Math.floor(n / ALPHABET.length);\n    return char;\n  }).join('');\n};\nconst taken = new Set(rows.filter((candidate) => candidate.status === 'open').map((candidate) => String(candidate.short_code)));\nconst minute = Math.floor(now / 60000);\nlet code = '';\nfor (let salt = 0; !code || taken.has(code); salt++) code = codeFor(alertId + '|' + minute + '|' + salt);\n\nreturn [{\n  json: {\n    action: 'open',\n    row: {\n      alert_id: alertId, service, severity, message, status: 'open', level: 0, notified_phone: '', message_id: '',\n      notified_at: '', acknowledged_by: '', acknowledged_at: '', resolved_at: '', runbook_url: runbookUrl,\n      short_code: code, opened_at: nowIso, pages: 0, paged_phones: '', last_error: '',\n    },\n  },\n}];"
+			},
+			"id": "34ed777f-33c6-44c4-a4af-b3f6611c5cb6",
+			"name": "Decide what to do with the alert",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "Checks and caps the fields, ignores low severities and repeated firing, closes on resolved, opens a new incident otherwise. An alert with an odd id or no id is still paged.",
+			"position": [
+				1840,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "oncall_alerts"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "alert_id",
+							"condition": "eq",
+							"keyValue": "={{ $json.row.alert_id }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"alert_id": "={{ $json.row.alert_id }}",
+						"service": "={{ $json.row.service }}",
+						"severity": "={{ $json.row.severity }}",
+						"message": "={{ $json.row.message }}",
+						"status": "={{ $json.row.status }}",
+						"level": "={{ $json.row.level }}",
+						"notified_phone": "={{ $json.row.notified_phone }}",
+						"message_id": "={{ $json.row.message_id }}",
+						"notified_at": "={{ $json.row.notified_at }}",
+						"acknowledged_by": "={{ $json.row.acknowledged_by }}",
+						"acknowledged_at": "={{ $json.row.acknowledged_at }}",
+						"resolved_at": "={{ $json.row.resolved_at }}",
+						"runbook_url": "={{ $json.row.runbook_url }}",
+						"short_code": "={{ $json.row.short_code }}",
+						"opened_at": "={{ $json.row.opened_at }}",
+						"pages": "={{ $json.row.pages }}",
+						"paged_phones": "={{ $json.row.paged_phones }}",
+						"last_error": "={{ $json.row.last_error }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "alert_id",
+							"displayName": "alert_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "service",
+							"displayName": "service",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "severity",
+							"displayName": "severity",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message",
+							"displayName": "message",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "level",
+							"displayName": "level",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "notified_phone",
+							"displayName": "notified_phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message_id",
+							"displayName": "message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "notified_at",
+							"displayName": "notified_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "acknowledged_by",
+							"displayName": "acknowledged_by",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "acknowledged_at",
+							"displayName": "acknowledged_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "resolved_at",
+							"displayName": "resolved_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "runbook_url",
+							"displayName": "runbook_url",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "short_code",
+							"displayName": "short_code",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "opened_at",
+							"displayName": "opened_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "pages",
+							"displayName": "pages",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "paged_phones",
+							"displayName": "paged_phones",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "f9557e05-8e18-4d10-a640-47e3ca3bd4bc",
+			"name": "Save the alert",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"notes": "The alert is stored BEFORE anybody is paged, so a restart cannot lose it.",
+			"position": [
+				2100,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "oncall_alerts"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "open"
+						}
+					]
+				},
+				"returnAll": true,
+				"options": {}
+			},
+			"id": "e71d0146-1f53-47dd-aa6e-1f324dde72b9",
+			"name": "Read the open alerts",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"notes": "Reads the alerts that are still open, once per run.",
+			"position": [
+				1580,
+				300
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Looks at the OPEN alerts. After a poll it matches the replies of the people who were paged to the alert they\n// take. On the minute timer it finds the alerts whose current level did not answer in time (or whose page was\n// refused) and so need the next level. Nothing is sent or saved here.\nconst cfg = $('Your settings').first().json;\nconst source = $('Check the settings').first().json.source;\nconst COLUMNS = ['alert_id', 'service', 'severity', 'message', 'status', 'level', 'notified_phone', 'message_id', 'notified_at', 'acknowledged_by', 'acknowledged_at', 'resolved_at', 'runbook_url', 'short_code', 'opened_at', 'pages', 'paged_phones', 'last_error'];\nconst pick = (row) => Object.fromEntries(COLUMNS.map((name) => [name, row[name] ?? (name === 'level' || name === 'pages' ? 0 : '')]));\nconst rows = $input.all().map((item) => item.json).filter((row) => row && row.alert_id && row.status === 'open');\nconst now = Date.now();\nconst nowIso = new Date(now).toISOString();\nconst digits = (value) => String(value ?? '').replace(/\\D/g, '');\nconst pagedOf = (row) => String(row.paged_phones || '').split(',').map((phone) => phone.trim()).filter(Boolean);\n\nif (source === 'timer') {\n  // One minute of grace after ack_minutes: a reply written just before the deadline is read by the poll one tick\n  // before the timer can escalate. Escalation therefore happens ack_minutes + 1 to + 2 minutes after the page.\n  const ackMs = Number(cfg.ack_minutes) * 60000 + 60000;\n  return rows\n    .filter((row) => {\n      const since = (iso) => (Date.parse(iso) ? now - Date.parse(iso) : Infinity); // a missing time counts as long ago\n      if (!Number(row.level)) return since(row.opened_at) >= 120000; // opened, but no page went out (the run that opened it stopped)\n      if (!row.message_id) return true; // the last page was refused: do not wait for an answer that cannot come\n      return since(row.notified_at) >= ackMs; // nobody answered in time\n    })\n    .map((row) => ({ json: { action: 'page', row: pick(row) } }));\n}\n\n// Replies. A reply is: an acknowledgement word, optionally followed by the short code of the alert.\nconst normalize = (value) =>\n  String(value ?? '')\n    .toLowerCase()\n    .normalize('NFD')\n    .replace(/[̀-ͯ]/g, '')\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim();\nconst words = String(cfg.ack_words).split(',').map(normalize).filter(Boolean).sort((a, b) => b.length - a.length);\nconst listed = [cfg.oncall_phone_1, cfg.oncall_phone_2, cfg.oncall_phone_3].map(digits).filter(Boolean);\nconst events = $('Poll WhatsApp replies').all().map((item) => item.json);\nconst claimed = new Set();\nconst plain = new Set(); // phones that already took the newest alert with a message without a code, in this poll\nconst out = [];\nfor (const event of events) {\n  const data = event.data || {};\n  if (event.type !== 'message.received' && event.type !== 'message.replied') continue;\n  if (data.direction !== 'inbound' || (data.to && data.to.group_id)) continue; // only private chats, only what people wrote\n  if (data.content_type !== 'text') continue; // a picture with the caption OK is not an answer\n  const from = digits(data.from && data.from.number);\n  if (!from || !listed.includes(from)) continue; // somebody who is not on the list\n  const phone = '+' + from;\n  // The open alerts this person was paged for, the newest first.\n  const mine = rows\n    .filter((row) => !claimed.has(row.alert_id) && pagedOf(row).includes(phone))\n    .sort((a, b) => Date.parse(b.opened_at) - Date.parse(a.opened_at));\n  if (mine.length === 0) continue;\n  const text = normalize(data.preview);\n  const word = words.find((candidate) => text === candidate || text.startsWith(candidate + ' '));\n  if (!word) continue; // anything else is ignored\n  const rest = text.slice(word.length).trim();\n  let target = mine[0]; // no code: the newest open alert of this person, once per poll (a second plain OK does not take another alert)\n  if (rest === '') {\n    if (plain.has(phone)) continue;\n    plain.add(phone);\n  } else {\n    target = rest.includes(' ') ? undefined : mine.find((row) => normalize(row.short_code) === rest);\n    if (!target) continue; // some other sentence, or a code that is not an open alert of this person\n  }\n  claimed.add(target.alert_id);\n  out.push({\n    json: {\n      action: 'ack',\n      responder: phone,\n      responder_name: String((data.from && data.from.name) || '').trim().slice(0, 60),\n      row: { ...pick(target), status: 'acknowledged', acknowledged_by: phone, acknowledged_at: nowIso },\n    },\n  });\n}\nreturn out;"
+			},
+			"id": "ab6bad56-0322-45a9-ab15-93965fa78068",
+			"name": "Decide what each open alert needs",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "After a poll: matches each reply to the alert it takes. On the timer: finds the alerts that need the next level, one minute after ack_minutes.",
+			"position": [
+				1840,
+				300
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// The one place that decides WHO gets WHICH message. It writes every text from the wording in Your settings.\n// Nothing is sent or saved here: the items it returns are sent one by one by the send nodes that follow.\nconst cfg = $('Your settings').first().json;\nconst source = $('Check the settings').first().json.source;\nconst incoming = source === 'alert' ? $('Decide what to do with the alert').all() : $input.all();\nconst nowIso = new Date().toISOString();\nconst digits = (value) => String(value ?? '').replace(/\\D/g, '');\nconst split = (value) => String(value || '').split(',').map((phone) => phone.trim()).filter(Boolean);\nconst phones = [cfg.oncall_phone_1, cfg.oncall_phone_2, cfg.oncall_phone_3].map((phone) => String(phone ?? '').trim()).filter(Boolean);\nconst owner = String(cfg.owner_phone).trim();\n// {placeholders} are filled in; a typed backslash and n become a line break.\nconst fill = (template, values) =>\n  String(template)\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\{(\\w+)\\}/g, (whole, name) => (name in values ? String(values[name]) : whole));\nconst safe = (value) => String(value).replace(/[^A-Za-z0-9._-]/g, '_');\n// The same small hash as in the node that opens the alert. It keeps two ids that differ only in punctuation apart.\nconst hash = (value) => {\n  let h = 5381;\n  for (const char of String(value)) h = (Math.imul(h, 33) + char.codePointAt(0)) >>> 0;\n  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;\n  return (h ^ (h >>> 12)) >>> 0;\n};\n// The runbook link goes at the end of the page text as well as on the button: the whole body stays within 1000 characters.\nconst withLink = (text, url) => (url ? text.slice(0, 1000 - url.length - 1) + '\\n' + url : text.slice(0, 1000));\n\nconst out = [];\nfor (const { json: item } of incoming) {\n  const row = item.row;\n  // One key per alert incident and message: sending it again returns the first message instead of a second one.\n  const base = 'oncall-' + safe(row.alert_id).slice(0, 60) + '-' + hash(row.alert_id).toString(36) + '-' + Math.floor(Date.parse(row.opened_at) / 60000);\n  const values = {\n    service: row.service, severity: row.severity || 'n/a', message: row.message, code: row.short_code,\n    alert_id: row.alert_id, minutes: cfg.ack_minutes,\n  };\n  const message = (kind, to, text, key, extra) => out.push({\n    json: { alert_id: row.alert_id, kind, level: 0, to, text, runbook_url: '', button_text: cfg.runbook_button_text, key, row_after: row, paged_before: '', ...extra },\n  });\n\n  if (item.action === 'open' || item.action === 'page') {\n    const level = Number(row.level) || 0;\n    const paged = split(row.paged_phones);\n    if (level < phones.length) {\n      const to = phones[level];\n      // The page that follows a level that was never reached is a first page for this person, not an escalation.\n      const escalated = level > 0 && Boolean(row.message_id);\n      const text = withLink(fill(escalated ? cfg.msg_escalated : cfg.msg_page, { ...values, level: level + 1, previous_level: level }), row.runbook_url);\n      // After a refused page the button goes: whatever made it fail cannot keep this person from being paged. The link stays in the text.\n      const refused = level > 0 && !row.message_id;\n      message('page', to, text, base + '-L' + (level + 1), {\n        level: level + 1,\n        runbook_url: refused ? '' : row.runbook_url || '',\n        paged_before: paged.join(','),\n        row_after: { ...row, level: level + 1, notified_phone: to, notified_at: nowIso, pages: level + 1, paged_phones: [...paged, to].join(','), message_id: '', last_error: '' },\n      });\n    } else {\n      // No level is left: ONE final message to everybody on the list and to the owner. Then it stops.\n      const closed = { ...row, status: 'unacknowledged', notified_at: nowIso };\n      for (const to of [...new Set([...phones, owner])]) {\n        message('final', to, fill(cfg.msg_final, values), base + '-final-' + digits(to), { row_after: closed });\n      }\n    }\n  } else if (item.action === 'ack') {\n    message('ack_confirm', item.responder, fill(cfg.msg_ack_confirm, values), base + '-ack-' + digits(item.responder), {});\n    const name = item.responder_name || item.responder;\n    for (const to of split(row.paged_phones).filter((phone) => digits(phone) !== digits(item.responder))) {\n      message('ack_note', to, fill(cfg.msg_ack_note, { ...values, name }), base + '-acknote-' + digits(to), {});\n    }\n  } else if (item.action === 'resolve') {\n    for (const to of split(row.paged_phones)) {\n      message('resolved', to, fill(cfg.msg_resolved, values), base + '-resolved-' + digits(to), {});\n    }\n  }\n}\nreturn out;"
+			},
+			"id": "af27eaa7-82c6-43a5-aa62-ca93d6fba934",
+			"name": "Write the messages",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "The one place that decides who gets which message, from the wording in Your settings.",
+			"position": [
+				2440,
+				150
+			]
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "43bcf799-7619-4ca8-a0e7-019d56d61f18",
+							"leftValue": "={{ $json.kind === 'page' && $json.runbook_url !== '' }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"id": "d66d899e-645c-44a9-aa02-7077df1da5aa",
+			"name": "Does the page carry a runbook button?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"notes": "True: a page for an alert that has a runbook link.",
+			"position": [
+				2700,
+				150
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "sendLinkButton",
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.to }}",
+				"body": "={{ $json.text }}",
+				"buttonText": "={{ $json.button_text }}",
+				"buttonUrl": "={{ $json.runbook_url }}",
+				"additionalFields": {},
+				"options": {
+					"idempotencyKey": "={{ $json.key }}"
+				}
+			},
+			"id": "c692e5ca-0fd2-4362-af6e-e5b2754e4b79",
+			"name": "Send the page with the runbook button",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput",
+			"notes": "One message with a button that opens the runbook. Tried up to 3 times when the first message of a batch is refused (the idempotency key makes a repeat safe). If it is still refused the run goes on and the row records why.",
+			"position": [
+				2960,
+				50
+			],
+			"retryOnFail": true,
+			"maxTries": 3,
+			"waitBetweenTries": 2000
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "sendText",
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.to }}",
+				"text": "={{ $json.text }}",
+				"options": {
+					"idempotencyKey": "={{ $json.key }}"
+				}
+			},
+			"id": "aeb23c55-a24b-42c6-ae51-4ccac02a9c8d",
+			"name": "Send the text message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput",
+			"notes": "Every other message. Tried up to 3 times when the first message of a batch is refused (the idempotency key makes a repeat safe). If it is still refused the run goes on and the row records why.",
+			"position": [
+				2960,
+				250
+			],
+			"retryOnFail": true,
+			"maxTries": 3,
+			"waitBetweenTries": 2000
+		},
+		{
+			"parameters": {},
+			"id": "3f61664c-428e-4137-a766-e58bed9748e9",
+			"name": "Gather the answers of Turbo Notify",
+			"type": "n8n-nodes-base.merge",
+			"typeVersion": 3.2,
+			"notes": "Puts the answers of both send nodes back together.",
+			"position": [
+				3220,
+				150
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Runs once, after every message of this run was sent or refused. Each answer of Turbo Notify is matched with the\n// message that was planned for it. Then ONE small record per alert is written for the table, and it holds ONLY the\n// columns this run owns: a page writes the level, the phone, the time and the message id; an acknowledgement writes\n// who took the alert; the final message closes it; a \"resolved\" writes nothing but the failure. Because a save never\n// repeats the columns it does not own, a run that was slow cannot undo an acknowledgement or a resolution that\n// another run wrote in the meantime. A refused page is recorded, so the timer pages the next level without waiting\n// for an answer that cannot come. A refused send arrives here as an error: it never stopped the other messages.\nconst reasonOf = (error) => String(typeof error === 'string' ? error : (error && error.message) || JSON.stringify(error)).slice(0, 200);\n\nconst results = $input.all().map((answer, index) => {\n  const planned = $('Write the messages').itemMatching(index).json;\n  const failed = Boolean(answer.json.error) || !answer.json.id;\n  return {\n    planned,\n    ok: !failed,\n    message_id: failed ? '' : answer.json.id,\n    error: failed ? reasonOf(answer.json.error || 'Turbo Notify did not return a message id') : '',\n  };\n});\n\nconst byAlert = new Map();\nfor (const result of results) {\n  if (!byAlert.has(result.planned.alert_id)) byAlert.set(result.planned.alert_id, []);\n  byAlert.get(result.planned.alert_id).push(result);\n}\nconst out = [];\nfor (const [alertId, own] of byAlert) {\n  const kinds = new Set(own.map((result) => result.planned.kind));\n  const failures = own.filter((result) => !result.ok).map((result) => result.planned.kind + ' to ' + result.planned.to + ': ' + result.error);\n  const saved = { alert_id: alertId };\n  const page = own.find((result) => result.planned.kind === 'page');\n  if (page) {\n    const after = page.planned.row_after;\n    Object.assign(saved, {\n      level: after.level,\n      notified_phone: after.notified_phone,\n      notified_at: after.notified_at,\n      pages: after.pages,\n      // A refused page does not count as a person who received it: only those reached can take the alert.\n      paged_phones: page.ok ? after.paged_phones : page.planned.paged_before,\n      message_id: page.ok ? page.message_id : '',\n    });\n  }\n  if (kinds.has('final')) {\n    const after = own.find((result) => result.planned.kind === 'final').planned.row_after;\n    Object.assign(saved, { status: 'unacknowledged', notified_at: after.notified_at });\n  }\n  if (kinds.has('ack_confirm') || kinds.has('ack_note')) {\n    const after = own.find((result) => result.planned.kind === 'ack_confirm' || result.planned.kind === 'ack_note').planned.row_after;\n    Object.assign(saved, { status: 'acknowledged', acknowledged_by: after.acknowledged_by, acknowledged_at: after.acknowledged_at });\n  }\n  saved.last_error = failures.join(' | ');\n  out.push({ json: saved });\n}\nreturn out;"
+			},
+			"id": "e5e32bde-373a-4c07-a5c5-ee8ced2dac01",
+			"name": "Update the alert rows",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "Matches each answer with its message and keeps only the columns this run owns (a page writes the level, an acknowledgement writes who took it), so a slow run cannot undo another.",
+			"position": [
+				3560,
+				150
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "oncall_alerts"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "alert_id",
+							"condition": "eq",
+							"keyValue": "={{ $json.alert_id }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "autoMapInputData",
+					"value": null,
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "alert_id",
+							"displayName": "alert_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "service",
+							"displayName": "service",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "severity",
+							"displayName": "severity",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message",
+							"displayName": "message",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "level",
+							"displayName": "level",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "notified_phone",
+							"displayName": "notified_phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message_id",
+							"displayName": "message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "notified_at",
+							"displayName": "notified_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "acknowledged_by",
+							"displayName": "acknowledged_by",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "acknowledged_at",
+							"displayName": "acknowledged_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "resolved_at",
+							"displayName": "resolved_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "runbook_url",
+							"displayName": "runbook_url",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "short_code",
+							"displayName": "short_code",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "opened_at",
+							"displayName": "opened_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "pages",
+							"displayName": "pages",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "paged_phones",
+							"displayName": "paged_phones",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "2add67a5-9daf-491d-a6fe-e06f34ca7ab6",
+			"name": "Save the alert after sending",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"notes": "Writes the new level, the message id, the status where this run owns it, and any failure. Columns the run does not own are left as they are.",
+			"position": [
+				3820,
+				150
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// The last node of the run. A refused message is never silent: the row already holds it, and this node makes the\n// run fail so that your Error workflow (or the Executions list) shows it, naming the alert and the person.\n// Every refused message fails the run, also a page to a level that is followed by another level.\nconst cfg = $('Your settings').first().json;\nconst phoneCount = [cfg.oncall_phone_1, cfg.oncall_phone_2, cfg.oncall_phone_3].filter((phone) => String(phone ?? '').trim()).length;\nconst serviceOf = new Map($('Write the messages').all().map((item) => [item.json.alert_id, item.json.row_after.service]));\nconst lines = [];\nfor (const row of $('Update the alert rows').all().map((item) => item.json)) {\n  if (!row.last_error) continue;\n  // last_error holds one \"kind to phone: reason\" per refused message, separated by \" | \".\n  const failures = String(row.last_error).split(' | ');\n  const label = 'Alert ' + row.alert_id + ' (' + (serviceOf.get(row.alert_id) || 'unknown service') + ')';\n  const nobody = failures.some((failure) => failure.startsWith('page to ')) && row.paged_phones === '' && Number(row.level) >= phoneCount;\n  if (nobody) {\n    lines.push(label + ': NOBODY could be paged, every level failed. ' + row.last_error);\n  } else {\n    lines.push(label + ': ' + failures.map((failure) => failure.replace(/^(\\w+) to (\\S+): /, '$1 to $2 failed: ')).join(' | '));\n  }\n}\nif (lines.length > 0) throw new Error(lines.join(' || '));\nreturn $input.all();"
+			},
+			"id": "5f56b32a-979a-4228-a92b-f6fb0cc9f202",
+			"name": "Report what failed",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"notes": "Fails the run when any message was refused, naming the alert, the phone and the reason. This is what your Error workflow reacts to.",
+			"position": [
+				4080,
+				150
+			]
+		},
+		{
+			"parameters": {},
+			"id": "300e4493-15d6-4322-afc7-acb54cf32c1a",
+			"name": "Run once: create the table",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				800
+			]
+		},
+		{
+			"parameters": {
+				"resource": "table",
+				"operation": "create",
+				"tableName": "oncall_alerts",
+				"columns": {
+					"column": [
+						{
+							"name": "alert_id",
+							"type": "string"
+						},
+						{
+							"name": "service",
+							"type": "string"
+						},
+						{
+							"name": "severity",
+							"type": "string"
+						},
+						{
+							"name": "message",
+							"type": "string"
+						},
+						{
+							"name": "status",
+							"type": "string"
+						},
+						{
+							"name": "level",
+							"type": "number"
+						},
+						{
+							"name": "notified_phone",
+							"type": "string"
+						},
+						{
+							"name": "message_id",
+							"type": "string"
+						},
+						{
+							"name": "notified_at",
+							"type": "string"
+						},
+						{
+							"name": "acknowledged_by",
+							"type": "string"
+						},
+						{
+							"name": "acknowledged_at",
+							"type": "string"
+						},
+						{
+							"name": "resolved_at",
+							"type": "string"
+						},
+						{
+							"name": "runbook_url",
+							"type": "string"
+						},
+						{
+							"name": "short_code",
+							"type": "string"
+						},
+						{
+							"name": "opened_at",
+							"type": "string"
+						},
+						{
+							"name": "pages",
+							"type": "number"
+						},
+						{
+							"name": "paged_phones",
+							"type": "string"
+						},
+						{
+							"name": "last_error",
+							"type": "string"
+						}
+					]
+				},
+				"options": {
+					"createIfNotExists": true
+				}
+			},
+			"id": "962eaf4d-3bfc-4b28-a2d4-9449e4dd9414",
+			"name": "Create the oncall_alerts table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				260,
+				800
+			]
+		},
+		{
+			"parameters": {
+				"content": "### How it works\nA WhatsApp page next to your paging tool. Your monitoring tool posts a JSON alert to a protected webhook. The workflow pages on-call level 1 with the service, the severity, a 4 character code and, when the alert has a link, a runbook button. A reply such as \"OK 7K2F\" takes the alert and tells the other levels. If nobody answers within ack_minutes the next level is paged, then one final message goes to everybody. A resolved alert closes it. State is kept in the Data Table oncall_alerts. Replies are read by polling, so a confirmation can take up to a minute. The one-minute timer runs 1,440 times a day: check your plan, or set the Schedule Trigger to every 2 or 5 minutes. WhatsApp is an extra channel, not a replacement for a paging service.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15): Settings > Community Nodes, see https://docs.n8n.io/integrations/community-nodes/installation/. Works on n8n Cloud (verified node) and self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential (scopes messages:send and events:read) and a Header Auth credential \"Alert access (Header Auth)\": your tool must send exactly that header.\n3. Select the credentials on the Webhook, the Polling Trigger and both send nodes.\n4. Run the manual branch once to create the table.\n5. In Your settings type the on-call and owner numbers. None may be the phone linked to Turbo Notify. On Free use at most two different phones in all: owner_phone equal to oncall_phone_2, or oncall_phone_2 empty.\n6. POST JSON with a required alert_id (status \"resolved\" closes it) to the Production URL over HTTPS. See the README for the body and the Error workflow.\n7. Set an Error workflow, then activate.\n\n### Customization\nTexts, severities and times are in Your settings.",
+				"height": 1060,
+				"width": 640
+			},
+			"id": "86046ca1-047c-4cd0-aaf8-cfb5fb49659a",
+			"name": "Overview",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-880,
+				-110
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Three ways in\nAn alert from your monitoring tool, a reply from your on-call people, and a timer that runs every minute.",
+				"height": 740,
+				"width": 580,
+				"color": 7
+			},
+			"id": "6ff67daf-71a8-4c77-a113-83d7a34e93d2",
+			"name": "Section: three ways in",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-160,
+				-110
+			]
+		},
+		{
+			"parameters": {
+				"content": "**Replace the phone numbers before you activate**\nWhile a number is a placeholder the workflow stops and pages nobody. Never use the phone linked to Turbo Notify: it cannot page itself.",
+				"height": 390,
+				"width": 360,
+				"color": 3
+			},
+			"id": "d29cfeee-f8a2-4ccf-a45f-43cadaf46979",
+			"name": "Warning: phone numbers",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				460,
+				-10
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Your settings\nEvery value you change lives in this node. Read its Notes.",
+				"height": 100,
+				"width": 360,
+				"color": 7
+			},
+			"id": "649fb797-53f5-40f6-b8fe-8b06cc34f610",
+			"name": "Section: your settings",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				460,
+				-120
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Check, then route\nStops on a placeholder, then sends an alert one way and replies or the timer the other.",
+				"height": 320,
+				"width": 520,
+				"color": 7
+			},
+			"id": "23e09913-bf7e-4cd0-a59f-247b53ba8e0c",
+			"name": "Section: check and route",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				940,
+				90
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Decide what is needed\nA new alert opens or closes an incident. A reply takes one. The timer finds the alert nobody took in time.",
+				"height": 620,
+				"width": 780,
+				"color": 7
+			},
+			"id": "b74ab88c-6a30-462f-aa23-04b4e5ce2b67",
+			"name": "Section: decide what is needed",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1500,
+				-110
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Write and send\nOne place writes every message. A page with a runbook link gets a button. A refused send never stops the others.",
+				"height": 520,
+				"width": 1020,
+				"color": 7
+			},
+			"id": "f6bc1eed-6992-40db-ab5c-95e244c58c29",
+			"name": "Section: write and send",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				2380,
+				-60
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Record and report\nEach alert row gets the message id or the failure. The run then fails loudly if nobody could be paged.",
+				"height": 340,
+				"width": 780,
+				"color": 7
+			},
+			"id": "d84ad9bd-b5fb-4c67-a85a-cd6c75ae240d",
+			"name": "Section: record and report",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				3500,
+				40
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Run once: create the table\nCreates oncall_alerts when it is missing. Safe to run again.",
+				"height": 300,
+				"width": 600,
+				"color": 7
+			},
+			"id": "4c47cd9e-ea91-4831-abbf-a6295ab45cfd",
+			"name": "Section: create the table",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-160,
+				690
+			]
+		}
+	],
+	"connections": {
+		"Receive an alert": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Poll WhatsApp replies": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Every minute: look for unanswered alerts": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Your settings": {
+			"main": [
+				[
+					{
+						"node": "Check the settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Check the settings": {
+			"main": [
+				[
+					{
+						"node": "Webhook alert, or replies and timer?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Webhook alert, or replies and timer?": {
+			"main": [
+				[
+					{
+						"node": "Find the alert in the table",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Read the open alerts",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Find the alert in the table": {
+			"main": [
+				[
+					{
+						"node": "Decide what to do with the alert",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Decide what to do with the alert": {
+			"main": [
+				[
+					{
+						"node": "Save the alert",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the alert": {
+			"main": [
+				[
+					{
+						"node": "Write the messages",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the open alerts": {
+			"main": [
+				[
+					{
+						"node": "Decide what each open alert needs",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Decide what each open alert needs": {
+			"main": [
+				[
+					{
+						"node": "Write the messages",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Write the messages": {
+			"main": [
+				[
+					{
+						"node": "Does the page carry a runbook button?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Does the page carry a runbook button?": {
+			"main": [
+				[
+					{
+						"node": "Send the page with the runbook button",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Send the text message",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the page with the runbook button": {
+			"main": [
+				[
+					{
+						"node": "Gather the answers of Turbo Notify",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the text message": {
+			"main": [
+				[
+					{
+						"node": "Gather the answers of Turbo Notify",
+						"type": "main",
+						"index": 1
+					}
+				]
+			]
+		},
+		"Gather the answers of Turbo Notify": {
+			"main": [
+				[
+					{
+						"node": "Update the alert rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Update the alert rows": {
+			"main": [
+				[
+					{
+						"node": "Save the alert after sending",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the alert after sending": {
+			"main": [
+				[
+					{
+						"node": "Report what failed",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Run once: create the table": {
+			"main": [
+				[
+					{
+						"node": "Create the oncall_alerts table",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"tags": [],
+	"pinData": {}
+}
