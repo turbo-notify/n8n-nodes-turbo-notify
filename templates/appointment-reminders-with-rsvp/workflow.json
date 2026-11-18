@@ -1,0 +1,1703 @@
+{
+	"name": "Send WhatsApp appointment reminders and track RSVP answers with Turbo Notify",
+	"nodes": [
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000100",
+			"name": "Form: new appointment",
+			"type": "n8n-nodes-base.formTrigger",
+			"typeVersion": 2.1,
+			"position": [
+				0,
+				40
+			],
+			"webhookId": "37914814-fae1-4b31-84fe-3ba8ee7db324",
+			"credentials": {
+				"httpBasicAuth": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Form access (Basic Auth)"
+				}
+			},
+			"parameters": {
+				"authentication": "basicAuth",
+				"formTitle": "New appointment",
+				"formDescription": "Add an appointment. The customer gets a WhatsApp reminder before it starts.",
+				"formFields": {
+					"values": [
+						{
+							"fieldLabel": "Customer name",
+							"placeholder": "Ana Souza",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "WhatsApp number",
+							"placeholder": "+5511977770001 or 11 97777-0001",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Appointment",
+							"placeholder": "Check-up",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Date",
+							"fieldType": "date",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Time",
+							"placeholder": "14:30",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Duration in minutes",
+							"fieldType": "number",
+							"placeholder": "30"
+						},
+						{
+							"fieldLabel": "Location",
+							"placeholder": "Leave empty to use your business address"
+						},
+						{
+							"fieldLabel": "Notes",
+							"fieldType": "textarea"
+						}
+					]
+				},
+				"responseMode": "responseNode",
+				"path": "37914814-fae1-4b31-84fe-3ba8ee7db324",
+				"options": {}
+			},
+			"notes": "The form address is this node's own random id. n8n gives an imported copy a new one: do not replace it with a short name, anybody could guess it. Share the Production URL and the password only with staff."
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000101",
+			"name": "Every hour: remind and report",
+			"type": "n8n-nodes-base.scheduleTrigger",
+			"typeVersion": 1.2,
+			"position": [
+				0,
+				520
+			],
+			"parameters": {
+				"rule": {
+					"interval": [
+						{
+							"field": "hours",
+							"hoursInterval": 1,
+							"triggerAtMinute": 5
+						}
+					]
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000102",
+			"name": "Poll: guest answered or delivery failed",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				1130
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"parameters": {
+				"events": [
+					"message.calendar_responded",
+					"message.send.failed"
+				],
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000103",
+			"name": "Run once: create the table",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				-420
+			],
+			"parameters": {}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000104",
+			"name": "Create the appointments table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				280,
+				-420
+			],
+			"parameters": {
+				"resource": "table",
+				"operation": "create",
+				"tableName": "appointments",
+				"columns": {
+					"column": [
+						{
+							"name": "customer_name",
+							"type": "string"
+						},
+						{
+							"name": "phone",
+							"type": "string"
+						},
+						{
+							"name": "title",
+							"type": "string"
+						},
+						{
+							"name": "location",
+							"type": "string"
+						},
+						{
+							"name": "start_at",
+							"type": "string"
+						},
+						{
+							"name": "duration_min",
+							"type": "number"
+						},
+						{
+							"name": "status",
+							"type": "string"
+						},
+						{
+							"name": "reminder_message_id",
+							"type": "string"
+						},
+						{
+							"name": "reminded_at",
+							"type": "string"
+						},
+						{
+							"name": "rsvp_at",
+							"type": "string"
+						},
+						{
+							"name": "extra_guests",
+							"type": "number"
+						},
+						{
+							"name": "last_error",
+							"type": "string"
+						},
+						{
+							"name": "notes",
+							"type": "string"
+						}
+					]
+				},
+				"options": {
+					"createIfNotExists": true
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000105",
+			"name": "Your settings",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				280,
+				520
+			],
+			"notes": "owner_phone: your own number, with + and country code. It gets the exceptions and the decline notes. It must be a different phone from the number linked to Turbo Notify.\nbusiness_name: used in the event title and in the texts.\nbusiness_location: used when the form's Location is empty.\nexpected_timezone: the time zone of the times you type. Runs stop if the workflow time zone (Workflow settings, Timezone) differs.\ndefault_country_code: added to local numbers typed without +. Works for 55 (Brazil). With another code only numbers that start with it, or with +, are accepted.\nreminder_hours_before: the invitation goes out when the appointment is this many hours away or less.\nmin_notice_minutes: no invitation for an appointment that starts sooner than this.\ninvite_alarm_minutes_before: WhatsApp reminds the guest this many minutes before the start.\nno_answer_window_hours: a customer who has not tapped is listed once the appointment is this close. 0 switches that report off.\ndefault_duration_minutes: used when the form's duration is empty.\nallow_extra_guests: let guests bring extra people (the answer then carries a count).\nmax_text_length: longest name, title, location or note the form accepts.\nmax_appointments_per_day: the form refuses more new appointments than this in 24 hours.\ninvite_text: the text of the invitation. {name} first name, {business}, {when}, {where}. A line with {where} is dropped when there is no location. \\n is a line break.\nthanks_going_text: sent when the guest taps Going. {name}, {title}, {business}, {when}, {guests} (the extra guests sentence, empty at 0).\nthanks_maybe_text: sent when the guest taps Maybe. Same placeholders.\ndecline_customer_text: sent when the guest taps Not going. {name}, {title}, {business}, {when}.\ndate_format: how {when} is written (Luxon tokens). Weekday and month names come out in English.",
+			"notesInFlow": true,
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000010",
+							"name": "owner_phone",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000011",
+							"name": "business_name",
+							"value": "Your Business Name",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000012",
+							"name": "business_location",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000013",
+							"name": "expected_timezone",
+							"value": "America/Sao_Paulo",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000014",
+							"name": "default_country_code",
+							"value": "55",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000015",
+							"name": "reminder_hours_before",
+							"value": 24,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000016",
+							"name": "min_notice_minutes",
+							"value": 60,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000017",
+							"name": "invite_alarm_minutes_before",
+							"value": 60,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000018",
+							"name": "no_answer_window_hours",
+							"value": 4,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000019",
+							"name": "default_duration_minutes",
+							"value": 30,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001a",
+							"name": "allow_extra_guests",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001b",
+							"name": "max_text_length",
+							"value": 100,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001c",
+							"name": "max_appointments_per_day",
+							"value": 50,
+							"type": "number"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001d",
+							"name": "invite_text",
+							"value": "Hello {name}, this is a reminder of your appointment at {business}.\\nWhen: {when}\\nWhere: {where}\\nIf you see the buttons below, tap one, or just reply here.",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001e",
+							"name": "thanks_going_text",
+							"value": "Thank you, {name}. Your {title} appointment at {business} on {when} is confirmed.{guests}",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000001f",
+							"name": "thanks_maybe_text",
+							"value": "Thank you, {name}. We noted that you might come to your {title} appointment on {when}.{guests} Please tell us here as soon as you know.",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000020",
+							"name": "decline_customer_text",
+							"value": "Thank you for letting us know, {name}. We will contact you to reschedule your {title} appointment.",
+							"type": "string"
+						},
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000021",
+							"name": "date_format",
+							"value": "cccc d LLLL 'at' HH:mm",
+							"type": "string"
+						}
+					]
+				},
+				"includeOtherFields": true,
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000106",
+			"name": "Route by entry point",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				560,
+				520
+			],
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000030",
+										"leftValue": "={{ $('Form: new appointment').isExecuted }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "New appointment"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000031",
+										"leftValue": "={{ $('Every hour: remind and report').isExecuted }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Hourly run"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000032",
+										"leftValue": "={{ $('Poll: guest answered or delivery failed').isExecuted && !($json.type === 'message.calendar_responded' && $json.data?.direction === 'outbound') }}",
+										"rightValue": "",
+										"operator": {
+											"type": "boolean",
+											"operation": "true",
+											"singleValue": true
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Guest answer or failed delivery"
+						}
+					]
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000107",
+			"name": "Read the appointments of the last 24 hours",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				800,
+				40
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "createdAt",
+							"condition": "gte",
+							"keyValue": "={{ new Date(Date.now() - 24 * 3600000).toISOString() }}"
+						}
+					]
+				},
+				"returnAll": true,
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000108",
+			"name": "Check the form answers",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1080,
+				40
+			],
+			"parameters": {
+				"jsCode": "// Validates one appointment typed in the form and prepares the row. Nothing is saved when anything is wrong:\n// the person who typed it is told why (the form shows the message). Free text that is echoed into WhatsApp\n// is cleaned (control characters), capped (max_text_length) and refused when it carries a web address or an @mention.\nconst s = $('Your settings').first().json;\nconst recent = $input.all().map((item) => item.json).filter((row) => row.id !== undefined);\nconst refuse = (reason) => [{ json: { ok: false, message: 'Not saved. ' + reason + ' Nothing was saved, please correct the entry and submit it again.' } }];\n\nif ($now.zoneName !== s.expected_timezone) {\n\treturn refuse('This form is not set up yet: the workflow time zone is ' + $now.zoneName + ' but expected_timezone in Your settings is ' + s.expected_timezone + '. Ask the owner to fix it.');\n}\nconst dayAgo = Date.now() - 24 * 3600000;\nif (recent.filter((row) => Date.parse(row.createdAt) >= dayAgo).length >= Number(s.max_appointments_per_day)) {\n\treturn refuse('The limit of ' + s.max_appointments_per_day + ' new appointments in 24 hours is reached.');\n}\n\nconst max = Number(s.max_text_length) > 0 ? Number(s.max_text_length) : 100;\n// Control characters, zero-width and bidirectional marks become spaces (written as escapes on purpose).\nconst clean = (value) => String(value ?? '').replace(/[\\u0000-\\u001f\\u007f\\u200b-\\u200f\\u202a-\\u202e\\u2066-\\u2069]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst hasLink = (text) => /https?:|www\\.|@\\d/i.test(text);\nconst name = clean(s['Customer name']);\nconst title = clean(s['Appointment']);\nconst location = clean(s['Location']);\nconst notes = clean(s['Notes']);\nconst date = clean(s['Date']);\nconst time = clean(s['Time']);\nconst errors = [];\nif (!name) errors.push('The customer name is empty.');\nif (!title) errors.push('The appointment title is empty.');\nfor (const [label, value] of [['customer name', name], ['appointment title', title], ['location', location], ['notes', notes]]) {\n\tif (value.length > max) errors.push('The ' + label + (label === 'notes' ? ' are' : ' is') + ' longer than ' + max + ' characters.');\n}\nfor (const [label, value] of [['customer name', name], ['appointment title', title], ['location', location]]) {\n\tif (hasLink(value)) errors.push('The ' + label + ' cannot contain a web address or an @mention.');\n}\n\n// Phone: E.164 only where it is unambiguous. Local formats get default_country_code only for 55 (Brazil: the area\n// code and the 9 digit mobile number are needed). With another code, only numbers that start with that code or\n// with + are accepted: a leading 0 or a trunk prefix cannot be told apart from the number itself, so it is not guessed.\nconst country = String(s.default_country_code || '55').replace(/\\D/g, '');\nconst international = (digits) => {\n\tif (!/^[1-9]\\d{7,14}$/.test(digits)) return { error: 'The WhatsApp number is not a valid international number.' };\n\tif (digits.startsWith('55') && !(digits.length === 13 && digits[4] === '9')) {\n\t\treturn { error: 'A Brazilian mobile number has the country code 55, the area code, then 9 and 8 more digits.' };\n\t}\n\treturn { phone: '+' + digits };\n};\nconst toE164 = (raw) => {\n\tconst cleaned = String(raw ?? '').trim().replace(/[\\s().-]/g, '');\n\tif (!/^\\+?\\d+$/.test(cleaned)) return { error: 'The WhatsApp number must be digits with the area code, for example +5511977770001.' };\n\tif (cleaned.startsWith('+')) return international(cleaned.slice(1));\n\tif (cleaned.startsWith('00')) return international(cleaned.slice(2));\n\tlet digits = cleaned;\n\tif (country === '55') {\n\t\tdigits = digits.replace(/^0(?=\\d{10,11}$)/, '');\n\t\tif (/^55\\d{11}$/.test(digits)) return international(digits);\n\t\tif (/^[1-9][1-9]9\\d{8}$/.test(digits)) return international('55' + digits);\n\t\tif (/^(55)?[1-9][1-9]\\d{8}$/.test(digits)) return { error: 'The WhatsApp number looks like it lacks the ninth digit: add the 9 after the area code.' };\n\t\treturn { error: 'The WhatsApp number needs the area code and the 9 digit mobile number, or must start with + and the country code.' };\n\t}\n\tif (digits.startsWith(country)) return international(digits);\n\treturn { error: 'The WhatsApp number must start with + and the country code.' };\n};\nconst parsed = toE164(s['WhatsApp number']);\nif (parsed.error) errors.push(parsed.error);\n\n// The date and time are read in the time zone of this workflow (checked above) and stored in UTC.\nconst timeOk = /^([01]?\\d|2[0-3]):[0-5]\\d$/.test(time);\nconst start = DateTime.fromFormat(date + ' ' + (timeOk ? time.padStart(5, '0') : ''), 'yyyy-MM-dd HH:mm', { zone: $now.zoneName });\nif (!timeOk) errors.push('The time must look like 14:30.');\nelse if (!start.isValid) errors.push('The date is not valid.');\nelse if (start.toMillis() <= Date.now()) errors.push('The appointment is not in the future.');\nconst asked = Number(s['Duration in minutes']);\nif (asked > 1440) errors.push('The duration is longer than 1440 minutes.');\nif (errors.length) return refuse(errors.join(' '));\n\nconst first = DateTime.fromMillis(start.toMillis(), { zone: $now.zoneName }).toFormat('ccc d LLL HH:mm');\n// The same phone at the same start, saved in the last 24 hours, is the form sent twice: refuse it instead of inviting twice.\nif (recent.some((row) => row.phone === parsed.phone && Date.parse(row.start_at) === start.toMillis())) {\n\treturn refuse('An appointment for ' + parsed.phone + ' on ' + first + ' is already in the table.');\n}\n\nconst minutes = asked > 0 ? Math.round(asked) : Number(s.default_duration_minutes);\nconst soon = start.toMillis() - Date.now() < Number(s.min_notice_minutes) * 60000;\nconst reminderNote = soon\n\t? 'It starts in less than ' + s.min_notice_minutes + ' minutes, so no reminder will be sent.'\n\t: 'The customer is reminded by the first hourly run that falls within ' + s.reminder_hours_before + ' hours of the start.';\nreturn [{\n\tjson: {\n\t\tok: true,\n\t\tmessage: 'Saved: ' + name + ', ' + parsed.phone + ', ' + title + ', ' + first + ' (' + $now.zoneName + '). ' + reminderNote,\n\t\tcustomer_name: name,\n\t\tphone: parsed.phone,\n\t\ttitle,\n\t\tlocation: location || String(s.business_location ?? ''),\n\t\tstart_at: start.toUTC().toISO(),\n\t\tduration_min: minutes,\n\t\tstatus: 'scheduled',\n\t\treminder_message_id: '',\n\t\treminded_at: '',\n\t\trsvp_at: '',\n\t\textra_guests: 0,\n\t\tlast_error: '',\n\t\tnotes,\n\t},\n}];"
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000109",
+			"name": "Is the appointment valid?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				1360,
+				40
+			],
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000040",
+							"leftValue": "={{ $json.ok }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010a",
+			"name": "Save the appointment",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1640,
+				-60
+			],
+			"parameters": {
+				"resource": "row",
+				"operation": "insert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"customer_name": "={{ $json.customer_name }}",
+						"phone": "={{ $json.phone }}",
+						"title": "={{ $json.title }}",
+						"location": "={{ $json.location }}",
+						"start_at": "={{ $json.start_at }}",
+						"duration_min": "={{ $json.duration_min }}",
+						"status": "={{ $json.status }}",
+						"reminder_message_id": "={{ $json.reminder_message_id }}",
+						"reminded_at": "={{ $json.reminded_at }}",
+						"rsvp_at": "={{ $json.rsvp_at }}",
+						"extra_guests": "={{ $json.extra_guests }}",
+						"last_error": "={{ $json.last_error }}",
+						"notes": "={{ $json.notes }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "customer_name",
+							"displayName": "customer_name",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "phone",
+							"displayName": "phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "title",
+							"displayName": "title",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "location",
+							"displayName": "location",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "start_at",
+							"displayName": "start_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "duration_min",
+							"displayName": "duration_min",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "reminder_message_id",
+							"displayName": "reminder_message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "reminded_at",
+							"displayName": "reminded_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "rsvp_at",
+							"displayName": "rsvp_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "extra_guests",
+							"displayName": "extra_guests",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "notes",
+							"displayName": "notes",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					],
+					"attemptToConvertTypes": false,
+					"convertFieldsToString": false
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010b",
+			"name": "Answer the form",
+			"type": "n8n-nodes-base.respondToWebhook",
+			"typeVersion": 1.4,
+			"position": [
+				1920,
+				40
+			],
+			"executeOnce": true,
+			"parameters": {
+				"respondWith": "json",
+				"responseBody": "={{ JSON.stringify({ formSubmittedText: $('Check the form answers').first().json.message }) }}",
+				"options": {
+					"responseCode": "={{ $('Check the form answers').first().json.ok ? 200 : 422 }}"
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010c",
+			"name": "Get the message quota",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				800,
+				520
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "getQuota"
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010d",
+			"name": "Read the appointments to remind",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1080,
+				520
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "scheduled"
+						},
+						{
+							"keyName": "start_at",
+							"condition": "gte",
+							"keyValue": "={{ new Date(Date.now() + Number($('Your settings').first().json.min_notice_minutes) * 60000).toISOString() }}"
+						},
+						{
+							"keyName": "start_at",
+							"condition": "lte",
+							"keyValue": "={{ new Date(Date.now() + Number($('Your settings').first().json.reminder_hours_before) * 3600000).toISOString() }}"
+						}
+					]
+				},
+				"returnAll": true,
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010e",
+			"name": "Write the invitations",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1360,
+				520
+			],
+			"parameters": {
+				"jsCode": "const s = $('Your settings').first().json;\nif (!/^\\+[1-9]\\d{7,14}$/.test(String(s.owner_phone ?? ''))) {\n\tthrow new Error('Your settings: set owner_phone to your own WhatsApp number, with + and the country code, for example +5511977770001.');\n}\nif ($now.zoneName !== s.expected_timezone) {\n\tthrow new Error('Time zone mismatch: this workflow runs in ' + $now.zoneName + ' but expected_timezone in Your settings is ' + s.expected_timezone + '. Set the time zone in the workflow settings, or change expected_timezone, so that the times you type are the times customers read.');\n}\n\n// Plans the invitations of this run. The rows were read with their window already applied: they start between\n// min_notice_minutes and reminder_hours_before from now, earliest first. One message of the quota always stays free\n// for the message to the owner: rows that do not fit are not sent now and are listed for the owner afterwards.\nif (!String(s.invite_text ?? '').trim()) throw new Error('Your settings: invite_text is empty.');\n// Texts come from Your settings. {name}, {business}, {when}, {where}; \\n is a line break; a line with {where} is dropped without a location.\nconst fill = (template, values) => String(template).replace(/\\\\n/g, '\\n').split('\\n')\n\t.filter((line) => values.where || !line.includes('{where}'))\n\t.map((line) => line.replace(/\\{(\\w+)\\}/g, (all, key) => (key in values ? values[key] : all)))\n\t.join('\\n').trim();\nconst quota = $('Get the message quota').first().json;\nconst room = typeof quota.remaining === 'number' ? Math.max(0, quota.remaining - 1) : Infinity;\nconst e164 = /^\\+[1-9]\\d{7,14}$/;\nconst rows = $input.all().map((item) => item.json)\n\t.filter((row) => row.id !== undefined && Number.isFinite(Date.parse(row.start_at)))\n\t.sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at))\n\t.slice(0, room);\nreturn rows.map((r) => {\n\tconst start = Date.parse(r.start_at);\n\tconst minutes = Number(r.duration_min) > 0 ? Number(r.duration_min) : Number(s.default_duration_minutes);\n\tconst when = DateTime.fromMillis(start, { zone: $now.zoneName }).toFormat(String(s.date_format || \"cccc d LLLL 'at' HH:mm\"));\n\tconst first = String(r.customer_name || '').trim().split(/\\s+/)[0] || 'there';\n\tconst where = String(r.location || '').trim();\n\treturn {\n\t\tjson: {\n\t\t\t...r,\n\t\t\tphone_ok: e164.test(String(r.phone || '')),\n\t\t\tidempotency_key: 'appt-' + r.id + '-' + start,\n\t\t\tevent_name: (r.title + ' at ' + s.business_name).slice(0, 200),\n\t\t\t// Guests on a personal WhatsApp account see the invitation without the time card: the text repeats it.\n\t\t\tevent_description: fill(s.invite_text, { name: first, business: s.business_name, when, where }),\n\t\t\tstart_iso: new Date(start).toISOString(),\n\t\t\tend_iso: new Date(start + minutes * 60000).toISOString(),\n\t\t\talarm_minutes: Number(s.invite_alarm_minutes_before),\n\t\t\tallow_extra_guests: s.allow_extra_guests === true,\n\t\t},\n\t};\n});"
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000010f",
+			"name": "Send the calendar invitation",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1640,
+				520
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput",
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "sendCalendarEvent",
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.phone }}",
+				"eventName": "={{ $json.event_name }}",
+				"startAt": "={{ $json.start_iso }}",
+				"additionalFields": {
+					"description": "={{ $json.event_description }}",
+					"endAt": "={{ $json.end_iso }}",
+					"extraGuestsAllowed": "={{ $json.allow_extra_guests }}",
+					"remindBeforeMinutes": "={{ $json.alarm_minutes }}"
+				},
+				"options": {
+					"idempotencyKey": "={{ $json.idempotency_key }}"
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000110",
+			"name": "Record the reminder or the failure",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1920,
+				520
+			],
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "id",
+							"condition": "eq",
+							"keyValue": "={{ $('Write the invitations').item.json.id }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "={{ $json.error ? ($('Write the invitations').item.json.phone_ok ? 'send_failed' : 'invalid_phone') : 'reminded' }}",
+						"reminder_message_id": "={{ $json.error ? '' : $json.id }}",
+						"reminded_at": "={{ $json.error ? '' : new Date().toISOString() }}",
+						"last_error": "={{ $json.error ? (String($json.error).replace(/[.\\s]+$/, '') + '. ' + String($json.hint ?? '')).trim().slice(0, 300) : '' }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "reminder_message_id",
+							"displayName": "reminder_message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "reminded_at",
+							"displayName": "reminded_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					],
+					"attemptToConvertTypes": false,
+					"convertFieldsToString": false
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000123",
+			"name": "Wait for the invitations to finish",
+			"type": "n8n-nodes-base.merge",
+			"typeVersion": 3.1,
+			"position": [
+				560,
+				830
+			],
+			"notes": "Passes nothing on that matters. It makes 'Flag reminders that were not sent' wait until every invitation has been sent and recorded (or until there was none to send), so the order never depends on where nodes sit on the canvas.",
+			"parameters": {}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000111",
+			"name": "Flag reminders that were not sent",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				800,
+				830
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "scheduled"
+						},
+						{
+							"keyName": "start_at",
+							"condition": "lte",
+							"keyValue": "={{ new Date(Date.now() + Number($('Your settings').first().json.reminder_hours_before) * 3600000).toISOString() }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "not_reminded",
+						"last_error": "No reminder was sent: too close to the start, quota used up or n8n was not running. See the message to the owner."
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					],
+					"attemptToConvertTypes": false,
+					"convertFieldsToString": false
+				},
+				"options": {}
+			},
+			"notes": "Runs only after the Merge on its left has seen every invitation sent and recorded: rows still scheduled and inside the window were not sent (quota, too little notice, n8n was off)."
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000112",
+			"name": "Flag unanswered reminders",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1080,
+				830
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true,
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "reminded"
+						},
+						{
+							"keyName": "start_at",
+							"condition": "gt",
+							"keyValue": "={{ new Date(Date.now()).toISOString() }}"
+						},
+						{
+							"keyName": "start_at",
+							"condition": "lte",
+							"keyValue": "={{ new Date(Date.now() + Number($('Your settings').first().json.no_answer_window_hours) * 3600000).toISOString() }}"
+						},
+						{
+							"keyName": "reminded_at",
+							"condition": "lt",
+							"keyValue": "={{ new Date(Date.now() - 3600000).toISOString() }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "no_answer"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					],
+					"attemptToConvertTypes": false,
+					"convertFieldsToString": false
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000113",
+			"name": "Write the message to the owner",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1360,
+				830
+			],
+			"parameters": {
+				"jsCode": "// ONE message to the owner for this run, listing only exceptions: reminders that were not sent (with the reason),\n// sends that failed, customers who have not answered, and the quota left when it was the cause. Nothing to report: no message.\nconst s = $('Your settings').first().json;\nconst zone = $now.zoneName;\nconst hash = (text) => { let h = 5381; for (const c of text) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return h.toString(16); };\nconst rowsOf = (name) => ($(name).isExecuted ? $(name).all() : []).map((item) => item.json).filter((row) => row.id !== undefined);\nconst now = Date.now();\nconst when = (r) => DateTime.fromISO(r.start_at).setZone(zone).toFormat('ccc d LLL HH:mm');\nconst who = (r) => r.customer_name + ', ' + r.title + ', ' + when(r);\n\nconst readIds = new Set(rowsOf('Read the appointments to remind').map((r) => r.id));\nconst attempted = rowsOf('Record the reminder or the failure');\nconst sentCount = attempted.filter((r) => r.status === 'reminded').length;\nconst failed = attempted.filter((r) => r.status === 'send_failed' || r.status === 'invalid_phone');\nconst notSent = rowsOf('Flag reminders that were not sent');\nconst silent = $input.all().map((item) => item.json).filter((row) => row.id !== undefined);\n\nlet quotaBlocked = 0;\nconst why = (r) => {\n\tconst start = Date.parse(r.start_at);\n\tif (!Number.isFinite(start)) return 'the start time is missing or not a valid date';\n\tif (start <= now) return 'the appointment had already started when the run saw it (added too late, or n8n was not running)';\n\tif (start - now < Number(s.min_notice_minutes) * 60000) {\n\t\treturn 'it starts in ' + Math.max(1, Math.round((start - now) / 60000)) + ' minutes, less than the ' + s.min_notice_minutes + ' minutes of notice a reminder needs';\n\t}\n\tif (readIds.has(r.id)) { quotaBlocked += 1; return 'the message quota had no room for it'; }\n\treturn 'it was added while this run was working';\n};\n\nconst parts = [];\nif (notSent.length) parts.push('Not reminded (' + notSent.length + '):\\n' + notSent.map((r) => '- ' + who(r) + ': ' + why(r)).join('\\n'));\nif (failed.length) {\n\tparts.push('Reminder failed (' + failed.length + '):\\n' + failed.map((r) => '- ' + who(r) + ': ' + (r.status === 'invalid_phone' ? 'the phone number is not valid (' + r.phone + ')' : r.last_error)).join('\\n'));\n}\nif (silent.length) {\n\tparts.push('No answer yet (' + silent.length + '):\\n' + silent.map((r) => '- ' + who(r) + ', ' + r.phone + ', in ' + (Math.round((Date.parse(r.start_at) - now) / 360000) / 10) + ' h').join('\\n'));\n}\nif (quotaBlocked > 0) {\n\tconst q = $('Get the message quota').first().json;\n\tconst left = typeof q.remaining === 'number' ? Math.max(0, q.remaining - sentCount - 1) : 'unknown';\n\tconst resets = q.resets_at ? DateTime.fromISO(q.resets_at).setZone(zone).toFormat('d LLL') : '';\n\tparts.push('Message quota left: ' + left + (q.quota ? ' of ' + q.quota : '') + ' (one message is always kept for this report)' + (resets ? ', it resets on ' + resets : '') + '.');\n}\nif (!parts.length) return [];\nlet text = 'Appointment reminders, ' + s.business_name + ' (' + DateTime.now().setZone(zone).toFormat('ccc d LLL HH:mm') + ', ' + zone + '):\\n\\n' + parts.join('\\n\\n');\nif (notSent.length || failed.length) text += '\\n\\nTo try a row again, fix the cause and set its status back to scheduled in the appointments table.';\nif (text.length > 3800) text = text.slice(0, 3800) + '\\n...and more in the appointments table.';\nreturn [{ json: { phone: s.owner_phone, text, key: 'report-' + DateTime.now().setZone(zone).toFormat('yyyy-MM-dd-HH') + '-' + hash(text) } }];"
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000114",
+			"name": "Record the answer or the failed delivery",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				800,
+				1130
+			],
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "appointments"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "reminder_message_id",
+							"condition": "eq",
+							"keyValue": "={{ String($json.data.id ?? \"no-id\") }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "={{ $json.type === 'message.calendar_responded' ? ({ going: 'confirmed', not_going: 'declined', maybe: 'tentative' }[$json.data.response] || 'tentative') : 'send_failed' }}",
+						"rsvp_at": "={{ $json.type === 'message.calendar_responded' ? $json.data.at : '' }}",
+						"extra_guests": "={{ $json.data.extra_guests || 0 }}",
+						"last_error": "={{ $json.type === 'message.send.failed' ? String($json.data.error?.message || 'WhatsApp could not deliver the invitation.') : '' }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "rsvp_at",
+							"displayName": "rsvp_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "extra_guests",
+							"displayName": "extra_guests",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_error",
+							"displayName": "last_error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					],
+					"attemptToConvertTypes": false,
+					"convertFieldsToString": false
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000115",
+			"name": "Write the answer messages",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1080,
+				1130
+			],
+			"parameters": {
+				"jsCode": "const s = $('Your settings').first().json;\nif (!/^\\+[1-9]\\d{7,14}$/.test(String(s.owner_phone ?? ''))) {\n\tthrow new Error('Your settings: set owner_phone to your own WhatsApp number, with + and the country code, for example +5511977770001.');\n}\nif ($now.zoneName !== s.expected_timezone) {\n\tthrow new Error('Time zone mismatch: this workflow runs in ' + $now.zoneName + ' but expected_timezone in Your settings is ' + s.expected_timezone + '. Set the time zone in the workflow settings, or change expected_timezone, so that the times you type are the times customers read.');\n}\n\n// The texts the customer reads are in Your settings (thanks_going_text, thanks_maybe_text, decline_customer_text).\n// {name} is the first name; {title}, {business}, {when} come from the row and the settings; {guests} is the extra guests sentence.\nconst fill = (template, values) => String(template).replace(/\\\\n/g, '\\n').replace(/\\{(\\w+)\\}/g, (all, key) => (key in values ? values[key] : all)).trim();\nconst customerText = { confirmed: s.thanks_going_text, tentative: s.thanks_maybe_text, declined: s.decline_customer_text };\nfor (const [status, text] of Object.entries(customerText)) {\n\tif (!String(text ?? '').trim()) throw new Error('Your settings: the text for ' + status + ' answers is empty (thanks_going_text, thanks_maybe_text or decline_customer_text).');\n}\n// The texts to you (the owner) are written here.\nconst plain = (text) => String(text).replace(/[.\\s]+$/, '');\nconst wording = {\n\townerDeclined: (row, when, guests) => row.customer_name + ' declined the ' + row.title + ' appointment on ' + when + guests + '. Their contact card follows so you can call.',\n\townerFailed: (row, when) => 'The reminder for ' + row.customer_name + ', ' + row.title + ', ' + when + ' could not be delivered: ' + plain(row.last_error) + '. Check the number ' + row.phone + ', then set the row status back to scheduled.',\n};\nconst hash = (text) => { let h = 5381; for (const c of text) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return h.toString(16); };\nconst out = [];\nfor (const row of $input.all().map((item) => item.json).filter((r) => r.id !== undefined)) {\n\tconst name = String(row.customer_name).trim().split(/\\s+/)[0];\n\tconst when = DateTime.fromISO(row.start_at).setZone($now.zoneName).toFormat(String(s.date_format || \"cccc d LLLL 'at' HH:mm\"));\n\tconst extra = Number(row.extra_guests) > 0 ? Number(row.extra_guests) : 0;\n\tif (row.status === 'send_failed') {\n\t\tout.push({ json: { phone: s.owner_phone, text: wording.ownerFailed(row, when), key: 'failed-' + row.id + '-' + hash(String(row.last_error)) } });\n\t\tcontinue;\n\t}\n\tif (row.status === 'declined') {\n\t\tout.push({ json: {\n\t\t\tphone: s.owner_phone,\n\t\t\ttext: wording.ownerDeclined(row, when, extra ? ' (+' + extra + ' guest(s))' : ''),\n\t\t\tkey: 'decline-' + row.id + '-' + row.rsvp_at,\n\t\t\tcard: true, card_name: row.customer_name, card_phone: row.phone, card_key: 'decline-card-' + row.id + '-' + row.rsvp_at,\n\t\t} });\n\t}\n\tconst guests = extra ? ' We noted ' + extra + ' extra guest(s).' : '';\n\tout.push({ json: { phone: row.phone, text: fill(customerText[row.status], { name, title: row.title, business: s.business_name, when, guests }), key: 'rsvp-' + row.id + '-' + row.rsvp_at } });\n}\nreturn out;"
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000116",
+			"name": "Send a WhatsApp text",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1640,
+				950
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "sendText",
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.phone }}",
+				"text": "={{ $json.text }}",
+				"options": {
+					"idempotencyKey": "={{ $json.key }}"
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000117",
+			"name": "Was it a decline?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				1920,
+				950
+			],
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000041",
+							"leftValue": "={{ $('Write the answer messages').isExecuted && $('Write the answer messages').item.json.card === true }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000118",
+			"name": "Send the customer contact card to the owner",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				2200,
+				950
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"parameters": {
+				"resource": "message",
+				"number": {
+					"__rl": true,
+					"mode": "list",
+					"value": "main",
+					"cachedResultName": "main"
+				},
+				"operation": "sendContactCard",
+				"recipientType": "phone",
+				"phoneNumber": "={{ $('Your settings').first().json.owner_phone }}",
+				"displayName": "={{ $('Write the answer messages').item.json.card_name }}",
+				"phonesInput": "fields",
+				"phones": {
+					"phoneValues": [
+						{
+							"number": "={{ $('Write the answer messages').item.json.card_phone }}",
+							"label": "Mobile"
+						}
+					]
+				},
+				"options": {
+					"idempotencyKey": "={{ $('Write the answer messages').item.json.card_key }}"
+				}
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000119",
+			"name": "Overview",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-780,
+				-550
+			],
+			"parameters": {
+				"content": "### How it works\nFor clinics, salons and studios. Staff add appointments with a form. Every hour the workflow sends each customer whose appointment is coming up a native WhatsApp calendar invitation, once. A Polling Trigger reads the answers from the documented message.calendar_responded event, records Going, Maybe or Not going, thanks the customer and, on a decline, texts you with the customer's contact card. Each run sends you ONE message listing only exceptions: reminders that could not go out and customers who have not tapped. Guests on personal WhatsApp accounts see the invitation without the time card, so the text repeats it. n8n must be running for reminders to go out; answers given while it was off are handled at the next poll.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. In the Turbo Notify dashboard create an API key with the scopes messages:send, messages:read and events:read (chosen when the key is created). Make a Turbo Notify API credential with it, and a Basic Auth credential \"Form access (Basic Auth)\". Share the form link only with staff.\n3. In Your settings set owner_phone (not the number linked to Turbo Notify) and expected_timezone, then set the same time zone in Workflow settings, Timezone.\n4. Run \"Run once: create the table\", add a first row with the form, then activate.\n5. Set an Error workflow: a disconnected number fails reminders and rows turn send_failed until you set them back to scheduled.\nFree reaches 2 different contacts per cycle, Lone Wolf 100. The table holds names and phones: tell your customers, delete old rows. Tested on n8n 2.45.5.\n\n### Customization\nEdit the texts and the date format in Your settings. A row marked not_reminded, send_failed or invalid_phone shows why: fix it, set it back to scheduled.",
+				"width": 640,
+				"height": 1120
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011a",
+			"name": "Section: create the table",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-40,
+				-550
+			],
+			"parameters": {
+				"content": "## Create the table (run once)\nCreates the appointments Data Table if it is missing. Then add a first row with the form.",
+				"width": 480,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011b",
+			"name": "Section: entry points",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-40,
+				-90
+			],
+			"parameters": {
+				"content": "## Entry points\nThe form, the hourly timer and the Polling Trigger all pass through Your settings.",
+				"width": 200,
+				"height": 1380,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011c",
+			"name": "Section: add appointments",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				760,
+				-190
+			],
+			"parameters": {
+				"content": "## Add appointments\nStaff use the form. A valid entry is saved, a rejected one is explained to the person who typed it.",
+				"width": 1300,
+				"height": 390,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011d",
+			"name": "Section: read what is due",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				760,
+				390
+			],
+			"parameters": {
+				"content": "## Read the quota and the due rows\nOne message of the quota stays free for you. Only rows inside the reminder window are read.",
+				"width": 540,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011e",
+			"name": "Warning: personal accounts and time zone",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1320,
+				370
+			],
+			"parameters": {
+				"content": "**Personal WhatsApp accounts** see the invitation without the time card, so the text repeats the date and time. `expected_timezone` must match the time zone of this workflow, or the run stops.",
+				"width": 250,
+				"height": 310,
+				"color": 3
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b0000000011f",
+			"name": "Section: send and record",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1590,
+				390
+			],
+			"parameters": {
+				"content": "## Send and record\nEach invitation goes out once. The row keeps the message id, or the reason it failed.",
+				"width": 470,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000120",
+			"name": "Section: report to the owner",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				520,
+				700
+			],
+			"parameters": {
+				"content": "## Wait for the sends, then list what needs you\nThe Merge waits until every invitation is sent. Rows not reminded, failed sends and customers who have not tapped become one message.",
+				"width": 980,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000121",
+			"name": "Section: guest answers",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				760,
+				1000
+			],
+			"parameters": {
+				"content": "## Record the answers\nThe Polling Trigger reads Going, Maybe and Not going, or a failed delivery.",
+				"width": 480,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000122",
+			"name": "Section: texts and contact card",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1560,
+				820
+			],
+			"parameters": {
+				"content": "## Texts and contact card\nOne node sends every text. A decline also sends the customer's contact card to the owner.",
+				"width": 800,
+				"height": 290,
+				"color": 7
+			}
+		},
+		{
+			"id": "a17c0e2f-3b4d-4c5e-8f60-b00000000124",
+			"name": "Section: settings and routing",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				240,
+				400
+			],
+			"parameters": {
+				"content": "## Your settings and routing\nEvery run starts here. Edit your values in Your settings. The switch then sends the run to the form, the hourly report or the answers.",
+				"width": 460,
+				"height": 280,
+				"color": 7
+			}
+		}
+	],
+	"pinData": {},
+	"connections": {
+		"Form: new appointment": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Every hour: remind and report": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Poll: guest answered or delivery failed": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Run once: create the table": {
+			"main": [
+				[
+					{
+						"node": "Create the appointments table",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Your settings": {
+			"main": [
+				[
+					{
+						"node": "Route by entry point",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Route by entry point": {
+			"main": [
+				[
+					{
+						"node": "Read the appointments of the last 24 hours",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Get the message quota",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Record the answer or the failed delivery",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the appointments of the last 24 hours": {
+			"main": [
+				[
+					{
+						"node": "Check the form answers",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Check the form answers": {
+			"main": [
+				[
+					{
+						"node": "Is the appointment valid?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Is the appointment valid?": {
+			"main": [
+				[
+					{
+						"node": "Save the appointment",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Answer the form",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the appointment": {
+			"main": [
+				[
+					{
+						"node": "Answer the form",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Get the message quota": {
+			"main": [
+				[
+					{
+						"node": "Read the appointments to remind",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the appointments to remind": {
+			"main": [
+				[
+					{
+						"node": "Write the invitations",
+						"type": "main",
+						"index": 0
+					},
+					{
+						"node": "Wait for the invitations to finish",
+						"type": "main",
+						"index": 1
+					}
+				]
+			]
+		},
+		"Write the invitations": {
+			"main": [
+				[
+					{
+						"node": "Send the calendar invitation",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the calendar invitation": {
+			"main": [
+				[
+					{
+						"node": "Record the reminder or the failure",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Flag reminders that were not sent": {
+			"main": [
+				[
+					{
+						"node": "Flag unanswered reminders",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Flag unanswered reminders": {
+			"main": [
+				[
+					{
+						"node": "Write the message to the owner",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Write the message to the owner": {
+			"main": [
+				[
+					{
+						"node": "Send a WhatsApp text",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Record the answer or the failed delivery": {
+			"main": [
+				[
+					{
+						"node": "Write the answer messages",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Write the answer messages": {
+			"main": [
+				[
+					{
+						"node": "Send a WhatsApp text",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send a WhatsApp text": {
+			"main": [
+				[
+					{
+						"node": "Was it a decline?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Was it a decline?": {
+			"main": [
+				[
+					{
+						"node": "Send the customer contact card to the owner",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Record the reminder or the failure": {
+			"main": [
+				[
+					{
+						"node": "Wait for the invitations to finish",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Wait for the invitations to finish": {
+			"main": [
+				[
+					{
+						"node": "Flag reminders that were not sent",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

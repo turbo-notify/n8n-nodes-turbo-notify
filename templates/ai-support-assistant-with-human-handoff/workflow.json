@@ -1,0 +1,1880 @@
+{
+	"name": "Answer WhatsApp support chats with an AI agent and hand over to a person with Turbo Notify",
+	"nodes": [
+		{
+			"parameters": {
+				"events": [
+					"message.received",
+					"message.replied",
+					"message.sent"
+				],
+				"pollTimes": {
+					"item": [
+						{
+							"mode": "everyMinute"
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "e6ac6f50-18a2-4eb6-86e2-c79150adad43",
+			"name": "Poll new WhatsApp messages",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "350b5035-cb4e-4c28-87bc-c3ebbc67a5bc",
+							"name": "owner_phone",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "b78dc63f-7e4e-490a-8290-c61855c55de2",
+							"name": "business_name",
+							"value": "Your Business Name",
+							"type": "string"
+						},
+						{
+							"id": "04dd34d0-d80e-4966-81a6-c26a345fd412",
+							"name": "business_facts",
+							"value": "Replace this with what the assistant may say about your business: hours, address, services, payment, deadlines.",
+							"type": "string"
+						},
+						{
+							"id": "0d339b91-c6a4-4487-803d-c24c54676e75",
+							"name": "tone",
+							"value": "friendly, short and polite; answer in the language the customer writes in",
+							"type": "string"
+						},
+						{
+							"id": "3be74b8c-62ba-4c67-80a1-ca5bd8e0fb3e",
+							"name": "rules",
+							"value": "Answer only from the FAQ search results and the business facts. Never invent prices, dates, discounts or promises. If you are not sure, say so, give a low confidence and ask for a person. Keep the answer under 600 characters. Do not discuss anything outside this business.",
+							"type": "string"
+						},
+						{
+							"id": "9d177e70-f078-497e-bb72-e272ff69f83d",
+							"name": "ignore_phones",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"id": "7c51c8d5-b6fc-41ae-843b-c0ba14f52cbe",
+							"name": "handoff_words",
+							"value": "speak to a person, talk to a person, speak to someone, talk to someone, a human, real person, attendant, atendente, humano, falar com alguem, falar com uma pessoa, falar com um humano, complaint, reclamar, reclamacao, refund, reembolso, unsubscribe, descadastrar, urgent, urgente",
+							"type": "string"
+						},
+						{
+							"id": "dcc66a5c-5490-4429-851a-cb79b9484522",
+							"name": "optout_words",
+							"value": "stop, parar, sair",
+							"type": "string"
+						},
+						{
+							"id": "6a89ca60-f351-456a-8902-c512dbb538b8",
+							"name": "optin_words",
+							"value": "start, voltar",
+							"type": "string"
+						},
+						{
+							"id": "4d608634-8f00-4942-810e-cd72ba687643",
+							"name": "confidence_threshold",
+							"value": 0.7,
+							"type": "number"
+						},
+						{
+							"id": "32697686-a812-4745-82e3-cf50d1aca656",
+							"name": "human_hours",
+							"value": 4,
+							"type": "number"
+						},
+						{
+							"id": "ee45cc2c-d5f2-426a-8a5f-c13602274642",
+							"name": "hourly_cap",
+							"value": 6,
+							"type": "number"
+						},
+						{
+							"id": "74f527a4-41c5-4370-b056-81465eafaa87",
+							"name": "audio_to_person",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"id": "b5552ead-0e89-45b6-89a7-c07b96f60c1d",
+							"name": "optout_reply",
+							"value": "Done. You will not get more automatic messages from us. Send START to get them again.",
+							"type": "string"
+						},
+						{
+							"id": "175fafb8-01cd-4fc2-8995-c0534b09f4da",
+							"name": "optin_reply",
+							"value": "Welcome back. Write your question and we will answer.",
+							"type": "string"
+						},
+						{
+							"id": "666ffd02-e1ce-45bf-80c8-c427a2c2cc0c",
+							"name": "nontext_reply",
+							"value": "I can only read text messages. Please write your question in text.",
+							"type": "string"
+						},
+						{
+							"id": "f9379a84-174e-499c-8960-c68ab1d2cf63",
+							"name": "handoff_reply",
+							"value": "Thank you. I passed your message to our team. A person will answer you here.",
+							"type": "string"
+						}
+					]
+				},
+				"includeOtherFields": false,
+				"options": {}
+			},
+			"id": "6e63acb1-7f3d-4fa8-8630-c27634a28061",
+			"name": "Your settings",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				240,
+				-520
+			],
+			"executeOnce": true,
+			"notesInFlow": true,
+			"notes": "owner_phone: your own number, with + and country code. Gets the alerts\nbusiness_name: how the assistant names your business\nbusiness_facts: what it may say: hours, address, payment, deadlines\ntone: how it speaks\nrules: what it must never do\nignore_phones: numbers it never answers, comma separated (family, suppliers)\nhandoff_words: a word or phrase that hands the chat to a person (phrases like \"speak to a person\" are safer than \"person\")\noptout_words: a whole message that stops it for that customer\noptin_words: a whole message that starts it again\nconfidence_threshold: below this a person answers (0 to 1)\nhuman_hours: silence after a handover or after you write\nhourly_cap: most automatic replies per customer per hour\naudio_to_person: true hands voice notes to a person, false (default) answers them with nontext_reply\noptout_reply: fixed text after STOP\noptin_reply: fixed text after START\nnontext_reply: fixed text for images, audio and the like\nhandoff_reply: fixed text when a person will answer"
+		},
+		{
+			"parameters": {
+				"batchSize": 1,
+				"options": {}
+			},
+			"id": "fc590428-983b-4a0b-89b7-cdb5e53d13d0",
+			"name": "Loop over events",
+			"type": "n8n-nodes-base.splitInBatches",
+			"typeVersion": 3,
+			"position": [
+				720,
+				0
+			],
+			"notes": "One event at a time. The poll hands them over oldest first, so a STOP or a handover is saved before the next event of the same customer is read."
+		},
+		{
+			"parameters": {
+				"mode": "runOnceForEachItem",
+				"jsCode": "// Decides what kind of event this is. Nothing is sent or saved here.\nconst cfg = $('Your settings').first().json;\nconst ev = $json;\nconst d = ev.data || {};\nconst digits = (value) => String(value || '').replace(/\\D/g, '');\n\nconst base = {\n  event_id: ev.id,\n  event_type: ev.type,\n  message_id: d.id || '',\n  number_id: ev.number_id || '',\n  content_type: d.content_type || '',\n};\n\n// Only private chats: a group message carries the group id in \"to\".\nif (d.to && d.to.group_id) {\n  return { json: { ...base, kind: 'ignore', why: 'group message' } };\n}\n\nconst fromDigits = digits(d.from && d.from.number);\nconst toDigits = digits(d.to && d.to.number);\nconst ownerDigits = digits(cfg.owner_phone);\n// Numbers this workflow never answers (family, suppliers), comma separated, any format.\nconst ignoreDigits = String(cfg.ignore_phones || '').split(',').map(digits).filter(Boolean);\n\n// A customer wrote to the number. A quoted answer arrives as message.replied, not message.received.\nif ((ev.type === 'message.received' || ev.type === 'message.replied') && d.direction === 'inbound') {\n  if (!fromDigits || fromDigits === toDigits) {\n    return { json: { ...base, kind: 'ignore', why: 'message from the number itself' } };\n  }\n  if (fromDigits === ownerDigits) {\n    return { json: { ...base, kind: 'ignore', why: 'message from the owner phone' } };\n  }\n  if (ignoreDigits.includes(fromDigits)) {\n    return { json: { ...base, kind: 'ignore', why: 'phone on the ignore list' } };\n  }\n  return {\n    json: {\n      ...base,\n      kind: 'customer',\n      phone: '+' + fromDigits,\n      name: (d.from && d.from.name) || '',\n      preview: d.preview || '',\n    },\n  };\n}\n\n// A message that leaves the number. Only one typed in the WhatsApp app (origin native) means a\n// person took over. Messages sent through the API (origin tn), including this workflow's own, are ignored.\nif ((ev.type === 'message.sent' || ev.type === 'message.replied') && d.direction === 'outbound') {\n  if (d.origin === 'native' && ignoreDigits.includes(toDigits)) {\n    return { json: { ...base, kind: 'ignore', why: 'phone on the ignore list' } };\n  }\n  if (d.origin === 'native' && toDigits && toDigits !== ownerDigits) {\n    return { json: { ...base, kind: 'owner', phone: '+' + toDigits } };\n  }\n  return { json: { ...base, kind: 'ignore', why: 'own message sent through the API' } };\n}\n\nreturn { json: { ...base, kind: 'ignore', why: 'event not handled' } };"
+			},
+			"id": "8e76faba-14a4-4d4c-8763-c1bca3cb694f",
+			"name": "Classify the event",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				960,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "3419e27d-543e-427d-86c3-c2d0e6333ed5",
+										"leftValue": "={{ $json.kind }}",
+										"rightValue": "customer",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Customer"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "c9a022ef-2190-4fe8-888a-c6bc0f44274f",
+										"leftValue": "={{ $json.kind }}",
+										"rightValue": "owner",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Owner wrote"
+						}
+					]
+				},
+				"options": {
+					"fallbackOutput": "extra",
+					"renameFallbackOutput": "Ignore"
+				}
+			},
+			"id": "5553d24c-0070-4d17-8b11-c9938bba587f",
+			"name": "Customer, owner or ignore",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				1200,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "contacts_state"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "phone",
+							"condition": "eq",
+							"keyValue": "={{ $('Classify the event').item.json.phone }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"phone": "={{ $('Classify the event').item.json.phone }}",
+						"human_until": "={{ $now.plus({ hours: $('Your settings').first().json.human_hours }).toISO() }}",
+						"last_message_at": "={{ $now.toISO() }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "phone",
+							"displayName": "phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "opted_out",
+							"displayName": "opted_out",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "boolean",
+							"canBeUsedToMatch": true,
+							"removed": true
+						},
+						{
+							"id": "human_until",
+							"displayName": "human_until",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_message_at",
+							"displayName": "last_message_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "ai_answers",
+							"displayName": "ai_answers",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true,
+							"removed": true
+						},
+						{
+							"id": "ai_window_start",
+							"displayName": "ai_window_start",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true,
+							"removed": true
+						},
+						{
+							"id": "recent_event_ids",
+							"displayName": "recent_event_ids",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true,
+							"removed": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "2d5e942f-49f9-42d3-815b-ce3d3b4bbd5e",
+			"name": "Pause the assistant while the owner writes",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1460,
+				-220
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "get",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"messageId": "={{ $('Classify the event').item.json.message_id }}",
+				"simplify": true
+			},
+			"id": "f127e7ec-0f96-45fe-82cd-cd56eea8c59f",
+			"name": "Read the whole message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1460,
+				0
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "contacts_state"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "phone",
+							"condition": "eq",
+							"keyValue": "={{ $('Classify the event').item.json.phone }}"
+						}
+					]
+				},
+				"returnAll": false,
+				"limit": 1,
+				"orderBy": false
+			},
+			"id": "9e08f1a4-7189-4bae-82f8-c118ae9e4d97",
+			"name": "Read the contact state",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1700,
+				0
+			],
+			"alwaysOutputData": true
+		},
+		{
+			"parameters": {
+				"mode": "runOnceForEachItem",
+				"jsCode": "// Applies the rules that must never depend on the AI: duplicates, STOP and START, a person in the\n// chat, non-text messages, handoff words and the hourly cap. Nothing is sent or saved here.\nconst cfg = $('Your settings').first().json;\nconst ctx = $('Classify the event').item.json;\nconst msg = $('Read the whole message').item.json;\nconst row = $json && $json.phone ? $json : null;\n\nconst now = $now;\nconst nowMs = now.toMillis();\nconst HOUR = 3600 * 1000;\n\nconst clean = (value) =>\n  String(value || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\nconst squash = (value) => value.replace(/\\s+/g, ' ').trim();\nconst wordList = (value) => String(value || '').split(',').map((w) => squash(clean(w))).filter(Boolean);\nconst escapeRegex = (value) => value.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst containsWord = (haystack, needle) =>\n  new RegExp('(^|[^\\\\p{L}\\\\p{N}])' + escapeRegex(needle) + '($|[^\\\\p{L}\\\\p{N}])', 'u').test(haystack);\n\nconst text = typeof msg.text === 'string' ? msg.text.trim() : '';\nconst isText = ctx.content_type === 'text';\nconst normalized = squash(clean(text));\nconst keyword = normalized.replace(/[^\\p{L}\\p{N}\\s]/gu, '').replace(/\\s+/g, ' ').trim();\n\n// What the table remembers about this phone.\nconst optedOut = Boolean(row && row.opted_out);\nconst humanUntilMs = row && row.human_until ? new Date(row.human_until).getTime() : 0;\nconst humanActive = humanUntilMs > nowMs;\nconst windowStartMs = row && row.ai_window_start ? new Date(row.ai_window_start).getTime() : 0;\nconst inWindow = windowStartMs > 0 && nowMs - windowStartMs < HOUR;\nconst answersThisHour = inWindow ? Number(row.ai_answers || 0) : 0;\nconst recentIds = String((row && row.recent_event_ids) || '').split(',').filter(Boolean);\nconst recentNext = [...recentIds, ctx.event_id].slice(-20).join(',');\n\nconst humanUntilIso = now.plus({ hours: Number(cfg.human_hours) }).toISO();\nconst untilLabel = now.plus({ hours: Number(cfg.human_hours) }).toFormat('yyyy-LL-dd HH:mm ZZZZ');\nconst windowIso = inWindow ? row.ai_window_start : now.toISO();\n\nconst stateBase = {\n  phone: ctx.phone,\n  opted_out: optedOut,\n  human_until: row && row.human_until ? row.human_until : null,\n  last_message_at: now.toISO(),\n  ai_answers: answersThisHour,\n  ai_window_start: inWindow ? row.ai_window_start : null,\n  recent_event_ids: recentNext,\n};\n\nconst result = {\n  ...ctx,\n  text,\n  route: 'silent',\n  reason: '',\n  reply_text: '',\n  until_label: untilLabel,\n  state_after: stateBase,\n  state_handoff: { ...stateBase, human_until: humanUntilIso },\n};\n\nconst pick = (route, reason, replyText, statePatch) => ({\n  json: {\n    ...result,\n    route,\n    reason,\n    reply_text: replyText || '',\n    state_after: { ...stateBase, ...(statePatch || {}) },\n  },\n});\n\nif (recentIds.includes(ctx.event_id)) return pick('silent', 'event already handled');\n\n// STOP and START are whole-message keywords and always win over everything below.\nif (isText && wordList(cfg.optout_words).includes(keyword)) {\n  if (optedOut) return pick('silent', 'already opted out');\n  return pick('fixed', 'opt-out', cfg.optout_reply, { opted_out: true });\n}\nif (isText && optedOut && wordList(cfg.optin_words).includes(keyword)) {\n  return pick('fixed', 'opt-in', cfg.optin_reply, { opted_out: false });\n}\nif (optedOut) return pick('silent', 'customer opted out');\nif (humanActive) return pick('silent', 'a person is handling this chat');\n\nconst capReached = answersThisHour >= Number(cfg.hourly_cap);\nconst counted = { ai_answers: answersThisHour + 1, ai_window_start: windowIso };\n\nconst audioToPerson = cfg.audio_to_person === true || String(cfg.audio_to_person).toLowerCase() === 'true';\nif (!isText) {\n  if (audioToPerson && ctx.content_type === 'audio') {\n    // A voice note is read by a person when the setting says so: no fixed text about \"text only\", a handover.\n    return {\n      json: {\n        ...result,\n        text: text || '(voice note)',\n        route: 'handoff',\n        reason: 'the customer sent a voice note',\n        reply_text: cfg.handoff_reply,\n      },\n    };\n  }\n  if (capReached) return pick('silent', 'hourly cap reached, no more automatic replies');\n  return pick('fixed', 'non-text message', cfg.nontext_reply, counted);\n}\nif (!text) {\n  return pick('handoff', 'the message text could not be read', cfg.handoff_reply);\n}\n\nconst hit = wordList(cfg.handoff_words).find((word) => containsWord(normalized, word));\nif (hit) return pick('handoff', 'the customer wrote \"' + hit + '\"', cfg.handoff_reply);\n\nif (capReached) {\n  return pick(\n    'handoff',\n    'more than ' + cfg.hourly_cap + ' automatic replies to this phone in one hour (possible loop)',\n    cfg.handoff_reply,\n  );\n}\n\nreturn pick('ai', '', '', counted);"
+			},
+			"id": "a61e9d92-b3ec-45da-8bca-cdbb1304d7f8",
+			"name": "Decide how to handle the message",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1940,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"rules": {
+					"values": [
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "5e2a0ff4-9e90-4684-8276-cbab45093c10",
+										"leftValue": "={{ $json.route }}",
+										"rightValue": "fixed",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Fixed reply"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "ba548ef5-80fb-4cef-84f3-cbdd95b3377a",
+										"leftValue": "={{ $json.route }}",
+										"rightValue": "ai",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Ask the AI"
+						},
+						{
+							"conditions": {
+								"options": {
+									"caseSensitive": true,
+									"leftValue": "",
+									"typeValidation": "strict",
+									"version": 2
+								},
+								"conditions": [
+									{
+										"id": "f3f20e94-8e11-4e10-8d35-c13c85fe53cd",
+										"leftValue": "={{ $json.route }}",
+										"rightValue": "handoff",
+										"operator": {
+											"type": "string",
+											"operation": "equals"
+										}
+									}
+								],
+								"combinator": "and"
+							},
+							"renameOutput": true,
+							"outputKey": "Hand over"
+						}
+					]
+				},
+				"options": {
+					"fallbackOutput": "extra",
+					"renameFallbackOutput": "Stay silent"
+				}
+			},
+			"id": "03003fa9-009b-443e-88b7-c4f1655d4892",
+			"name": "Route the decision",
+			"type": "n8n-nodes-base.switch",
+			"typeVersion": 3.2,
+			"position": [
+				2180,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendTypingIndicator",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ $('Classify the event').item.json.phone }}",
+				"isTyping": true
+			},
+			"id": "25cd379e-7e06-4d78-8b58-cff1279f1830",
+			"name": "Show typing",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				2460,
+				120
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput",
+			"notes": "Needs Lone Wolf. On Free it is refused, this step carries on and the answer is still sent."
+		},
+		{
+			"parameters": {
+				"promptType": "define",
+				"text": "={{ $('Read the whole message').item.json.text }}",
+				"options": {
+					"systemMessage": "=You are the WhatsApp assistant of {{ $('Your settings').first().json.business_name }}.\nTone: {{ $('Your settings').first().json.tone }}.\nBusiness facts: {{ $('Your settings').first().json.business_facts }}\nRules: {{ $('Your settings').first().json.rules }}\n\nBefore you answer a question about the business, call the Search the FAQ tool with one keyword from the question.\nReply with ONE JSON object and nothing else, in this exact shape:\n{\"answer\": \"text for the customer\", \"confidence\": 0.0 to 1.0, \"handoff\": true or false, \"handoff_reason\": \"why a person is needed, or empty\"}\nSet handoff to true when the customer is upset, asks for a person, or when the FAQ and the facts do not answer the question.",
+					"maxIterations": 5
+				}
+			},
+			"id": "13a9254b-b614-4585-831e-cdb17f699be0",
+			"name": "Support AI Agent",
+			"type": "@n8n/n8n-nodes-langchain.agent",
+			"typeVersion": 3.1,
+			"position": [
+				2700,
+				120
+			],
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"model": {
+					"__rl": true,
+					"mode": "list",
+					"value": "gpt-4.1-mini",
+					"cachedResultName": "gpt-4.1-mini"
+				},
+				"options": {
+					"temperature": 0.2
+				}
+			},
+			"id": "5a971c06-bef6-49ff-8e24-cd92b0d6a0f1",
+			"name": "OpenAI Chat Model",
+			"type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+			"typeVersion": 1.3,
+			"position": [
+				2620,
+				380
+			],
+			"credentials": {
+				"openAiApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "OpenAI account"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"sessionIdType": "customKey",
+				"sessionKey": "={{ $('Classify the event').item.json.phone }}",
+				"contextWindowLength": 10
+			},
+			"id": "fa9c04ad-14a8-4d2f-8f76-c6830a74228c",
+			"name": "Chat memory per customer",
+			"type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+			"typeVersion": 1.3,
+			"position": [
+				2780,
+				380
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "faq"
+				},
+				"matchType": "anyCondition",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "question",
+							"condition": "ilike",
+							"keyValue": "={{ $fromAI('keyword', 'One keyword from the customer question, for example hours, address, pay or cancel', 'string') }}"
+						},
+						{
+							"keyName": "keywords",
+							"condition": "ilike",
+							"keyValue": "={{ $fromAI('keyword', 'One keyword from the customer question, for example hours, address, pay or cancel', 'string') }}"
+						},
+						{
+							"keyName": "answer",
+							"condition": "ilike",
+							"keyValue": "={{ $fromAI('keyword', 'One keyword from the customer question, for example hours, address, pay or cancel', 'string') }}"
+						}
+					]
+				},
+				"returnAll": false,
+				"limit": 5,
+				"orderBy": false,
+				"descriptionType": "manual",
+				"toolDescription": "Search the business FAQ. Give one keyword from the customer question. Returns the matching rows with question, answer and keywords. Returns nothing when the FAQ has no answer."
+			},
+			"id": "fc34041d-4d96-4613-8fef-cea79d8a5008",
+			"name": "Search the FAQ",
+			"type": "n8n-nodes-base.dataTableTool",
+			"typeVersion": 1.1,
+			"position": [
+				2940,
+				380
+			],
+			"notes": "One keyword search over question, keywords and answer. For a long FAQ use a vector store or put a short FAQ in business_facts."
+		},
+		{
+			"parameters": {
+				"mode": "runOnceForEachItem",
+				"jsCode": "// Reads the agent's answer as a decision. Anything unclear becomes a handoff, never silence\n// and never unchecked text sent to a customer.\nconst cfg = $('Your settings').first().json;\nconst decide = $('Decide how to handle the message').item.json;\nconst out = $json;\nconst threshold = Number(cfg.confidence_threshold);\n\nlet answer = '';\nlet confidence = 0;\nlet reason = '';\n\nif (out.error) {\n  reason = 'the assistant failed to run: ' + String((out.error && out.error.message) || out.error).slice(0, 200);\n} else {\n  let raw = String(out.output === undefined || out.output === null ? '' : out.output).trim();\n  raw = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\n  const start = raw.indexOf('{');\n  const end = raw.lastIndexOf('}');\n  let parsed = null;\n  try {\n    parsed = JSON.parse(raw.slice(start, end + 1));\n  } catch (error) {\n    parsed = null;\n  }\n  if (!parsed || typeof parsed !== 'object') {\n    reason = 'the assistant did not return a readable decision';\n  } else if (typeof parsed.answer !== 'string' || !parsed.answer.trim()) {\n    reason = 'the assistant returned an empty answer';\n  } else if (typeof parsed.confidence !== 'number' || !isFinite(parsed.confidence)) {\n    reason = 'the assistant returned no confidence';\n  } else if (typeof parsed.handoff !== 'boolean') {\n    reason = 'the assistant did not say whether a person is needed';\n  } else {\n    answer = parsed.answer.trim();\n    confidence = Math.min(1, Math.max(0, parsed.confidence));\n    if (parsed.handoff) {\n      reason = 'the assistant asked for a person: ' + (String(parsed.handoff_reason || '').trim() || 'no reason given');\n    } else if (confidence < threshold) {\n      reason = 'low confidence (' + confidence.toFixed(2) + ' is below ' + threshold + ')';\n    } else if (answer.length > 1500) {\n      reason = 'the answer was too long to send';\n    }\n  }\n}\n\nconst needsPerson = reason !== '';\nreturn {\n  json: {\n    ...decide,\n    route: needsPerson ? 'handoff' : 'ai',\n    needs_person: needsPerson,\n    reason,\n    confidence,\n    answer,\n    reply_text: needsPerson ? cfg.handoff_reply : answer,\n  },\n};"
+			},
+			"id": "0e9a3f22-2636-42fa-85ab-c5b321dd911d",
+			"name": "Read the agent decision",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				3000,
+				120
+			]
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "018f82fe-f5df-4d84-85cd-c6e2fa33d278",
+							"leftValue": "={{ $json.needs_person }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"id": "fb664a77-7b14-4f2e-811e-cf5ca8874490",
+			"name": "Needs a person?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				3240,
+				120
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "contacts_state"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "phone",
+							"condition": "eq",
+							"keyValue": "={{ $('Decide how to handle the message').item.json.phone }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"phone": "={{ $('Decide how to handle the message').item.json.state_after.phone }}",
+						"opted_out": "={{ $('Decide how to handle the message').item.json.state_after.opted_out }}",
+						"human_until": "={{ $('Decide how to handle the message').item.json.state_after.human_until }}",
+						"last_message_at": "={{ $('Decide how to handle the message').item.json.state_after.last_message_at }}",
+						"ai_answers": "={{ $('Decide how to handle the message').item.json.state_after.ai_answers }}",
+						"ai_window_start": "={{ $('Decide how to handle the message').item.json.state_after.ai_window_start }}",
+						"recent_event_ids": "={{ $('Decide how to handle the message').item.json.state_after.recent_event_ids }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "phone",
+							"displayName": "phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "opted_out",
+							"displayName": "opted_out",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "boolean",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "human_until",
+							"displayName": "human_until",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_message_at",
+							"displayName": "last_message_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "ai_answers",
+							"displayName": "ai_answers",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "ai_window_start",
+							"displayName": "ai_window_start",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "recent_event_ids",
+							"displayName": "recent_event_ids",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "34540556-e3ba-4197-8d45-c3c649d062d6",
+			"name": "Save the contact state",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				3500,
+				-80
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "reply",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"messageId": "={{ $('Decide how to handle the message').item.json.message_id }}",
+				"text": "={{ $('Decide how to handle the message').item.json.route === 'ai' ? $('Read the agent decision').item.json.answer : $('Decide how to handle the message').item.json.reply_text }}",
+				"options": {
+					"idempotencyKey": "={{ 'reply-' + $('Decide how to handle the message').item.json.event_id }}"
+				}
+			},
+			"id": "46d29487-d68f-4a10-8348-cf6ca612efaf",
+			"name": "Send the reply",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				3740,
+				-80
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {},
+			"id": "beab7f53-76f1-44fb-889e-cfa863807c33",
+			"name": "Handover starts here",
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				3500,
+				300
+			],
+			"notes": "The two ways to a handover meet here: the rules deciding before the model, or the agent asking for a person. Kept as one named point so both paths share the same three messages."
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "contacts_state"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "phone",
+							"condition": "eq",
+							"keyValue": "={{ $('Handover starts here').item.json.phone }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"phone": "={{ $('Handover starts here').item.json.state_handoff.phone }}",
+						"opted_out": "={{ $('Handover starts here').item.json.state_handoff.opted_out }}",
+						"human_until": "={{ $('Handover starts here').item.json.state_handoff.human_until }}",
+						"last_message_at": "={{ $('Handover starts here').item.json.state_handoff.last_message_at }}",
+						"ai_answers": "={{ $('Handover starts here').item.json.state_handoff.ai_answers }}",
+						"ai_window_start": "={{ $('Handover starts here').item.json.state_handoff.ai_window_start }}",
+						"recent_event_ids": "={{ $('Handover starts here').item.json.state_handoff.recent_event_ids }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "phone",
+							"displayName": "phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "opted_out",
+							"displayName": "opted_out",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "boolean",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "human_until",
+							"displayName": "human_until",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "last_message_at",
+							"displayName": "last_message_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "ai_answers",
+							"displayName": "ai_answers",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "number",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "ai_window_start",
+							"displayName": "ai_window_start",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "dateTime",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "recent_event_ids",
+							"displayName": "recent_event_ids",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "f8b28509-603d-407b-8fde-c9742718e2c8",
+			"name": "Hold the chat for a person",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				3740,
+				300
+			]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "reply",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"messageId": "={{ $('Handover starts here').item.json.message_id }}",
+				"text": "={{ $('Your settings').first().json.handoff_reply }}",
+				"options": {
+					"idempotencyKey": "={{ 'handoff-' + $('Handover starts here').item.json.event_id }}"
+				}
+			},
+			"id": "47e73c2f-74e7-4faf-8d56-c2b3b723204f",
+			"name": "Tell the customer a person will answer",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				3980,
+				300
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ $('Your settings').first().json.owner_phone }}",
+				"text": "={{ 'Handover needed: ' + $('Handover starts here').item.json.reason + '\\nCustomer: ' + ($('Handover starts here').item.json.name || 'unknown') + ' ' + $('Handover starts here').item.json.phone + '\\nLast message: \"' + String($('Handover starts here').item.json.text || '').slice(0, 500) + '\"\\nThe assistant stays silent in this chat until ' + $('Handover starts here').item.json.until_label + '. Answer from the WhatsApp app.' }}",
+				"options": {
+					"idempotencyKey": "={{ 'alert-' + $('Handover starts here').item.json.event_id }}"
+				}
+			},
+			"id": "324d6a0d-9698-4bf5-8499-c0ee0bcbb513",
+			"name": "Alert the owner",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				4220,
+				300
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendContactCard",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Classify the event').item.json.number_id }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ $('Your settings').first().json.owner_phone }}",
+				"displayName": "={{ $('Handover starts here').item.json.name || $('Handover starts here').item.json.phone }}",
+				"phonesInput": "fields",
+				"phones": {
+					"phoneValues": [
+						{
+							"number": "={{ $('Handover starts here').item.json.phone }}",
+							"label": "WhatsApp"
+						}
+					]
+				},
+				"options": {
+					"idempotencyKey": "={{ 'card-' + $('Handover starts here').item.json.event_id }}"
+				}
+			},
+			"id": "c5a30f1e-c26c-4d00-8794-cf6c5ab495e9",
+			"name": "Send the customer contact card to the owner",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				4460,
+				300
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"parameters": {
+				"jsCode": "// Runs once, after every event of this execution was handled. The items are the ones each event handed back to\n// the loop. A reply that did not go out leaves a customer without an answer, so make the run fail where you will\n// see it, and say who.\nconst rows = $input.all().map((item) => item.json);\nconst noAnswer = rows.map((row) => row.no_answer).filter(Boolean);\nconst noAlert = rows.map((row) => row.owner_not_alerted).filter(Boolean);\nif (noAnswer.length > 0 || noAlert.length > 0) {\n  const parts = [];\n  if (noAnswer.length > 0) parts.push('No answer reached these customers, write to them by hand: ' + noAnswer.join(' | '));\n  if (noAlert.length > 0) parts.push('The owner could not be alerted about: ' + noAlert.join(' | '));\n  throw new Error(parts.join('. '));\n}\nreturn $input.all();"
+			},
+			"id": "62f06b1a-e7d9-4b2b-8283-c1b1a1d5052c",
+			"name": "Fail the run if a reply or an alert failed",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				720,
+				320
+			],
+			"notes": "Every event runs to the end even when a send fails: the poll already moved past these events, so stopping early would drop the rest. The run fails here, once, with the list."
+		},
+		{
+			"parameters": {},
+			"id": "42c62387-ac47-4be2-85e3-c416e79e5871",
+			"name": "Run once: set up the tables",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				820
+			]
+		},
+		{
+			"parameters": {
+				"resource": "table",
+				"operation": "create",
+				"tableName": "faq",
+				"columns": {
+					"column": [
+						{
+							"name": "question",
+							"type": "string"
+						},
+						{
+							"name": "answer",
+							"type": "string"
+						},
+						{
+							"name": "keywords",
+							"type": "string"
+						},
+						{
+							"name": "sample",
+							"type": "boolean"
+						}
+					]
+				},
+				"options": {
+					"createIfNotExists": true
+				}
+			},
+			"id": "9b9c6db5-2e62-4bf9-87d3-c62b2ae75f5a",
+			"name": "Create the faq table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				260,
+				820
+			]
+		},
+		{
+			"parameters": {
+				"resource": "table",
+				"operation": "create",
+				"tableName": "contacts_state",
+				"columns": {
+					"column": [
+						{
+							"name": "phone",
+							"type": "string"
+						},
+						{
+							"name": "opted_out",
+							"type": "boolean"
+						},
+						{
+							"name": "human_until",
+							"type": "date"
+						},
+						{
+							"name": "last_message_at",
+							"type": "date"
+						},
+						{
+							"name": "ai_answers",
+							"type": "number"
+						},
+						{
+							"name": "ai_window_start",
+							"type": "date"
+						},
+						{
+							"name": "recent_event_ids",
+							"type": "string"
+						}
+					]
+				},
+				"options": {
+					"createIfNotExists": true
+				}
+			},
+			"id": "2e77b23d-e1cb-42c5-867b-c1575d142010",
+			"name": "Create the contacts_state table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				520,
+				820
+			]
+		},
+		{
+			"parameters": {
+				"jsCode": "// Synthetic sample rows for the faq table, flagged sample: the workflow refuses to answer customers while any\n// row is flagged. Delete them (or rewrite them and set sample to false) and add your own answers.\nconst rows = [\n  {\n    question: 'What are your opening hours?',\n    answer: 'We are open Monday to Saturday, from 7am to 7pm. We are closed on Sunday.',\n    keywords: 'hours, open, opening, schedule, closed, horario',\n  },\n  {\n    question: 'Where are you located?',\n    answer: 'Our shop is at 100 Example Street, Springfield. There is free parking in front.',\n    keywords: 'address, location, where, parking, endereco',\n  },\n  {\n    question: 'How do I cancel or change an order?',\n    answer: 'You can cancel or change an order free of charge up to 24 hours before pickup. After that, a person needs to check it.',\n    keywords: 'cancel, change, order, cancelar, pedido',\n  },\n  {\n    question: 'How can I pay?',\n    answer: 'We accept card, cash and Pix.',\n    keywords: 'pay, payment, card, cash, pix, pagar',\n  },\n];\nreturn rows.map((row) => ({ json: { ...row, sample: true } }));"
+			},
+			"id": "cf6ea33b-68dc-4e4e-8d05-cdaf7d8ab27a",
+			"name": "Sample FAQ rows",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				780,
+				820
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "upsert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "faq"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "question",
+							"condition": "eq",
+							"keyValue": "={{ $json.question }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"question": "={{ $json.question }}",
+						"answer": "={{ $json.answer }}",
+						"keywords": "={{ $json.keywords }}",
+						"sample": "={{ $json.sample }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "question",
+							"displayName": "question",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "answer",
+							"displayName": "answer",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "keywords",
+							"displayName": "keywords",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "sample",
+							"displayName": "sample",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "boolean",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"id": "105163cc-c66d-448f-82f5-c0cd0460b08d",
+			"name": "Add the sample FAQ rows",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1040,
+				820
+			]
+		},
+		{
+			"parameters": {
+				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. It answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START. A model can be wrong.\n\nWhen the assistant hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant only goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15), on n8n Cloud or self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node. OpenAI needs an API account with billing (a ChatGPT subscription is not an API key). Other OpenAI compatible providers need Use Responses API off (verified: an OpenRouter free model worked, Groq gpt-oss did not).\n3. Run the manual branch once: it creates the tables (Data tables tab) and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Workflow settings > Error workflow: pick a second workflow with an Error Trigger and a mail or Slack node. Otherwise a failed reply only shows in Executions.\n6. Test from another phone, then activate.\n\nFree: 2 contacts per cycle (you count as one); Lone Wolf: 100. Typing needs Lone Wolf. Voice notes get a fixed text, or a handover with audio_to_person.",
+				"height": 800,
+				"width": 720
+			},
+			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",
+			"name": "Overview",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-20,
+				-1500
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Listen and check\nPolls your number every minute and stops while the settings or the FAQ are still samples. Groups, your own messages, ignore_phones and the owner phone are skipped.",
+				"height": 290,
+				"width": 1360,
+				"color": 7
+			},
+			"id": "f4f7b260-1505-41d3-8956-ce7777a7e0dd",
+			"name": "Section: listen",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-20,
+				-60
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Rules before the AI\nSTOP and START words, a person in the chat, non-text messages, handoff words and the hourly cap are decided in code, never by the model.",
+				"height": 560,
+				"width": 880,
+				"color": 7
+			},
+			"id": "10241d8d-49e7-4265-8a69-c212b51452e6",
+			"name": "Section: rules",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1420,
+				-360
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Ask the AI\nThe agent is told to answer only from the FAQ table and your facts, and returns a decision with a confidence. Anything unclear becomes a handoff.",
+				"height": 520,
+				"width": 1000,
+				"color": 7
+			},
+			"id": "94c95ee4-8715-4e11-86b5-cb0942e0f7a9",
+			"name": "Section: AI",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				2360,
+				20
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Reply\nThe contact state is saved first, then the answer goes out quoting the customer message.",
+				"height": 260,
+				"width": 560,
+				"color": 7
+			},
+			"id": "70304a48-d67b-4061-8009-c045e90a6755",
+			"name": "Section: reply",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				3440,
+				-200
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Hand over to a person\nPauses the assistant in this chat, tells the customer, then sends you the reason, the last message and the contact card.",
+				"height": 280,
+				"width": 1160,
+				"color": 7
+			},
+			"id": "34d88ea7-3ea8-4278-8785-c105954ba0b2",
+			"name": "Section: handover",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				3440,
+				220
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Report what failed\nEvery event ends here and notes a reply or an owner alert that failed. When all events are done, the run fails with that list.",
+				"height": 230,
+				"width": 480,
+				"color": 7
+			},
+			"id": "9466bdf9-200f-4a87-8073-ccb0f612f696",
+			"name": "Section: failures",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				660,
+				260
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Run once: tables and samples\nCreates the faq and contacts_state tables if they are missing, then adds four sample FAQ rows flagged sample. Delete them before you activate.",
+				"height": 280,
+				"width": 1320,
+				"color": 7
+			},
+			"id": "26c2322d-1d91-42f4-845f-c7186f53005d",
+			"name": "Section: setup",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-20,
+				700
+			]
+		},
+		{
+			"parameters": {
+				"content": "**Replace these before you activate**\nowner_phone, business_name, business_facts and the sample FAQ rows. Until then the workflow stops with a message and answers nobody.\nCustomer text goes to your AI provider: tell your customers.",
+				"height": 340,
+				"width": 420,
+				"color": 3
+			},
+			"id": "a3d1c463-d884-4bc7-8035-ca9c2bba0a01",
+			"name": "Warning: owner phone",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				200,
+				-700
+			]
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "faq"
+				},
+				"matchType": "anyCondition",
+				"filters": {
+					"conditions": []
+				},
+				"returnAll": true,
+				"orderBy": false
+			},
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				240,
+				0
+			],
+			"id": "aec0f37b-201e-4e58-875e-f20fddd61c74",
+			"name": "Read the FAQ rows",
+			"executeOnce": true,
+			"alwaysOutputData": true,
+			"notes": "Reads the whole faq table once per run, only to check that the sample rows are gone."
+		},
+		{
+			"parameters": {
+				"jsCode": "// Stops the run, before any event is handled, while the settings or the FAQ are still the samples.\n// A customer must never get an answer written for a sample business.\nconst cfg = $('Your settings').first().json;\nconst problems = [];\nif (!/^\\+[1-9]\\d{7,14}$/.test(String(cfg.owner_phone || '').trim())) {\n  problems.push('owner_phone is not a real number yet (your own WhatsApp number, with + and the country code)');\n}\nconst name = String(cfg.business_name || '').trim();\nif (!name || name === \"Your Business Name\") problems.push('business_name is still the sample');\nconst facts = String(cfg.business_facts || '').trim();\nif (!facts || facts === \"Replace this with what the assistant may say about your business: hours, address, services, payment, deadlines.\") problems.push('business_facts is still the sample');\nconst rows = $input.all().map((item) => item.json).filter((row) => row && row.question);\nconst samples = rows.filter((row) => row.sample === true).length;\nif (rows.length === 0) {\n  problems.push('the faq table is empty (run the setup branch once, then write your own answers)');\n} else if (samples > 0) {\n  problems.push('the faq table still has ' + samples + ' sample row(s): delete them, or rewrite them and set sample to false');\n}\nif (problems.length > 0) {\n  throw new Error('Not ready to answer customers: ' + problems.join('; ') + '. Fix Your settings and the faq table, then the workflow runs.');\n}\n// The events of this poll, unchanged.\nreturn $('Poll new WhatsApp messages').all();"
+			},
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				480,
+				0
+			],
+			"id": "c65e12fc-c1c0-45d7-bd1c-91fca5a432d2",
+			"name": "Check the settings",
+			"notes": "Fails with a plain message while owner_phone, business_name, business_facts or the FAQ rows are still the samples."
+		},
+		{
+			"parameters": {
+				"mode": "runOnceForEachItem",
+				"jsCode": "// Notes what did not reach its recipient for THIS event. Nothing stops here: the other events of the run\n// are still handled first, and the last node of the run fails with the list.\nconst decide = $('Decide how to handle the message').item.json;\nconst reasonOf = (error) =>\n  String(typeof error === 'string' ? error : (error && error.message) || JSON.stringify(error)).slice(0, 200);\nconst failureOf = (name) => {\n  try {\n    const out = $(name).item.json;\n    return out && out.error ? reasonOf(out.error) : '';\n  } catch (error) {\n    return ''; // this event did not pass through that node\n  }\n};\nconst who = decide.phone + (decide.name ? ' (' + decide.name + ')' : '');\nconst noAnswer = failureOf('Send the reply') || failureOf('Tell the customer a person will answer');\nconst ownerAlert = failureOf('Alert the owner');\nconst ownerCard = failureOf('Send the customer contact card to the owner');\nreturn {\n  json: {\n    event_id: decide.event_id,\n    phone: decide.phone,\n    no_answer: noAnswer ? who + ': ' + noAnswer : '',\n    owner_not_alerted: ownerAlert || ownerCard\n      ? who + ': ' + [ownerAlert && 'text ' + ownerAlert, ownerCard && 'contact card ' + ownerCard].filter(Boolean).join(', ')\n      : '',\n  },\n};"
+			},
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				960,
+				320
+			],
+			"id": "bed67b72-661f-4c71-87da-313cb7004cc0",
+			"name": "Record what failed for this event",
+			"notes": "Both ways of answering a customer end here. A send that failed is written on the item, nothing stops yet."
+		}
+	],
+	"connections": {
+		"Loop over events": {
+			"main": [
+				[
+					{
+						"node": "Fail the run if a reply or an alert failed",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Classify the event",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Classify the event": {
+			"main": [
+				[
+					{
+						"node": "Customer, owner or ignore",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Customer, owner or ignore": {
+			"main": [
+				[
+					{
+						"node": "Read the whole message",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Pause the assistant while the owner writes",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Loop over events",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Pause the assistant while the owner writes": {
+			"main": [
+				[
+					{
+						"node": "Loop over events",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the whole message": {
+			"main": [
+				[
+					{
+						"node": "Read the contact state",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the contact state": {
+			"main": [
+				[
+					{
+						"node": "Decide how to handle the message",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Decide how to handle the message": {
+			"main": [
+				[
+					{
+						"node": "Route the decision",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Route the decision": {
+			"main": [
+				[
+					{
+						"node": "Save the contact state",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Show typing",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Handover starts here",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Loop over events",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Show typing": {
+			"main": [
+				[
+					{
+						"node": "Support AI Agent",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"OpenAI Chat Model": {
+			"ai_languageModel": [
+				[
+					{
+						"node": "Support AI Agent",
+						"type": "ai_languageModel",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Chat memory per customer": {
+			"ai_memory": [
+				[
+					{
+						"node": "Support AI Agent",
+						"type": "ai_memory",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Search the FAQ": {
+			"ai_tool": [
+				[
+					{
+						"node": "Support AI Agent",
+						"type": "ai_tool",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Support AI Agent": {
+			"main": [
+				[
+					{
+						"node": "Read the agent decision",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the agent decision": {
+			"main": [
+				[
+					{
+						"node": "Needs a person?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Needs a person?": {
+			"main": [
+				[
+					{
+						"node": "Handover starts here",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Save the contact state",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the contact state": {
+			"main": [
+				[
+					{
+						"node": "Send the reply",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Handover starts here": {
+			"main": [
+				[
+					{
+						"node": "Hold the chat for a person",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Hold the chat for a person": {
+			"main": [
+				[
+					{
+						"node": "Tell the customer a person will answer",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Tell the customer a person will answer": {
+			"main": [
+				[
+					{
+						"node": "Alert the owner",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Alert the owner": {
+			"main": [
+				[
+					{
+						"node": "Send the customer contact card to the owner",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Run once: set up the tables": {
+			"main": [
+				[
+					{
+						"node": "Create the faq table",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Create the faq table": {
+			"main": [
+				[
+					{
+						"node": "Create the contacts_state table",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Create the contacts_state table": {
+			"main": [
+				[
+					{
+						"node": "Sample FAQ rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Sample FAQ rows": {
+			"main": [
+				[
+					{
+						"node": "Add the sample FAQ rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Poll new WhatsApp messages": {
+			"main": [
+				[
+					{
+						"node": "Your settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Your settings": {
+			"main": [
+				[
+					{
+						"node": "Read the FAQ rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read the FAQ rows": {
+			"main": [
+				[
+					{
+						"node": "Check the settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Check the settings": {
+			"main": [
+				[
+					{
+						"node": "Loop over events",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the reply": {
+			"main": [
+				[
+					{
+						"node": "Record what failed for this event",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the customer contact card to the owner": {
+			"main": [
+				[
+					{
+						"node": "Record what failed for this event",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Record what failed for this event": {
+			"main": [
+				[
+					{
+						"node": "Loop over events",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"tags": [],
+	"pinData": {}
+}

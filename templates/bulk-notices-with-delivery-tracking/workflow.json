@@ -1,0 +1,1558 @@
+{
+	"name": "Send WhatsApp notices to a list and track delivery with Turbo Notify",
+	"nodes": [
+		{
+			"id": "7af2e7b3-0d6e-4cb6-872f-2b3975aebd5b",
+			"parameters": {
+				"content": "### How it works\nSend one notice to a list of people and see what happened to each message. A password protected form takes name and phone (two columns copied from a sheet work) and the text, with {name} where the name goes. The workflow cleans the numbers, drops duplicates and your stop list, checks your quota and sends in paced batches from your own number. A Polling Trigger writes delivered, read and failed into the `notices` data table. You get ONE WhatsApp summary per batch: when everyone has a receipt, at the latest after report_after_hours. Free reaches one customer (2 contacts, yours counts), Lone Wolf 100.\n\n### Setup\nTested on n8n 2.45.5 (n8n Cloud and self-hosted).\n1. Install the community node @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. In the Turbo Notify dashboard create an API key with the scopes messages:send, messages:read and events:read (fixed once created). Create the n8n credential and select it in all four Turbo Notify nodes.\n3. Create a Basic Auth credential for the form.\n4. Run \"Create the notices table\" once.\n5. In Settings set owner_phone: your own number, not the one linked to Turbo Notify.\n6. Activate. n8n must be reachable over HTTPS by the people who use the form and stay active (after a pause it catches up).\n7. Test with two rows to yourself.\nEnd your text with \"Reply STOP if you do not want these notices\", add anyone who asks to stop to stop_list, tell people why they get these messages and delete old rows from the table.\n\n### Customization\nTo send from another number, set number in Settings and pick the same number in the Polling Trigger options. Batch size, pause and caps are also in Settings.",
+				"height": 840,
+				"width": 660
+			},
+			"name": "Overview note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-780,
+				-1000
+			]
+		},
+		{
+			"id": "d2124b65-05fb-459b-8752-5fd42ce6f4a9",
+			"parameters": {
+				"content": "## Create the table\nRun this once. It makes the `notices` data table with 12 columns and does nothing if it already exists.",
+				"height": 240,
+				"width": 560,
+				"color": 7
+			},
+			"name": "Create the table note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-60,
+				-1000
+			]
+		},
+		{
+			"id": "d977dba9-cef3-44a0-8628-ecc117b25a4b",
+			"parameters": {},
+			"name": "Create the notices table (run once)",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				0,
+				-880
+			]
+		},
+		{
+			"id": "7e09b93a-579f-41ae-80e0-8dd5f2566cd3",
+			"parameters": {
+				"resource": "table",
+				"operation": "create",
+				"tableName": "notices",
+				"columns": {
+					"column": [
+						{
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"name": "phone",
+							"type": "string"
+						},
+						{
+							"name": "message",
+							"type": "string"
+						},
+						{
+							"name": "status",
+							"type": "string"
+						},
+						{
+							"name": "message_id",
+							"type": "string"
+						},
+						{
+							"name": "error",
+							"type": "string"
+						},
+						{
+							"name": "batch_id",
+							"type": "string"
+						},
+						{
+							"name": "label",
+							"type": "string"
+						},
+						{
+							"name": "sent_at",
+							"type": "string"
+						},
+						{
+							"name": "delivered_at",
+							"type": "string"
+						},
+						{
+							"name": "read_at",
+							"type": "string"
+						},
+						{
+							"name": "reported_at",
+							"type": "string"
+						}
+					]
+				},
+				"options": {
+					"createIfNotExists": true
+				}
+			},
+			"name": "Create the notices data table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				260,
+				-880
+			]
+		},
+		{
+			"id": "f28f062e-04fd-45f3-8161-034699a2f26c",
+			"parameters": {
+				"content": "## Triggers\nThe form sends a batch. The Polling Trigger brings delivery news and, after a pause, resumes where it stopped. The hourly check closes silent messages.",
+				"height": 550,
+				"width": 300,
+				"color": 7
+			},
+			"name": "Triggers note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-60,
+				-600
+			]
+		},
+		{
+			"id": "ae4051c6-160a-4a55-8fa9-161b4ac860d8",
+			"parameters": {
+				"content": "Protect the form below: set a Basic Auth credential on it before you activate. Anyone with the address and the password can message your list.",
+				"height": 140,
+				"width": 300,
+				"color": 3
+			},
+			"name": "Protect the form note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				-60,
+				-750
+			]
+		},
+		{
+			"id": "212c0ea7-11e7-4f1b-8571-fccfaad5d474",
+			"parameters": {
+				"authentication": "basicAuth",
+				"path": "3ede736c-571f-4c46-8a5e-41a08fcfb274",
+				"formTitle": "Send a notice",
+				"formDescription": "One person per line: name, then phone, separated by a tab (copy two columns from a sheet and paste), a semicolon or a comma. The message is required: write it once, put {name} where the name goes and end it with \"Reply STOP if you do not want these notices\". The same exact text to more than 20 people in an hour is refused, so keep {name} in it.",
+				"formFields": {
+					"values": [
+						{
+							"fieldLabel": "Recipients",
+							"fieldType": "textarea",
+							"placeholder": "Ana Souza,+5511977770001\nBruno Lima;11 97777-0002",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Message",
+							"fieldType": "textarea",
+							"placeholder": "Hello {name}, ... Reply STOP if you do not want these notices.",
+							"requiredField": true
+						},
+						{
+							"fieldLabel": "Batch label",
+							"fieldType": "text",
+							"placeholder": "Friday class"
+						}
+					]
+				},
+				"responseMode": "responseNode",
+				"options": {}
+			},
+			"name": "New batch form",
+			"type": "n8n-nodes-base.formTrigger",
+			"typeVersion": 2.1,
+			"position": [
+				40,
+				-460
+			],
+			"webhookId": "3ede736c-571f-4c46-8a5e-41a08fcfb274",
+			"credentials": {
+				"httpBasicAuth": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Form access (Basic Auth)"
+				}
+			}
+		},
+		{
+			"id": "51e6bd2a-a33e-401d-8984-d3b40bd143e1",
+			"parameters": {
+				"events": [
+					"message.delivered",
+					"message.read",
+					"message.send.failed"
+				],
+				"pollTimes": {
+					"item": [
+						{
+							"mode": "everyMinute"
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "New delivery and failure events",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"position": [
+				40,
+				-320
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"id": "405c7607-fd42-4a89-8386-ccb8d50470b5",
+			"parameters": {
+				"rule": {
+					"interval": [
+						{
+							"field": "hours",
+							"hoursInterval": 1
+						}
+					]
+				}
+			},
+			"name": "Every hour",
+			"type": "n8n-nodes-base.scheduleTrigger",
+			"typeVersion": 1.2,
+			"position": [
+				40,
+				-160
+			]
+		},
+		{
+			"id": "f36f25e6-ee8d-486e-8838-70a031984b8c",
+			"parameters": {
+				"content": "## Settings and routing\nEvery value you may change is in Settings. The quota is read once per run, then new batches go up and tracking goes down.",
+				"height": 700,
+				"width": 780,
+				"color": 7
+			},
+			"name": "Settings and routing note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				300,
+				-740
+			]
+		},
+		{
+			"id": "dc73f799-9035-4cd9-83b2-eeef544be40e",
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "0e60a249-ab1b-4ead-8ca2-22b309603a52",
+							"name": "owner_phone",
+							"value": "+55XXXXXXXXXXX",
+							"type": "string"
+						},
+						{
+							"id": "baabddbb-62d2-473b-89d3-88d083579f02",
+							"name": "number",
+							"value": "main",
+							"type": "string"
+						},
+						{
+							"id": "57bd71ab-9dcc-4352-802f-a2cfc6bede0c",
+							"name": "batch_size",
+							"value": 10,
+							"type": "number"
+						},
+						{
+							"id": "ff096b3d-4f6e-4781-8e42-2b8f3cc527d6",
+							"name": "pause_between_batches_seconds",
+							"value": 150,
+							"type": "number"
+						},
+						{
+							"id": "64aa4866-cff2-47e2-8dde-af15ee72299d",
+							"name": "dedupe_days",
+							"value": 3,
+							"type": "number"
+						},
+						{
+							"id": "a30a63a1-7b66-4d54-8555-e7c7c3d8583b",
+							"name": "report_after_hours",
+							"value": 12,
+							"type": "number"
+						},
+						{
+							"id": "c0a5318d-e66f-42cd-8ad0-2646fca8381b",
+							"name": "track_days",
+							"value": 3,
+							"type": "number"
+						},
+						{
+							"id": "637c0f06-b597-4c1d-8429-716e7a320b13",
+							"name": "queued_max_age_hours",
+							"value": 24,
+							"type": "number"
+						},
+						{
+							"id": "f8005827-c39b-45ab-8a00-473a6b635e1b",
+							"name": "max_recipients_per_submission",
+							"value": 200,
+							"type": "number"
+						},
+						{
+							"id": "e9b98947-f7a2-4ef7-8552-444ae2cefb94",
+							"name": "max_message_length",
+							"value": 1000,
+							"type": "number"
+						},
+						{
+							"id": "e9591e9a-b32c-4998-8b92-4f5e73bfe74b",
+							"name": "daily_cap",
+							"value": 500,
+							"type": "number"
+						},
+						{
+							"id": "38494c03-4eee-4aa5-8e9b-38dafd3ee43c",
+							"name": "default_message",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"id": "62a48532-0900-43f1-8cd9-df82eacb989d",
+							"name": "default_country_code",
+							"value": "55",
+							"type": "string"
+						},
+						{
+							"id": "3fdd9daf-2eae-4652-8388-ebaacfd9325a",
+							"name": "stop_list",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"includeOtherFields": true,
+				"options": {}
+			},
+			"name": "Settings",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				340,
+				-440
+			],
+			"notes": "owner_phone: your own number with the country code and + (summaries go here). Must be changed, and must be a different phone from the number linked to Turbo Notify.\nnumber: alias of the Turbo Notify number that sends (main unless you added others). Read by Get message quota and both send nodes, never from the form. To send from another number, set it here and pick the same number in the Polling Trigger options (that option only filters the events).\nbatch_size: messages sent before each pause. Keep it small: a number sends about one message every 15 seconds.\npause_between_batches_seconds: pause after each batch so the number queue empties (a message that waits more than 5 minutes fails). Use at least batch_size x 15.\ndedupe_days: a number that got the same final text in this many days is skipped as duplicate. 0 switches it off.\nreport_after_hours (12): a phone that is off sends no receipt, so the summary of its batch would wait for it. After this many hours a silent message is closed as no_receipt and the summary goes out anyway; a late receipt still updates the table.\ntrack_days: delivery news is applied to notices younger than this many days.\nqueued_max_age_hours: a queued line older than this is marked skipped_stale (when the next batch is submitted) instead of being sent days late.\nmax_recipients_per_submission: a longer list is refused.\nmax_message_length: a longer text is refused (WhatsApp stops at 4096).\ndaily_cap: messages accepted in 24 hours across batches. A batch that would pass it is refused whole.\ndefault_message: leave it empty. The form requires a message, so this is only used if the message arrives empty from another source. Example of a good text: Hello {name}, the class on Friday moved to 7 pm. Reply here if you cannot come. Reply STOP if you do not want these notices.\ndefault_country_code: added to numbers typed without + (55 is Brazil). With another code only numbers that start with it or with + are accepted.\nstop_list: phones that must never get a notice, separated by commas, with + and country code, for example +5511977770001, +5511977770002. When someone replies STOP, type the number here at once.",
+			"notesInFlow": true
+		},
+		{
+			"id": "e992e458-f10a-45c6-8552-d567100314a7",
+			"parameters": {
+				"resource": "message",
+				"operation": "getQuota",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Settings').first().json.number }}"
+				}
+			},
+			"name": "Get message quota",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				600,
+				-440
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput",
+			"executeOnce": true,
+			"notes": "One quota read per run. If it fails the run goes on: sending then stops with a message, tracking and summaries carry on.",
+			"notesInFlow": true
+		},
+		{
+			"id": "057db794-6d89-450e-8428-4b211e65b179",
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "7881869d-6760-464c-872d-0f282257e099",
+							"leftValue": "={{ $('New batch form').isExecuted }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"name": "Is it a new batch?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				860,
+				-440
+			]
+		},
+		{
+			"id": "5c908c52-3482-457f-87d4-44bfb24755ba",
+			"parameters": {
+				"content": "## Check the lines and save them\nEach phone becomes +E.164 only when it is certain. Invalid, duplicate and stop list lines are kept with a reason.",
+				"height": 260,
+				"width": 1040,
+				"color": 7
+			},
+			"name": "Check and save the lines note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1120,
+				-1000
+			]
+		},
+		{
+			"id": "d9bd8ba7-542c-4847-8363-4d2e2b9b9cd5",
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "createdAt",
+							"condition": "gte",
+							"keyValue": "={{ $now.minus({ days: Math.max(Number($('Settings').first().json.dedupe_days) || 0, Math.ceil((Number($('Settings').first().json.queued_max_age_hours) || 0) / 24), 1) }).toISO() }}"
+						}
+					]
+				},
+				"returnAll": true,
+				"orderBy": true,
+				"orderByColumn": "id",
+				"orderByDirection": "ASC"
+			},
+			"name": "Read recent notices",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1160,
+				-900
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true
+		},
+		{
+			"id": "f3d5b61f-25c2-44c7-8b5d-e8e673a5c01e",
+			"parameters": {
+				"jsCode": "// Turns the pasted lines into table rows: clean the phone, merge the name, drop duplicates and the stop list.\nconst s = $('Settings').first().json;\nconst form = $('New batch form').first().json;\nconst recent = $('Read recent notices').all().map((item) => item.json).filter((row) => row.id !== undefined);\nconst country = String(s.default_country_code || '55').replace(/\\D/g, '');\n\n// A refused submission saves nothing and sends nothing. The form shows the reason.\nconst refuse = (reason) => [{ json: { refused: true, reason } }];\nif (!/^\\+[1-9]\\d{7,14}$/.test(String(s.owner_phone || '').replace(/[\\s().-]/g, ''))) {\n  return refuse('Settings: set owner_phone to your own WhatsApp number with the country code, for example +5511977770001. The summaries are sent there.');\n}\nconst template = String(form['Message'] || '').trim() || String(s.default_message || '').trim();\nif (!template) return refuse('Write a message in the form: it is required.');\nif (template.length > Number(s.max_message_length)) {\n  return refuse('The message has ' + template.length + ' characters, the limit is ' + s.max_message_length + '.');\n}\n\n// Phone numbers: E.164 only where it is unambiguous, otherwise the row is marked invalid_phone.\nfunction international(digits) {\n  if (!/^[1-9]\\d{7,14}$/.test(digits)) return { error: 'Not a valid international number' };\n  if (digits.startsWith('55') && !(digits.length === 13 && digits[4] === '9')) {\n    return { error: 'A Brazilian mobile number has the country code 55, the area code, then 9 and 8 more digits' };\n  }\n  return { phone: '+' + digits };\n}\nfunction toE164(raw) {\n  const cleaned = String(raw).trim().replace(/[\\s().-]/g, '');\n  if (!/^\\+?\\d+$/.test(cleaned)) return { error: 'Not a phone number: use digits, with the area code' };\n  if (cleaned.startsWith('+')) return international(cleaned.slice(1));\n  if (cleaned.startsWith('00')) return international(cleaned.slice(2));\n  let digits = cleaned;\n  if (country === '55') {\n    digits = digits.replace(/^0(?=\\d{10,11}$)/, '');\n    if (/^55\\d{11}$/.test(digits)) return international(digits);\n    if (/^[1-9][1-9]9\\d{8}$/.test(digits)) return international('55' + digits);\n    if (/^(55)?[1-9][1-9]\\d{8}$/.test(digits)) return { error: 'Looks like a number without the ninth digit: add the 9 after the area code' };\n    return { error: 'Use the area code and the 9 digit mobile number, or start with + and the country code' };\n  }\n  if (digits.startsWith(country)) return international(digits);\n  return { error: 'Start with + and the country code' };\n}\n\nconst mergeName = (name) =>\n  template.replace(/([ \\t]*)\\{name\\}/gi, (_, space) => (name ? space + name : '')).trim();\n\nconst stopList = new Set(\n  String(s.stop_list || '').split(/[,;\\n]/).map((entry) => entry.trim()).filter(Boolean).map((entry) => toE164(entry).phone).filter(Boolean),\n);\n\nconst stamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');\nconst batchId = stamp + '-' + Math.random().toString(36).slice(2, 5);\nconst label = String(form['Batch label'] || '').trim().slice(0, 60);\n\nconst alreadyNotified = new Set(\n  recent\n    .filter((row) => ['queued', 'sent', 'delivered', 'read', 'no_receipt'].includes(row.status))\n    .filter((row) => Date.parse(row.createdAt) >= Date.now() - Number(s.dedupe_days) * 86400000)\n    .map((row) => row.phone + '|' + row.message),\n);\n\nconst lines = String(form['Recipients'] || '').split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean);\nif (!lines.length) return refuse('The list of recipients is empty.');\nif (lines.length > Number(s.max_recipients_per_submission)) {\n  return refuse('The list has ' + lines.length + ' lines, the limit for one submission is ' + s.max_recipients_per_submission + '.');\n}\n\nconst seen = new Set();\nconst rows = [];\nlines.forEach((line, index) => {\n  if (index === 0 && /^[\"']?name[\"']?\\s*[\\t,;]\\s*[\"']?(phone|number)/i.test(line)) return;\n  // A paste from a spreadsheet is separated by a tab, otherwise a semicolon, otherwise a comma.\n  const separator = line.includes('\\t') ? '\\t' : line.includes(';') ? ';' : ',';\n  const cut = line.lastIndexOf(separator);\n  const name = (cut === -1 ? '' : line.slice(0, cut)).trim().replace(/^\"|\"$/g, '').trim().slice(0, 90);\n  const rawPhone = (cut === -1 ? line : line.slice(cut + 1)).trim().replace(/^\"|\"$/g, '');\n  const row = {\n    name, phone: rawPhone, message: '', status: 'queued', message_id: '', error: '', batch_id: batchId, label,\n    sent_at: '', delivered_at: '', read_at: '', reported_at: '',\n  };\n  const parsed = toE164(rawPhone);\n  if (parsed.error) {\n    rows.push({ ...row, status: 'invalid_phone', error: parsed.error });\n    return;\n  }\n  row.phone = parsed.phone;\n  row.message = mergeName(name);\n  if (stopList.has(row.phone)) {\n    row.status = 'opted_out';\n    row.error = 'This number is on your stop list';\n  } else if (seen.has(row.phone)) {\n    row.status = 'duplicate';\n    row.error = 'The same number appears earlier in this batch';\n  } else if (alreadyNotified.has(row.phone + '|' + row.message)) {\n    row.status = 'duplicate';\n    row.error = 'This number already got, or is about to get, this text in the last ' + s.dedupe_days + ' days';\n  }\n  seen.add(row.phone);\n  rows.push(row);\n});\nif (!rows.length) return refuse('No line to send was found in the list.');\n\n// Daily cap across batches: rows that count as a message in the last 24 hours, plus this batch.\nconst dayAgo = Date.now() - 24 * 3600000;\nconst today = recent.filter((row) => ['queued', 'sent', 'delivered', 'read', 'failed', 'no_receipt'].includes(row.status) && Date.parse(row.createdAt) >= dayAgo).length;\nconst adding = rows.filter((row) => row.status === 'queued').length;\nif (today + adding > Number(s.daily_cap)) {\n  return refuse('This batch adds ' + adding + ' messages to the ' + today + ' of the last 24 hours, and the daily cap is ' + s.daily_cap + '.');\n}\nreturn rows.map((json) => ({ json }));"
+			},
+			"name": "Clean and check the lines",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1380,
+				-900
+			]
+		},
+		{
+			"id": "e638e084-7103-41bc-86d2-be9278705e32",
+			"parameters": {
+				"respondWith": "json",
+				"responseBody": "={{ JSON.stringify({ formSubmittedText: $input.first().json.refused ? 'Not sent. ' + $input.first().json.reason + ' Nothing was saved.' : 'Batch received: ' + $input.all().filter((i) => i.json.status === 'queued').length + ' to send, ' + $input.all().filter((i) => i.json.status !== 'queued').length + ' left out (invalid number, duplicate or stop list, see the table). You get one WhatsApp summary when the batch is done.' }) }}",
+				"options": {
+					"responseCode": "={{ $input.first().json.refused ? 422 : 200 }}"
+				}
+			},
+			"name": "Answer the form",
+			"type": "n8n-nodes-base.respondToWebhook",
+			"typeVersion": 1.4,
+			"position": [
+				1600,
+				-900
+			]
+		},
+		{
+			"id": "ada4ccfb-1c0f-48a9-88ee-2285c9f00417",
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "5157d8e9-12fe-42f3-8aa0-e4a59ab0438c",
+							"leftValue": "={{ $json.refused === true }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"name": "Was the batch refused?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				1820,
+				-900
+			]
+		},
+		{
+			"id": "65ba2b45-faf0-4bb0-8ba0-5a93af63cbd0",
+			"parameters": {
+				"resource": "row",
+				"operation": "insert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"columns": {
+					"mappingMode": "autoMapInputData",
+					"value": null,
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "name",
+							"displayName": "name",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "phone",
+							"displayName": "phone",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message",
+							"displayName": "message",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message_id",
+							"displayName": "message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "error",
+							"displayName": "error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "batch_id",
+							"displayName": "batch_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "label",
+							"displayName": "label",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "sent_at",
+							"displayName": "sent_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "delivered_at",
+							"displayName": "delivered_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "read_at",
+							"displayName": "read_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "reported_at",
+							"displayName": "reported_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "Save the rows as queued",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				2040,
+				-900
+			]
+		},
+		{
+			"id": "950ee6b1-a70a-4706-8b6f-044170a1d8e1",
+			"parameters": {
+				"content": "## Send in paced batches\nEvery row is marked first (send or skip), so the order of the two branches below does not matter. Only what fits the quota goes out, with the key batch and row, so a repeat never sends twice.",
+				"height": 480,
+				"width": 1640,
+				"color": 7
+			},
+			"name": "Send in paced batches note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1980,
+				-560
+			]
+		},
+		{
+			"id": "6dbde3d7-7f6e-451e-8573-98e2fc8f5d32",
+			"parameters": {
+				"jsCode": "// Compares the queued rows with the quota left in this billing cycle. Only what fits is sent.\nconst settings = $('Settings').first().json;\nconst quota = $('Get message quota').first().json;\nif (quota.error) {\n  throw new Error('Could not read your quota, so nothing was sent: ' + quota.error + '. The lines are saved as queued. They go out with the next batch you send, unless they are older than ' + settings.queued_max_age_hours + ' hours by then: such a line is marked as too old and not sent.');\n}\nconst recent = $('Read recent notices').all().map((item) => item.json).filter((row) => row.id !== undefined);\nconst inserted = $input.all().map((item) => item.json).filter((row) => row.id !== undefined);\n// Rows left queued by an earlier run come first, then this batch, always in the order they were saved.\nconst queued = [...recent, ...inserted].filter((row) => row.status === 'queued');\nconst maxAge = Number(settings.queued_max_age_hours) * 3600000;\nconst left = Math.max(0, Number(quota.remaining) || 0);\nlet room = Math.max(0, left - 1); // one message stays free for your summary\nconst resets = String(quota.resets_at || '').slice(0, 10);\nreturn queued.map((row) => {\n  const stale = Date.now() - Date.parse(row.createdAt) > maxAge;\n  let action = 'send';\n  let status = 'queued';\n  let reason = '';\n  if (stale) {\n    action = 'skip_stale';\n    status = 'skipped_stale';\n    reason = 'Not sent: this line waited more than ' + settings.queued_max_age_hours + ' hours in the queue. Paste it into the form again if the notice is still true.';\n  } else if (room > 0) {\n    room -= 1;\n  } else {\n    action = 'skip_quota';\n    status = 'skipped_quota';\n    reason = 'Not sent: ' + left + ' messages were left in this billing cycle (it resets ' + resets + '). Paste the line into the form again when there is room.';\n  }\n  return {\n    json: { row_id: row.id, name: row.name, phone: row.phone, message: row.message, batch_id: row.batch_id, action, status_after: status, reason },\n    pairedItem: { item: 0 },\n  };\n});"
+			},
+			"name": "Plan the send",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				2040,
+				-460
+			]
+		},
+		{
+			"id": "d2a38be3-10fa-461d-8180-54a47ba95907",
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "63974522-9b70-43c7-830f-625cad2681e0",
+							"leftValue": "={{ $json.status === 'queued' }}",
+							"rightValue": "",
+							"operator": {
+								"type": "boolean",
+								"operation": "true",
+								"singleValue": true
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"name": "Is this row to be sent?",
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				2520,
+				-460
+			],
+			"notes": "Both outputs can run in one submission. Every row was saved before this step, so the order between the two branches (set by their position on the canvas) does not change what is sent or reported.",
+			"notesInFlow": true
+		},
+		{
+			"id": "05b11a6a-6557-4440-86f6-7c1cd76698bc",
+			"parameters": {
+				"batchSize": "={{ $('Settings').first().json.batch_size }}",
+				"options": {}
+			},
+			"name": "Loop over batches",
+			"type": "n8n-nodes-base.splitInBatches",
+			"typeVersion": 3,
+			"position": [
+				2760,
+				-460
+			]
+		},
+		{
+			"id": "1d42b5bb-d7b9-465f-899f-bb447c6e4e5c",
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Settings').first().json.number }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.phone }}",
+				"text": "={{ $json.message }}",
+				"options": {
+					"idempotencyKey": "={{ $json.batch_id + '-' + $json.id }}"
+				}
+			},
+			"name": "Send the notice",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				3000,
+				-460
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			},
+			"onError": "continueRegularOutput"
+		},
+		{
+			"id": "e16dc080-173c-45de-833c-8d3fe00aa5f7",
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "id",
+							"condition": "eq",
+							"keyValue": "={{ $('Loop over batches').item.json.id }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "={{ $json.error ? (/quota_exceeded|warmup_limit_exceeded/.test($json.error) ? 'skipped_quota' : /duplicate_burst_blocked|reply_ratio_too_low/.test($json.error) ? 'held' : 'failed') : 'sent' }}",
+						"message_id": "={{ $json.id || '' }}",
+						"error": "={{ !$json.error ? '' : /duplicate_burst_blocked/.test($json.error) ? 'Held: the same text went to more than 20 people in an hour (duplicate_burst_blocked), so it was not sent. Personalise the text with {name} or wait, then send this line again.' : /reply_ratio_too_low/.test($json.error) ? 'Held: this number sends much more than it gets replies (reply_ratio_too_low), so it was not sent. Wait for replies or send less to people who do not interact, then send this line again.' : $json.error + ($json.hint ? '. ' + $json.hint : '') }}",
+						"sent_at": "={{ $json.error ? '' : ($json.status?.at || $now.toISO()) }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "message_id",
+							"displayName": "message_id",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "error",
+							"displayName": "error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "sent_at",
+							"displayName": "sent_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "Record the send result",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				3240,
+				-460
+			]
+		},
+		{
+			"id": "e9d7f1f1-d046-4924-8c65-6b2456ae35db",
+			"parameters": {
+				"amount": "={{ $('Loop over batches').context.noItemsLeft ? 0 : $('Settings').first().json.pause_between_batches_seconds }}",
+				"unit": "seconds"
+			},
+			"name": "Pause between batches",
+			"type": "n8n-nodes-base.wait",
+			"typeVersion": 1.1,
+			"position": [
+				3480,
+				-460
+			]
+		},
+		{
+			"id": "f8be0b35-1f4d-4cc6-8154-03954998ff19",
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "id",
+							"condition": "eq",
+							"keyValue": "={{ $json.row_id }}"
+						},
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "queued"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "={{ $json.status_after }}",
+						"error": "={{ $json.reason }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "error",
+							"displayName": "error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "Save the plan on each row",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				2280,
+				-460
+			],
+			"notes": "Saves the plan on every row first: it stays queued (to be sent) or is marked skipped with its reason. A row that is no longer queued is left alone and not sent.",
+			"notesInFlow": true
+		},
+		{
+			"id": "b63cc9a4-0243-4c4c-8d32-3d28525f2eff",
+			"parameters": {
+				"content": "## Follow each message\nDelivered, read and failed events update the matching row, never backwards. News about other messages is ignored.",
+				"height": 260,
+				"width": 720,
+				"color": 7
+			},
+			"name": "Follow each message note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1120,
+				0
+			]
+		},
+		{
+			"id": "a27798e6-014a-418e-8b80-b0521ea5b28e",
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "message_id",
+							"condition": "isNotEmpty"
+						},
+						{
+							"keyName": "read_at",
+							"condition": "isEmpty"
+						},
+						{
+							"keyName": "status",
+							"condition": "neq",
+							"keyValue": "failed"
+						},
+						{
+							"keyName": "createdAt",
+							"condition": "gte",
+							"keyValue": "={{ $now.minus({ days: $('Settings').first().json.track_days }).toISO() }}"
+						}
+					]
+				},
+				"returnAll": true,
+				"orderBy": true,
+				"orderByColumn": "id",
+				"orderByDirection": "ASC"
+			},
+			"name": "Read open notices",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1160,
+				100
+			],
+			"alwaysOutputData": true,
+			"executeOnce": true
+		},
+		{
+			"id": "9321f64c-65f7-449c-8199-51cafa76414a",
+			"parameters": {
+				"jsCode": "// Applies the delivery news (or the hourly check) to the rows. A row only moves forward: sent, delivered, read.\nconst settings = $('Settings').first().json;\nconst rows = $('Read open notices').all().map((item) => item.json).filter((row) => row.id !== undefined);\nconst rank = { sent: 1, no_receipt: 1, delivered: 2, read: 3 };\nconst byMessage = new Map(rows.filter((row) => row.message_id).map((row) => [row.message_id, row]));\nconst changes = new Map();\nconst change = (row) => {\n  if (!changes.has(row.id)) {\n    changes.set(row.id, { row_id: row.id, previous_status: row.status, status: row.status, delivered_at: row.delivered_at || '', read_at: row.read_at || '', error: row.error || '', dirty: false });\n  }\n  return changes.get(row.id);\n};\n\nif ($('New delivery and failure events').isExecuted) {\n  // A receipt for our message carries the message id in data.id (its direction says inbound: the recipient's phone sent it).\n  const events = $('New delivery and failure events').all().map((item) => item.json)\n    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));\n  for (const event of events) {\n    const row = byMessage.get(event.data?.id);\n    if (!row) continue; // not a notice of this table\n    const next = change(row);\n    const at = event.data.at || event.created_at;\n    if (event.type === 'message.read' && rank[next.status] < 3) {\n      Object.assign(next, { status: 'read', read_at: at, error: '', dirty: true });\n    } else if (event.type === 'message.delivered' && rank[next.status] < 2) {\n      Object.assign(next, { status: 'delivered', delivered_at: at, error: '', dirty: true });\n    } else if (event.type === 'message.delivered' && !next.delivered_at) {\n      Object.assign(next, { delivered_at: at, dirty: true }); // the news came late: the row stays read, it only learns when it was delivered\n    } else if (event.type === 'message.send.failed' && rank[next.status] < 2) {\n      const failure = event.data.error || {};\n      Object.assign(next, { status: 'failed', error: [failure.code, failure.message].filter(Boolean).join(': ') || 'WhatsApp could not deliver the message', dirty: true });\n    }\n  }\n} else {\n  // The hourly check: a row that is still \"sent\" with no news for report_after_hours is closed as no_receipt.\n  const limit = Date.now() - Number(settings.report_after_hours) * 3600000;\n  for (const row of rows) {\n    if (row.status === 'sent' && Date.parse(row.updatedAt) <= limit) {\n      Object.assign(change(row), { status: 'no_receipt', error: 'No delivery or read news from WhatsApp after ' + settings.report_after_hours + ' hours', dirty: true });\n    }\n  }\n}\n\nconst out = [...changes.values()].filter((item) => item.dirty).map(({ dirty, ...json }) => ({ json }));\n// Something must flow on even when nothing changed, because the summary check after the save always runs.\n// This placeholder matches no row (the id 0 does not exist), so saving it changes nothing.\nreturn out.length ? out : [{ json: { row_id: 0, previous_status: '', status: '', delivered_at: '', read_at: '', error: '' } }];"
+			},
+			"name": "Work out the new status",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1380,
+				100
+			]
+		},
+		{
+			"id": "69344f71-a263-4c94-804f-29c577f2ccce",
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "id",
+							"condition": "eq",
+							"keyValue": "={{ $json.row_id }}"
+						},
+						{
+							"keyName": "status",
+							"condition": "eq",
+							"keyValue": "={{ $json.previous_status }}"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"status": "={{ $json.status }}",
+						"delivered_at": "={{ $json.delivered_at }}",
+						"read_at": "={{ $json.read_at }}",
+						"error": "={{ $json.error }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "status",
+							"displayName": "status",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "delivered_at",
+							"displayName": "delivered_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "read_at",
+							"displayName": "read_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						},
+						{
+							"id": "error",
+							"displayName": "error",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "Save progress",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1600,
+				100
+			],
+			"alwaysOutputData": true
+		},
+		{
+			"id": "ce637916-1233-4fe1-8e8f-f38d04203b95",
+			"parameters": {
+				"content": "## One summary per batch\nWhen every row of a batch is final, or after report_after_hours, you get one WhatsApp message with the counts. It is a snapshot: the table keeps updating.",
+				"height": 280,
+				"width": 1000,
+				"color": 7
+			},
+			"name": "One summary per batch note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1120,
+				320
+			]
+		},
+		{
+			"id": "4f883256-2ec9-4ab2-8635-e28f29f4e8f1",
+			"parameters": {
+				"resource": "row",
+				"operation": "get",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "reported_at",
+							"condition": "isEmpty"
+						}
+					]
+				},
+				"returnAll": true,
+				"orderBy": true,
+				"orderByColumn": "id",
+				"orderByDirection": "ASC"
+			},
+			"name": "Read unreported rows",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1160,
+				440
+			],
+			"executeOnce": true
+		},
+		{
+			"id": "58834d03-8659-4fac-837d-304185ddbea4",
+			"parameters": {
+				"jsCode": "// One summary per batch that is finished, or older than report_after_hours. Rows of a batch share batch_id.\nconst settings = $('Settings').first().json;\nconst quota = $('Get message quota').first().json;\nconst rows = $('Read unreported rows').all().map((item) => item.json).filter((row) => row.id !== undefined);\nconst owner = String(settings.owner_phone || '').replace(/[\\s().-]/g, '');\nif (rows.length && !/^\\+[1-9]\\d{7,14}$/.test(owner)) {\n  throw new Error('Settings: set owner_phone to your own WhatsApp number with the country code, for example +5511977770001. The summaries are sent there.');\n}\nconst FINAL = new Set(['delivered', 'read', 'failed', 'invalid_phone', 'duplicate', 'opted_out', 'skipped_quota', 'skipped_stale', 'held', 'no_receipt']);\nconst plain = (text) => String(text || '').replace(/[.\\s]+$/, '');\n\nconst batches = new Map();\nfor (const row of rows) {\n  if (!batches.has(row.batch_id)) batches.set(row.batch_id, []);\n  batches.get(row.batch_id).push(row);\n}\n\nconst out = [];\nfor (const [batchId, list] of batches) {\n  const everyRowIsFinal = list.every((row) => FINAL.has(row.status));\n  const startedAt = Math.max(...list.map((row) => Date.parse(row.createdAt)));\n  const tooOld = Date.now() - startedAt >= Number(settings.report_after_hours) * 3600000;\n  if (!everyRowIsFinal && !tooOld) continue;\n\n  const count = (status) => list.filter((row) => row.status === status).length;\n  const read = count('read');\n  const delivered = count('delivered') + read;\n  const waiting = list.filter((row) => !FINAL.has(row.status)).length;\n  const failed = list.filter((row) => row.status === 'failed');\n  const held = list.filter((row) => row.status === 'held');\n  const parts = [\n    'delivered ' + delivered + ' (read so far ' + read + ')',\n    failed.length && 'failed ' + failed.length,\n    held.length && 'held ' + held.length,\n    count('invalid_phone') && 'invalid number ' + count('invalid_phone'),\n    count('duplicate') && 'duplicate ' + count('duplicate'),\n    count('opted_out') && 'on your stop list ' + count('opted_out'),\n    count('skipped_quota') && 'not sent, quota short ' + count('skipped_quota'),\n    count('skipped_stale') && 'not sent, waited too long ' + count('skipped_stale'),\n    count('no_receipt') && 'no delivery news yet ' + count('no_receipt'),\n    waiting && 'still waiting ' + waiting,\n  ].filter(Boolean);\n\n  const label = list[0].label ? '\"' + list[0].label + '\" ' : '';\n  const lines = [\n    'Notices batch ' + label + '(' + batchId + ') ' + (everyRowIsFinal ? 'is done' : 'is closed after ' + settings.report_after_hours + ' hours') + ': ' + (list.length === 1 ? '1 person' : list.length + ' people') + '.',\n    parts.join(', ') + '.',\n  ];\n  if (failed.length) {\n    const shown = failed.slice(0, 10).map((row) => row.name + ' (' + row.phone + '): ' + plain(row.error));\n    lines.push('Failed: ' + shown.join('; ') + (failed.length > 10 ? '; and ' + (failed.length - 10) + ' more' : '') + '.');\n  }\n  if (held.length) {\n    const reasons = [...new Set(held.map((row) => plain(row.error).replace(/^Held: /, '')))];\n    lines.push('Held, not sent: ' + reasons.join(' / ') + '.');\n  }\n  if (!quota.error) {\n    lines.push('Messages left in this cycle: ' + quota.remaining + ' of ' + quota.quota + '.');\n  }\n  lines.push('This is a snapshot: the notices table keeps updating as delivery and read news arrive.');\n  if (failed.length || held.length || count('skipped_quota') || count('skipped_stale')) {\n    lines.push('To send those lines again, paste them into the form again. People who already got the text are skipped.');\n  }\n  out.push({ json: { batch_id: batchId, to: owner, summary: lines.join('\\n') }, pairedItem: { item: 0 } });\n}\nreturn out;"
+			},
+			"name": "Decide which batches are ready",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [
+				1380,
+				440
+			]
+		},
+		{
+			"id": "aa37f2ff-d248-4c54-8ac0-25bec7a483b5",
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Settings').first().json.number }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ $json.to }}",
+				"text": "={{ $json.summary }}",
+				"options": {
+					"idempotencyKey": "={{ 'report-' + $json.batch_id }}"
+				}
+			},
+			"name": "Send the summary to the owner",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [
+				1600,
+				440
+			],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"id": "0047e734-5b27-42aa-8516-9c4e71d88341",
+			"parameters": {
+				"resource": "row",
+				"operation": "update",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "name",
+					"value": "notices"
+				},
+				"matchType": "allConditions",
+				"filters": {
+					"conditions": [
+						{
+							"keyName": "batch_id",
+							"condition": "eq",
+							"keyValue": "={{ $('Decide which batches are ready').item.json.batch_id }}"
+						},
+						{
+							"keyName": "reported_at",
+							"condition": "isEmpty"
+						}
+					]
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"reported_at": "={{ $now.toISO() }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{
+							"id": "reported_at",
+							"displayName": "reported_at",
+							"required": false,
+							"defaultMatch": false,
+							"display": true,
+							"type": "string",
+							"canBeUsedToMatch": true
+						}
+					]
+				},
+				"options": {}
+			},
+			"name": "Mark the batch as reported",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [
+				1820,
+				440
+			]
+		}
+	],
+	"pinData": {},
+	"connections": {
+		"Create the notices table (run once)": {
+			"main": [
+				[
+					{
+						"node": "Create the notices data table",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"New batch form": {
+			"main": [
+				[
+					{
+						"node": "Settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"New delivery and failure events": {
+			"main": [
+				[
+					{
+						"node": "Settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Every hour": {
+			"main": [
+				[
+					{
+						"node": "Settings",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Settings": {
+			"main": [
+				[
+					{
+						"node": "Get message quota",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Get message quota": {
+			"main": [
+				[
+					{
+						"node": "Is it a new batch?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Is it a new batch?": {
+			"main": [
+				[
+					{
+						"node": "Read recent notices",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Read open notices",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read recent notices": {
+			"main": [
+				[
+					{
+						"node": "Clean and check the lines",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Clean and check the lines": {
+			"main": [
+				[
+					{
+						"node": "Answer the form",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Answer the form": {
+			"main": [
+				[
+					{
+						"node": "Was the batch refused?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Was the batch refused?": {
+			"main": [
+				[],
+				[
+					{
+						"node": "Save the rows as queued",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the rows as queued": {
+			"main": [
+				[
+					{
+						"node": "Plan the send",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Plan the send": {
+			"main": [
+				[
+					{
+						"node": "Save the plan on each row",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save the plan on each row": {
+			"main": [
+				[
+					{
+						"node": "Is this row to be sent?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Is this row to be sent?": {
+			"main": [
+				[
+					{
+						"node": "Loop over batches",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Read unreported rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Loop over batches": {
+			"main": [
+				[
+					{
+						"node": "Read unreported rows",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Send the notice",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the notice": {
+			"main": [
+				[
+					{
+						"node": "Record the send result",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Record the send result": {
+			"main": [
+				[
+					{
+						"node": "Pause between batches",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Pause between batches": {
+			"main": [
+				[
+					{
+						"node": "Loop over batches",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read open notices": {
+			"main": [
+				[
+					{
+						"node": "Work out the new status",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Work out the new status": {
+			"main": [
+				[
+					{
+						"node": "Save progress",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Save progress": {
+			"main": [
+				[
+					{
+						"node": "Read unreported rows",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Read unreported rows": {
+			"main": [
+				[
+					{
+						"node": "Decide which batches are ready",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Decide which batches are ready": {
+			"main": [
+				[
+					{
+						"node": "Send the summary to the owner",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Send the summary to the owner": {
+			"main": [
+				[
+					{
+						"node": "Mark the batch as reported",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"tags": []
+}

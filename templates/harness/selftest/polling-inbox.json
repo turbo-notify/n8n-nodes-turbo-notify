@@ -1,0 +1,44 @@
+{
+	"name": "Harness selftest: polling trigger",
+	"nodes": [
+		{
+			"parameters": {
+				"events": ["message.received"],
+				"options": {}
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000031",
+			"name": "Poll incoming messages",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+			"typeVersion": 1,
+			"position": [0, 0],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{ "id": "b1", "name": "seen_message", "value": "={{ $json.data.id }}", "type": "string" }
+					]
+				},
+				"options": {}
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000032",
+			"name": "Keep the message id",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [260, 0]
+		}
+	],
+	"connections": {
+		"Poll incoming messages": { "main": [[{ "node": "Keep the message id", "type": "main", "index": 0 }]] }
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}

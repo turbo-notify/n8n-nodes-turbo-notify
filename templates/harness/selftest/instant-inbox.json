@@ -1,0 +1,114 @@
+{
+	"name": "Harness selftest: instant trigger, data table and reply",
+	"nodes": [
+		{
+			"parameters": {
+				"events": ["message.received"],
+				"options": {}
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000011",
+			"name": "Incoming message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyTrigger",
+			"typeVersion": 1,
+			"position": [0, 0],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "get",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $json.number_id }}"
+				},
+				"messageId": "={{ $json.data.id }}"
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000012",
+			"name": "Read the message",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [260, 0],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"resource": "row",
+				"operation": "insert",
+				"dataTableId": {
+					"__rl": true,
+					"mode": "list",
+					"value": "",
+					"cachedResultName": "inbox"
+				},
+				"columns": {
+					"mappingMode": "defineBelow",
+					"value": {
+						"sender": "={{ $json.from.number }}",
+						"body": "={{ $json.text }}",
+						"message_id": "={{ $json.id }}"
+					},
+					"matchingColumns": [],
+					"schema": [
+						{ "id": "sender", "displayName": "sender", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+						{ "id": "body", "displayName": "body", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+						{ "id": "message_id", "displayName": "message_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+					]
+				},
+				"options": {}
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000013",
+			"name": "Store in the inbox table",
+			"type": "n8n-nodes-base.dataTable",
+			"typeVersion": 1.1,
+			"position": [520, 0]
+		},
+		{
+			"parameters": {
+				"resource": "message",
+				"operation": "sendText",
+				"number": {
+					"__rl": true,
+					"mode": "id",
+					"value": "={{ $('Incoming message').item.json.number_alias }}"
+				},
+				"recipientType": "phone",
+				"phoneNumber": "={{ '+' + $json.sender }}",
+				"text": "={{ 'Got it: ' + $json.body }}",
+				"options": {
+					"idempotencyKey": "={{ 'reply-' + $json.message_id }}"
+				}
+			},
+			"id": "5e1f0a10-0000-4000-8000-000000000014",
+			"name": "Reply to the sender",
+			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+			"typeVersion": 1,
+			"position": [780, 0],
+			"credentials": {
+				"turboNotifyApi": {
+					"id": "REPLACE_WITH_YOUR_CREDENTIAL",
+					"name": "Turbo Notify API"
+				}
+			}
+		}
+	],
+	"connections": {
+		"Incoming message": { "main": [[{ "node": "Read the message", "type": "main", "index": 0 }]] },
+		"Read the message": { "main": [[{ "node": "Store in the inbox table", "type": "main", "index": 0 }]] },
+		"Store in the inbox table": { "main": [[{ "node": "Reply to the sender", "type": "main", "index": 0 }]] }
+	},
+	"pinData": {},
+	"settings": {
+		"executionOrder": "v1"
+	}
+}
