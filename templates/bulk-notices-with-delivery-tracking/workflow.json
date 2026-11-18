@@ -5,7 +5,7 @@
 			"id": "7af2e7b3-0d6e-4cb6-872f-2b3975aebd5b",
 			"parameters": {
 				"content": "### How it works\nSend one notice to a list of people and see what happened to each message. A password protected form takes name and phone (two columns copied from a sheet work) and the text, with {name} where the name goes. The workflow cleans the numbers, drops duplicates and your stop list, checks your quota and sends in paced batches from your own number. A Polling Trigger writes delivered, read and failed into the `notices` data table. You get ONE WhatsApp summary per batch: when everyone has a receipt, at the latest after report_after_hours. Free reaches one customer (2 contacts, yours counts), Lone Wolf 100.\n\n### Setup\nTested on n8n 2.45.5 (n8n Cloud and self-hosted).\n1. Install the community node @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. In the Turbo Notify dashboard create an API key with the scopes messages:send, messages:read and events:read (fixed once created). Create the n8n credential and select it in all four Turbo Notify nodes.\n3. Create a Basic Auth credential for the form.\n4. Run \"Create the notices table\" once.\n5. In Settings set owner_phone: your own number, not the one linked to Turbo Notify.\n6. Activate. n8n must be reachable over HTTPS by the people who use the form and stay active (after a pause it catches up).\n7. Test with two rows to yourself.\nEnd your text with \"Reply STOP if you do not want these notices\", add anyone who asks to stop to stop_list, tell people why they get these messages and delete old rows from the table.\n\n### Customization\nTo send from another number, set number in Settings and pick the same number in the Polling Trigger options. Batch size, pause and caps are also in Settings.",
-				"height": 840,
+				"height": 590,
 				"width": 660
 			},
 			"name": "Overview note",
@@ -20,7 +20,7 @@
 			"id": "d2124b65-05fb-459b-8752-5fd42ce6f4a9",
 			"parameters": {
 				"content": "## Create the table\nRun this once. It makes the `notices` data table with 12 columns and does nothing if it already exists.",
-				"height": 240,
+				"height": 290,
 				"width": 560,
 				"color": 7
 			},
@@ -117,8 +117,8 @@
 			"id": "f28f062e-04fd-45f3-8161-034699a2f26c",
 			"parameters": {
 				"content": "## Triggers\nThe form sends a batch. The Polling Trigger brings delivery news and, after a pause, resumes where it stopped. The hourly check closes silent messages.",
-				"height": 550,
-				"width": 300,
+				"height": 680,
+				"width": 340,
 				"color": 7
 			},
 			"name": "Triggers note",
@@ -126,15 +126,15 @@
 			"typeVersion": 1,
 			"position": [
 				-60,
-				-600
+				-530
 			]
 		},
 		{
 			"id": "ae4051c6-160a-4a55-8fa9-161b4ac860d8",
 			"parameters": {
 				"content": "Protect the form below: set a Basic Auth credential on it before you activate. Anyone with the address and the password can message your list.",
-				"height": 140,
-				"width": 300,
+				"height": 115,
+				"width": 340,
 				"color": 3
 			},
 			"name": "Protect the form note",
@@ -142,7 +142,7 @@
 			"typeVersion": 1,
 			"position": [
 				-60,
-				-750
+				-675
 			]
 		},
 		{
@@ -181,7 +181,7 @@
 			"typeVersion": 2.1,
 			"position": [
 				40,
-				-460
+				-380
 			],
 			"webhookId": "3ede736c-571f-4c46-8a5e-41a08fcfb274",
 			"credentials": {
@@ -213,7 +213,7 @@
 			"typeVersion": 1,
 			"position": [
 				40,
-				-320
+				-200
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -239,23 +239,23 @@
 			"typeVersion": 1.2,
 			"position": [
 				40,
-				-160
+				-20
 			]
 		},
 		{
 			"id": "f36f25e6-ee8d-486e-8838-70a031984b8c",
 			"parameters": {
 				"content": "## Settings and routing\nEvery value you may change is in Settings. The quota is read once per run, then new batches go up and tracking goes down.",
-				"height": 700,
-				"width": 780,
+				"height": 295,
+				"width": 730,
 				"color": 7
 			},
 			"name": "Settings and routing note",
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				300,
-				-740
+				320,
+				-325
 			]
 		},
 		{
@@ -356,8 +356,8 @@
 			"type": "n8n-nodes-base.set",
 			"typeVersion": 3.4,
 			"position": [
-				340,
-				-440
+				390,
+				-200
 			],
 			"notes": "owner_phone: your own number with the country code and + (summaries go here). Must be changed, and must be a different phone from the number linked to Turbo Notify.\nnumber: alias of the Turbo Notify number that sends (main unless you added others). Read by Get message quota and both send nodes, never from the form. To send from another number, set it here and pick the same number in the Polling Trigger options (that option only filters the events).\nbatch_size: messages sent before each pause. Keep it small: a number sends about one message every 15 seconds.\npause_between_batches_seconds: pause after each batch so the number queue empties (a message that waits more than 5 minutes fails). Use at least batch_size x 15.\ndedupe_days: a number that got the same final text in this many days is skipped as duplicate. 0 switches it off.\nreport_after_hours (12): a phone that is off sends no receipt, so the summary of its batch would wait for it. After this many hours a silent message is closed as no_receipt and the summary goes out anyway; a late receipt still updates the table.\ntrack_days: delivery news is applied to notices younger than this many days.\nqueued_max_age_hours: a queued line older than this is marked skipped_stale (when the next batch is submitted) instead of being sent days late.\nmax_recipients_per_submission: a longer list is refused.\nmax_message_length: a longer text is refused (WhatsApp stops at 4096).\ndaily_cap: messages accepted in 24 hours across batches. A batch that would pass it is refused whole.\ndefault_message: leave it empty. The form requires a message, so this is only used if the message arrives empty from another source. Example of a good text: Hello {name}, the class on Friday moved to 7 pm. Reply here if you cannot come. Reply STOP if you do not want these notices.\ndefault_country_code: added to numbers typed without + (55 is Brazil). With another code only numbers that start with it or with + are accepted.\nstop_list: phones that must never get a notice, separated by commas, with + and country code, for example +5511977770001, +5511977770002. When someone replies STOP, type the number here at once.",
 			"notesInFlow": true
@@ -377,8 +377,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				600,
-				-440
+				650,
+				-200
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -421,16 +421,16 @@
 			"type": "n8n-nodes-base.if",
 			"typeVersion": 2.2,
 			"position": [
-				860,
-				-440
+				910,
+				-200
 			]
 		},
 		{
 			"id": "5c908c52-3482-457f-87d4-44bfb24755ba",
 			"parameters": {
 				"content": "## Check the lines and save them\nEach phone becomes +E.164 only when it is certain. Invalid, duplicate and stop list lines are kept with a reason.",
-				"height": 260,
-				"width": 1040,
+				"height": 325,
+				"width": 1100,
 				"color": 7
 			},
 			"name": "Check and save the lines note",
@@ -438,7 +438,7 @@
 			"typeVersion": 1,
 			"position": [
 				1120,
-				-1000
+				-990
 			]
 		},
 		{
@@ -471,7 +471,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1160,
-				-900
+				-880
 			],
 			"alwaysOutputData": true,
 			"executeOnce": true
@@ -486,7 +486,7 @@
 			"typeVersion": 2,
 			"position": [
 				1380,
-				-900
+				-880
 			]
 		},
 		{
@@ -503,7 +503,7 @@
 			"typeVersion": 1.4,
 			"position": [
 				1600,
-				-900
+				-880
 			]
 		},
 		{
@@ -537,7 +537,7 @@
 			"typeVersion": 2.2,
 			"position": [
 				1820,
-				-900
+				-880
 			]
 		},
 		{
@@ -672,23 +672,23 @@
 			"typeVersion": 1.1,
 			"position": [
 				2040,
-				-900
+				-880
 			]
 		},
 		{
 			"id": "950ee6b1-a70a-4706-8b6f-044170a1d8e1",
 			"parameters": {
 				"content": "## Send in paced batches\nEvery row is marked first (send or skip), so the order of the two branches below does not matter. Only what fits the quota goes out, with the key batch and row, so a repeat never sends twice.",
-				"height": 480,
-				"width": 1640,
+				"height": 355,
+				"width": 1670,
 				"color": 7
 			},
 			"name": "Send in paced batches note",
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1980,
-				-560
+				2010,
+				-570
 			]
 		},
 		{
@@ -751,7 +751,7 @@
 			"typeVersion": 3,
 			"position": [
 				2760,
-				-460
+				-420
 			]
 		},
 		{
@@ -776,7 +776,7 @@
 			"typeVersion": 1,
 			"position": [
 				3000,
-				-460
+				-420
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -861,7 +861,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				3240,
-				-460
+				-420
 			]
 		},
 		{
@@ -875,7 +875,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				3480,
-				-460
+				-420
 			]
 		},
 		{
@@ -947,16 +947,16 @@
 			"id": "b63cc9a4-0243-4c4c-8d32-3d28525f2eff",
 			"parameters": {
 				"content": "## Follow each message\nDelivered, read and failed events update the matching row, never backwards. News about other messages is ignored.",
-				"height": 260,
-				"width": 720,
+				"height": 340,
+				"width": 700,
 				"color": 7
 			},
 			"name": "Follow each message note",
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1120,
-				0
+				1130,
+				-215
 			]
 		},
 		{
@@ -1002,7 +1002,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1160,
-				100
+				-90
 			],
 			"alwaysOutputData": true,
 			"executeOnce": true
@@ -1017,7 +1017,7 @@
 			"typeVersion": 2,
 			"position": [
 				1380,
-				100
+				-90
 			]
 		},
 		{
@@ -1100,7 +1100,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1600,
-				100
+				-90
 			],
 			"alwaysOutputData": true
 		},
@@ -1108,16 +1108,16 @@
 			"id": "ce637916-1233-4fe1-8e8f-f38d04203b95",
 			"parameters": {
 				"content": "## One summary per batch\nWhen every row of a batch is final, or after report_after_hours, you get one WhatsApp message with the counts. It is a snapshot: the table keeps updating.",
-				"height": 280,
-				"width": 1000,
+				"height": 295,
+				"width": 850,
 				"color": 7
 			},
 			"name": "One summary per batch note",
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1120,
-				320
+				1130,
+				145
 			]
 		},
 		{
@@ -1149,7 +1149,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1160,
-				440
+				270
 			],
 			"executeOnce": true
 		},
@@ -1163,7 +1163,7 @@
 			"typeVersion": 2,
 			"position": [
 				1380,
-				440
+				270
 			]
 		},
 		{
@@ -1188,7 +1188,7 @@
 			"typeVersion": 1,
 			"position": [
 				1600,
-				440
+				270
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1246,7 +1246,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1820,
-				440
+				270
 			]
 		}
 	],

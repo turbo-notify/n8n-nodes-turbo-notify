@@ -78,6 +78,14 @@ export default async function scenario(t) {
 		const node = t.workflow.node('Your settings');
 		assert.equal(node.notesInFlow, true, 'the explanations show on the canvas');
 		for (const name of Object.keys(values)) assert.ok(String(node.notes).split('\n').some((line) => line.startsWith(`${name}:`)), `the note explains ${name}`);
+		// Layout: no two notes overlap or sit closer than 20 px, and no node is half inside a note (nodes are about 100 x 100).
+		const isNote = (n) => n.type === 'n8n-nodes-base.stickyNote';
+		const box = (n) => (isNote(n) ? { x: n.position[0], y: n.position[1], w: n.parameters.width, h: n.parameters.height } : { x: n.position[0], y: n.position[1], w: 100, h: 100 });
+		const gap = (a, b) => Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w), b.y - (a.y + a.h), a.y - (b.y + b.h));
+		const inside = (a, b) => a.x >= b.x && a.y >= b.y && a.x + a.w <= b.x + b.w && a.y + a.h <= b.y + b.h;
+		const notes = t.workflow.nodes.filter(isNote);
+		for (const a of notes) for (const b of notes) if (a.name < b.name) assert.ok(gap(box(a), box(b)) >= 20, `${a.name} and ${b.name} are at least 20 px apart`);
+		for (const note of notes) for (const n of t.workflow.nodes.filter((x) => !isNote(x))) assert.ok(gap(box(n), box(note)) >= 0 || inside(box(n), box(note)), `${n.name} is not half inside ${note.name}`);
 	});
 
 	// ---------------------------------------------------------------- setup branch

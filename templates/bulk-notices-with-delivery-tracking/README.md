@@ -157,9 +157,9 @@ Tested on 2026-11-17, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, digest `sha256:9
 
 | | |
 |---|---|
-| `workflow.json` | SHA-256 `74990457d241e3276d2447582852c31d19b96095fa651dec71262e82548aa673` (the exact file the run below imported) |
+| `workflow.json` | SHA-256 `eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd` (the exact file the run below imported) |
 | Method | a stateful simulation of the Turbo Notify public API (`templates/harness`, built from `openapi.json`), driven over HTTP, plus live round trips of the Polling Trigger |
-| Result | passed on the final file: 24 steps, 635 assertions, 0 failed, 202 s |
+| Result | passed on the final file: 24 steps, 635 assertions, 0 failed, 188 s (run again on 2026-11-17 after the last change of the canvas layout; `workflow.png` is a screenshot of this file in the n8n 2.45.5 editor) |
 
 Tested end to end in n8n 2.45.5 against a simulated Turbo Notify API (same routes, answers, events and errors as the public contract). An earlier revision of this workflow was also run against the real API with real WhatsApp delivery to a test number (see "Real API runs").
 

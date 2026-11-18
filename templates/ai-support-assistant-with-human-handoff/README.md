@@ -163,13 +163,13 @@ Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh thr
 | | |
 |---|---|
 | Date | 2026-11-17 |
-| `workflow.json` | SHA-256 `7b5401c5e4ae2c19928da61cc5d31679d922d4a16d47e761cb176b5f19e046c9` (`shasum -a 256 workflow.json`) |
+| `workflow.json` | SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8` (`shasum -a 256 workflow.json`) |
 | n8n | 2.45.5 (image `n8nio/n8n:2.45.5`, id `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`) |
 | Package | `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15 (built from this repository) |
 | Mock API | `templates/harness/mock-api.mjs`, same routes, answers, events and errors as `public-docs-web/public/openapi.json` |
 | Model | `templates/harness/fake-llm.mjs`, scripted replies and tool calls |
 | Patches applied to `workflow.json` by the scenario | none in the file. The workflow is imported as exported, and the scenario proves it refuses to run with the placeholders. Then it types the values a person must type, through the stored workflow: `owner_phone` (a fictitious test number), `business_name`, `business_facts`, and temporarily `ignore_phones` and `audio_to_person`. It flips the `sample` flag of the four sample FAQ rows, as a person rewriting the FAQ would. The mock's contact quota is lowered for one step |
-| Scenario | `test/scenario.mjs`, 33 steps, 443 assertions, 0 failed, 198 s (most of it waiting for real poller ticks). Run once on this exact file after the last edit, and it passed. An earlier version of the file failed once in the "contact quota used up" step on a run that shared the machine with another n8n container (that step took 31 s instead of 1 to 2 s; the cause was not found). It did not come back in this run, and the assertion message now prints the error and the sends if it does. On a loaded machine n8n can also fail a step with "Expression timed out" or "Turbo Notify did not answer in time"; the poller step skips a failed tick the way the next real tick would |
+| Scenario | `test/scenario.mjs`, 33 steps, 776 assertions, 0 failed, 238 s (most of it waiting for real poller ticks; the count grew with the layout checks of the notes added to the "as exported" step). Run on this exact file after the last change of the canvas layout (2026-11-17), and it passed. An earlier version of the file failed once in the "contact quota used up" step on a run that shared the machine with another n8n container (that step took 31 s instead of 1 to 2 s; the cause was not found). It did not come back in this run, and the assertion message now prints the error and the sends if it does. On a loaded machine n8n can also fail a step with "Expression timed out" or "Turbo Notify did not answer in time"; the poller step skips a failed tick the way the next real tick would |
 | Other checks | the module's own jest suites (17 suites, 359 tests, including the template tests: valid JSON, no placeholder credentials, no em or en dash, no invisible or bidirectional control characters, every node connected) and `npm run lint`, all green |
 
 Rerun:
@@ -305,5 +305,5 @@ With `--max-sends 7` the question, STOP, the second question and START all go ov
 - Reactivation after a long downtime was run for a few seconds of downtime, not hours or days.
 - Multiple n8n workers, queue mode, an n8n restart in the middle of a run, and the Simple Memory node on n8n Cloud.
 - n8n Cloud itself (the claim that the package is available there rests on the n8n verification noted in the module README).
-- The canvas look: how the settings notes under the node render, and whether the sticky notes sit where intended, was computed from node and note rectangles, not seen in a browser.
+- The canvas look was checked in the real n8n 2.45.5 editor on 2026-11-17 (`workflow.png` is that screenshot of the final file): every group leaves room under its nodes for the labels, no group description is crossed by a wire or a node, and the red note covers only the `Your settings` node. Other n8n versions can draw labels and wires a little differently.
 - Anything above a few hundred events: the workflow handles events one by one.

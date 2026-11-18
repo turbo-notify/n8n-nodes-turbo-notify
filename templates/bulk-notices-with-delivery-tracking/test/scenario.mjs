@@ -148,12 +148,13 @@ export default async function scenario(t) {
 		assert.equal(t.workflow.node('New batch form').parameters.formFields.values.find((f) => f.fieldLabel === 'Message').requiredField, true, 'the Message field of the form is required');
 		assert.includes(t.workflow.node('New batch form').parameters.formDescription, 'The message is required', 'and the form says so');
 		assert.match(t.workflow.node('Settings').notes, /pick the same number in the Polling Trigger options \(that option only filters the events\)/, 'the Settings note says where the sending number is chosen');
-		// Layout: no note sits inside, or touches, another note, and no node is half inside a note.
+		// Layout: no note sits inside, or touches, another note (at least 20 px apart), and no node is half inside a note.
 		const box = (n) => (n.type === 'n8n-nodes-base.stickyNote' ? { x: n.position[0], y: n.position[1], w: n.parameters.width, h: n.parameters.height } : { x: n.position[0], y: n.position[1], w: 100, h: 100 });
 		const apart = (a, b) => a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+		const gap = (a, b) => Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w), b.y - (a.y + a.h), a.y - (b.y + b.h));
 		const inside = (a, b) => a.x >= b.x && a.y >= b.y && a.x + a.w <= b.x + b.w && a.y + a.h <= b.y + b.h;
 		const notes = t.workflow.nodes.filter((n) => n.type === 'n8n-nodes-base.stickyNote');
-		for (const a of notes) for (const b of notes) if (a.name < b.name) assert.ok(apart(box(a), box(b)), `${a.name} and ${b.name} do not overlap or nest`);
+		for (const a of notes) for (const b of notes) if (a.name < b.name) assert.ok(apart(box(a), box(b)) && gap(box(a), box(b)) >= 20, `${a.name} and ${b.name} do not overlap or nest and are at least 20 px apart`);
 		for (const note of notes) for (const n of t.workflow.nodes.filter((x) => x.type !== 'n8n-nodes-base.stickyNote')) assert.ok(apart(box(n), box(note)) || inside(box(n), box(note)), `${n.name} is not half inside ${note.name}`);
 		assert.excludes(notes.map((n) => n.name + n.parameters.content).join('|'), 'Section:', 'no "Section:" prefix in the names or the headings');
 		assert.excludes(t.workflow.nodes.map((n) => n.name).join('|'), 'Mark rows not sent', 'the plan is saved on every row before the branch');
