@@ -158,7 +158,7 @@ Every value is also explained on the canvas, under the node.
 
 ## Test record
 
-Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh throwaway n8n, against a simulated Turbo Notify API and a scripted fake language model. Nothing reached WhatsApp and no real model answered in that run. A second, shorter run against the real Turbo Notify API with a real model is described in "Real API run" below and was made on the previous version of the file (see the note there). See also "What is not proven".
+Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh throwaway n8n, against a simulated Turbo Notify API and a scripted fake language model. Nothing reached WhatsApp and no real model answered in that run. A second run against the real Turbo Notify API with a real model is described in "Real API run" below: a first one on the previous version of the file and a final one on this exact file ("Real API run on this version"). See also "What is not proven".
 
 | | |
 |---|---|
@@ -213,10 +213,10 @@ Branches run (each step of the scenario asserts the requests the mock received, 
 
 ### Real API run
 
-**This run was made on the version of the file before the final round of changes** (SHA-256 `b85eec818d51bcfa710fca7ec659fde4261c1027dc39538fff553ba62ed93707`). Since then the default `handoff_words`, the new `audio_to_person` setting, the way the combining-accent range is written in the code of `Decide how to handle the message` and the canvas notes changed. The real run was not repeated on the final file: the final file was run again only against the simulated API (above).
+**The first run (this part) was made on the version of the file before the final round of changes** (SHA-256 `b85eec818d51bcfa710fca7ec659fde4261c1027dc39538fff553ba62ed93707`). Since then the default `handoff_words`, the new `audio_to_person` setting, the way the combining-accent range is written in the code of `Decide how to handle the message` and the canvas notes changed. The run on the final file is described in "Real API run on this version" further down. The model findings and the provider differences below still stand.
 
 2026-11-17, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`), package **@turbo-notify/n8n-nodes-turbo-notify 1.5.15**, the
-`workflow.json` named above,
+first file named above,
 real Turbo Notify API, real WhatsApp delivery and a real chat model. Two numbers owned by the same owner took part: the
 assistant ran on one of them, and the "customer" was the other one, which belongs to another organization and wrote to
 the first with its own key. A test guard allowed the assistant to message only the customer number, and the customer
@@ -277,6 +277,59 @@ hourly cap, the owner typing in the app, the instant trigger, any adversarial cu
 `gpt-4.1-mini` was not run), more than one question to one model (answer quality), the real START and the real second
 question over the wire, memory across turns with a real model.
 
+#### Real API run on this version
+
+2026-11-18, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`), package **@turbo-notify/n8n-nodes-turbo-notify 1.5.15**,
+`workflow.json` SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8` (the final file, checked with
+`shasum -a 256` before the run), real Turbo Notify API, real WhatsApp delivery, real chat model
+(OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free` through n8n's OpenAI credential with the base URL changed and **Use
+Responses API** off). Same setup as the first run: the assistant on one number, the "customer" on the other number of the
+same owner (another organization, its own key, plain text only), plan of the assistant organization **CUSTOM**, the test
+guard on and not bypassed. Harness result: **passed, 68 assertions, 0 failed, 739 s**. The scenario is
+`test/real.mjs`: the model key is now taken by the provider the base URL names (the first version of the scenario picked the
+first key it found in a file with several providers and failed its own pre-flight with a `401`; no message was sent
+before the fix), and a handover step was added.
+
+Patches made by the scenario: the same as in the first run (`owner_phone` set to the assistant number itself, `business_name`,
+`business_facts`, the model name, **Use Responses API** off, the two sample FAQ rows replaced by two real rows). No node
+was pinned in the real steps. Two steps used pinned events on purpose: the dry run of the model (no WhatsApp message) and
+START (see below).
+
+**Messages: 7 real messages, the whole budget.** The customer sent 4 (the question, STOP, a second question while opted
+out, "I want to speak to a person") and the assistant sent 3 (the answer, the opt-out confirmation, the handover text).
+Everything either side sent was deleted for everyone at the end (7 of 7), and the two Data Tables were removed.
+
+What ran for real:
+
+| Part | Result |
+|---|---|
+| Guard on the exported file | **Not run in this real run**: the scenario types the values a person types before the import, so the placeholders never reached a real send. That stop is proved only in the simulated run above |
+| Setup branch and real settings | The setup branch created both tables and the four sample rows; the scenario replaced them with two real rows (`sample` false) |
+| Dry run of the real model | A pinned event for a fictitious phone: the real model called `Search the FAQ`, got the row and answered in 2 seconds, no message was sent |
+| Question over the wire | The customer's text was seen by the live Polling Trigger. The run from the customer's send to the end of the workflow took 81 seconds (the poll tick is most of it). Get Message `200`. Typing indicator accepted by the real plan: `202` with `operation_id` and `status.state` `pending`. The model called the FAQ tool once with the keyword `hours`, got one row and wrote exactly one JSON object (`confidence` 1.0, `handoff` false). The agent step took 22 seconds, much longer than the 2 seconds of the dry run on the same model (a shared free tier). **Send the reply** was accepted with `202`, the text sent was exactly the model's `answer` (43 characters), it showed up in the customer organization as a received message, and the state row was written (`ai_answers` 1, `opted_out` false) |
+| STOP | Exactly one message, the fixed `optout_reply`, no model call, `opted_out` true |
+| Second question while opted out | A real incoming message, handed over by a real poll: the run went through `Decide how to handle the message` and ended with no model call, no reply, no handover and nothing sent. `opted_out` stayed true |
+| START | **Not over the wire** (the budget was reserved for the handover): the event was pinned and fed to the real workflow against the **real** state row that the real STOP wrote. It took the fixed opt-in route with the opt-in text and put `opted_out` back to false. The confirmation send was pinned, so nothing was sent |
+| Handoff words, over the wire | The customer wrote "I want to speak to a person". A real poll handed it over, `Decide how to handle the message` chose the handover route without a model call, the chat was held (`human_until` about 4 hours ahead, as `human_hours` says), and **Tell the customer a person will answer** sent the fixed `handoff_reply` as a Reply, accepted with `202`, which showed up in the customer organization as a received message |
+| Owner alert and contact card | **Tried, but refused by the test guard, not by the API.** The guard lets the test message only one number, the customer. `owner_phone` was the assistant number itself, so the two requests (a text of 235 characters that quotes the customer's message, and a contact card with `display_name` and `phones` of the customer) were addressed to the assistant's own number and the guard answered `403 harness_recipient_blocked` before anything was forwarded. They are not counted in the budget. The workflow did what the design says: both nodes continued on fail, the other steps of the event were done, and the run ended in an error whose message says the owner could not be alerted |
+| Guard | Exactly 2 refused calls (the alert and the card), both to `owner_phone`, none to any other number. No call was blocked for another reason |
+
+**Model behaviour, in plain terms.** In this run the free model followed the one JSON format every time (in the dry run and in
+the real question) and used the FAQ tool with a sensible keyword. It added an emoji the FAQ did not have in the real answer,
+and in the dry run it added "close at 7pm" to an answer about opening time (both facts are in the business facts). That
+is one question twice, not a test of quality. No customer tried to talk the model out of its rules.
+
+**Differences from the mock:** the poll tick makes every inbound message take up to a minute and a half, the
+typing indicator answers with an `operation_id` instead of a `message_id`, the free model's latency varied from 2 to 22
+seconds for the same call, and a handover on a real run could not deliver the owner alert and the card to anyone, because
+the only recipient the guard allows is the customer. The mock accepts both.
+
+**Not proven by this run:** that the real API accepts the owner alert and the contact card the workflow builds (the two requests were
+built and addressed to the right number, but never reached the API); that an owner receives them; START over the wire
+(it ran on the real state, not through a real incoming message); non-text messages, a group message, the hourly cap, the owner
+typing in the app, the instant trigger, any adversarial customer, `audio_to_person` and the default handoff phrases other than
+"speak to a person", OpenAI's own models, memory across turns with a real model.
+
 Rerun (needs two numbers of the same owner, two keys, a model key; nothing is written to the repository):
 
 ```bash
@@ -290,16 +343,16 @@ node templates/harness/run-template.mjs templates/ai-support-assistant-with-huma
   --run-id t3real --ports 5693,9221
 ```
 
-With `--max-sends 7` the question, STOP, the second question and START all go over the wire (7 messages).
+With `--max-sends 7` the scenario keeps two messages for the handover step (the customer's request and the fixed handover text) and runs START as a pinned event: the question, its answer, STOP, its confirmation, the second question and the handover go over the wire (7 messages). With a larger budget START goes over the wire too. The owner alert and the contact card need a third owned number to be delivered; the scenario asserts that the guard refused them.
 
 ### What is not proven
 
-- A real run of the final file: the real API and the real model ran on the previous file (see "Real API run"). The default handoff phrases and `audio_to_person` ran only against the simulated API and the scripted model. Whether the default phrases hand over the right chats in a real business is a matter of reading your first conversations.
+- A real run of the final file ran for the question, STOP, the silent second question and the handoff words (see "Real API run on this version"). Not proven there: delivery of the owner alert and the contact card (the test guard refused them), START over the wire, `audio_to_person` and the other default handoff phrases against a real model. Whether the default phrases hand over the right chats in a real business is a matter of reading your first conversations.
 - Whether a WhatsApp Business app greeting or away message reaches the API as an outgoing event with origin `native` (see "Things to know").
 - Setting the Polling Trigger to one number (**Options > Number**) and an organization with several numbers.
 - An Error workflow: it is described, not built, and was not run.
 - The quality, tone and safety of any real model. The model was scripted: the tests prove the wiring, the prompt that reaches the model, the tool call, and what the workflow does with an answer, a low confidence, prose, or a failure. Nothing here proves a model stays inside its rules against a customer who tries to talk it out of them.
-- Real WhatsApp delivery and the real Turbo Notify API are covered only by the short run in "Real API run" above. The typing behavior on a real Free plan stays simulated with the mock's plan gate. The contact quota and message quota refusals come from the mock; the wording of the real refusal text is the node's own, quoted above from this run.
+- Real WhatsApp delivery and the real Turbo Notify API are covered only by the runs in "Real API run" above. The typing behavior on a real Free plan stays simulated with the mock's plan gate. The contact quota and message quota refusals come from the mock; the wording of the real refusal text is the node's own, quoted above from this run.
 - The outgoing native `message.sent` event (the owner typing in the app) is shaped from the documentation; the mock cannot produce one, so that test feeds it through pinned data on the trigger.
 - A message whose text has expired (content retention): the mock does not simulate it, so the "becomes a handover" claim for expired text rests on the code path for an unreadable message (tested with a fault) and on the documented fact that the text is gone.
 - Reactivation after a long downtime was run for a few seconds of downtime, not hours or days.

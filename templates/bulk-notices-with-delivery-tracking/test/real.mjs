@@ -8,8 +8,8 @@
  *     --scenario templates/bulk-notices-with-delivery-tracking/test/real.mjs --image n8nio/n8n:2.45.5 \
  *     --run-id t2real --ports 5692,9211
  *
- * Updated for the revision with an empty default_message, a required Message field, report_after_hours 12, "people" and no plan name
- * in the summary, and the plan saved on every row before the split. This revision has NOT been run against the real API.
+ * Run against the real API on 2026-11-18 on the final workflow.json (see the README, "Real API runs"). Steps 0 to 3c passed; the last
+ * step was corrected afterwards (it now checks by message id) and has not been run again.
  *
  * It SENDS REAL MESSAGES (3 expected: the notice, its summary and the summary of the resubmitted batch; at most 4, to the owner test number, enforced by the harness guard) and deletes
  * them for everyone at the end. The number is never written in this file: it comes from TN_REAL_OWNER_PHONE.
@@ -120,11 +120,22 @@ export default async function scenario(t) {
 		await avoidTopOfHour(900);
 		await t.activate(); // stays active until the delivery news and the summary have been seen
 		const since = await t.executionMark();
+		const formUrl = `${t.urls.n8n}/form/${t.workflow.node('New batch form').parameters.path}`;
+		// Without the password nothing starts: the page and the submission answer 401 (403 is accepted too), no run, no send.
+		const noAuthBody = new FormData();
+		noAuthBody.set('field-0', lines.join('\n'));
+		noAuthBody.set('field-1', 'Real run notice for {name}.');
+		const noAuthPage = await fetch(formUrl);
+		const noAuthPost = await fetch(formUrl, { method: 'POST', body: noAuthBody });
+		const wrongPost = await fetch(formUrl, { method: 'POST', headers: { authorization: 'Basic ' + Buffer.from('notices-team:wrong').toString('base64') }, body: noAuthBody });
+		t.note('formWithoutPassword', { page: noAuthPage.status, post: noAuthPost.status, wrongPassword: wrongPost.status });
+		for (const r of [noAuthPage, noAuthPost, wrongPost]) assert.ok([401, 403].includes(r.status), `the form refuses a call without the right password (${r.status})`);
+		assert.count(await sendsSince(mark), 0, 'the refused calls sent nothing');
 		const body = new FormData();
 		body.set('field-0', lines.join('\n'));
 		body.set('field-1', 'Real run notice for {name}.');
 		body.set('field-2', 'Real');
-		const response = await fetch(`${t.urls.n8n}/form/${t.workflow.node('New batch form').parameters.path}`, { method: 'POST', headers: { authorization: AUTH }, body });
+		const response = await fetch(formUrl, { method: 'POST', headers: { authorization: AUTH }, body });
 		const text = await response.text();
 		assert.equal(response.status, 200, `the form accepted the submission: ${text.slice(0, 200)}`);
 		const execution = (await t.waitExecutions({ since, timeoutMs: 240_000 })).find((e) => e.ran('New batch form'));
@@ -238,9 +249,14 @@ export default async function scenario(t) {
 		const all = [...new Set(real.guard.acceptedMessageIds())];
 		assert.ok(all.length <= 4, `the budget of 4 real messages holds (${all.length} sent)`);
 		const list = await real.listSent(40);
-		const mine = list.data.filter((m) => m.origin !== 'native' && Date.parse(m.at) >= Date.parse(real.startedAt) - 2000);
-		assert.equal(mine.length, all.length, 'the real API lists exactly the messages the harness counted');
+		// The key's number may be used by other runs at the same time (the first real run of this revision saw a message of another run
+		// in the window): so the check is by id. Every message the harness counted is listed, to the owner test number only; the
+		// messages of other runs in the same window are recorded, not attributed to this one.
+		const inWindow = list.data.filter((m) => m.origin !== 'native' && Date.parse(m.at) >= Date.parse(real.startedAt) - 2000);
+		const mine = inWindow.filter((m) => all.includes(m.id));
+		assert.equal(mine.length, all.length, 'the real API lists every message the harness counted');
 		for (const m of mine) assert.equal(digits(m.to?.number), digits(OWNER), 'every message went to the owner test number');
+		t.note('otherMessagesOfOtherRunsInTheWindow', inWindow.length - mine.length);
 		t.note('messagesSent', all.length);
 		t.note('guard', { blockedCalls: real.guard.blocked, requests: (await real.guard.requests()).length });
 		assert.equal(real.guard.blocked, 0, 'the guard blocked nothing');

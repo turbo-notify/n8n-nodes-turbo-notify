@@ -161,7 +161,7 @@ Tested on 2026-11-17, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, digest `sha256:9
 | Method | a stateful simulation of the Turbo Notify public API (`templates/harness`, built from `openapi.json`), driven over HTTP, plus live round trips of the Polling Trigger |
 | Result | passed on the final file: 24 steps, 635 assertions, 0 failed, 188 s (run again on 2026-11-17 after the last change of the canvas layout; `workflow.png` is a screenshot of this file in the n8n 2.45.5 editor) |
 
-Tested end to end in n8n 2.45.5 against a simulated Turbo Notify API (same routes, answers, events and errors as the public contract). An earlier revision of this workflow was also run against the real API with real WhatsApp delivery to a test number (see "Real API runs").
+Tested end to end in n8n 2.45.5 against a simulated Turbo Notify API (same routes, answers, events and errors as the public contract). This exact file was also run against the real API with real WhatsApp delivery to a test number (see "Real API runs").
 
 Run it again (from the module folder, Docker running, `npm install` done once):
 
@@ -219,7 +219,7 @@ The workflow was imported exactly as exported. Nothing else was edited. The only
 
 ### What this test does not prove
 
-* **No message reached WhatsApp in the runs of this revision.** Delivery, read and failure are whatever the simulation was told to produce. The earlier revision's real run proved the delivery, quota and send contract on the real API (see "Real API runs"); the form, the summary, the Polling Trigger and the quota read were proven there, while the held and stale handling, the failure path and every change made after that run stay simulation only.
+* **The simulated run sent no message to WhatsApp.** Delivery, read and failure are whatever the simulation was told to produce. A separate run of this exact file against the real API (see "Real API runs") proved the form with its password, the quota read, one real send, the live Polling Trigger on a real delivery and a real read, the owner summary, the resubmit and the failure path of an over long text; the held, stale, stop list and cap handling stay simulation only.
 * **`duplicate_burst_blocked` and `reply_ratio_too_low`.** Existence and wording come from the docs only; they were never triggered on the real API, so their real response body, and whether a `Retry-After` comes with them, are not proven. The simulation answers a 429 with the documented code.
 * **The `message.send.failed` payload.** None exists on the account that was used, so the real shape (and which failures send an event) is the documented one, not an observed one. A failure after the send is also only caught while the workflow is active.
 * **The Polling Trigger on a real busy account**: pagination of hundreds of events, the two minute look-back under load, and a minute of delay on every state. Only live round trips against the simulation, and one against the real API.
@@ -232,24 +232,36 @@ The workflow was imported exactly as exported. Nothing else was edited. The only
 
 ### Real API runs
 
-Both runs: 2026-11-17, n8n 2.45.5, package 1.5.15, `https://api.turbonotify.com` with a production key of an account whose plan was **CUSTOM**, not Free. Every message went to one test number of the account owner, from a different number of the same owner, and every message was deleted for everyone at the end. They ran on **earlier revisions** of this workflow, not on the file whose SHA-256 is above; the parts that did not change since (quota read, send with the idempotency key, form with a TAB list, Polling Trigger, summary) are what they show. The changes since (empty `default_message`, required Message field, `report_after_hours` 12, no tier in the summary, "people" in the summary, the plan saved on every row before the split, the layout) ran only against the simulation.
+Two groups of runs, both against `https://api.turbonotify.com` with a production key of an account whose plan is **CUSTOM**, not Free, n8n 2.45.5 (image digest `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`), package `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15. Every message went to one test number of the account owner, from a different number of the same owner, and every message was deleted for everyone at the end. The guard of the harness was on (recipient check, budget, request log).
 
-Revision 1 (Get Status every 15 minutes, a Retry branch and a number check) and revision 2 (the Polling Trigger version, SHA-256 `b4b1dc94474ceb55e35f33ea36ed511f73375302e3e697ffe56bcd77fa6a2d32`, workflow active from the form to the end of the run so the real Polling Trigger was live; 49 assertions passed and 1 expectation of the scenario was wrong and has been corrected since):
+**Final run, 2026-11-18, on the exact file whose SHA-256 is above** (`eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`).
 
-| Part | What the real API showed |
+| Part | Result on the real API |
 |---|---|
-| Quota | **Get Quota** ran once per batch and nothing else read the number. `remaining` is a number and `tier` is upper case (`"CUSTOM"`); the object also carries `used`, `quota`, `cycle_start`, `cycle_end`, `resets_at` and `number_alias` |
-| Form | The form (Basic Auth, over HTTP) took a TAB separated line, a comma separated duplicate of the same number and a malformed line (`abc`): rows `sent`, `duplicate`, `invalid_phone`. One real send went out with the text merged (`{name}`), the phone with `+` and the idempotency key `<batch id>-<row id>`; the row stored the real message id |
-| Polling Trigger | The real receipt came back as a `message.delivered` event picked by the live trigger: the row moved to `delivered` with `delivered_at`, and the owner got **one** summary. In real time the row stayed `sent` for about 50 seconds and showed `delivered` at the next minute tick: the receipt arrives within a few seconds, the polling interval is the delay |
-| Receipt event | Envelope keys `created_at, data, id, number_alias, number_id, organization_id, type`; `data` keys `at, channel, content_type, direction, from, id, origin, preview, to`; `direction` `inbound`, `origin` `native`, and `data.id` is **our** message id (matched by id, never by direction) |
-| Resubmit | The same list submitted again made the rows `duplicate`, `duplicate`, `invalid_phone` and sent **nothing** to the real API |
-| Get Status | Never called |
-| The send | `202 {message_id, status}`, status `pending` then `sent` then `delivered`; a `pending` message cannot be deleted (`400`); sends are paced per number (about 15 seconds apart in a burst) |
-| Malformed phone | The real API answers `400 {"error":"invalid_phone_number"}` to a phone with a letter and **accepts** a phone without `+` (`202`), while the node refuses it client side, so the workflow always writes `+...`. A text of 4097 characters is refused **by the node** before any request |
+| Table | **Create the notices table** made the table with its 12 columns. Passed |
+| Password | The form page, a submission with no credentials and a submission with a wrong password all answered `401`: no run started, nothing was sent. Passed |
+| Form | One batch over HTTP with Basic Auth and the workflow active: a TAB separated line, a comma separated duplicate of the same number and a malformed line (`abc`) became `sent`, `duplicate`, `invalid_phone`. Exactly one real send went out, with the text merged (`{name}`), the phone with `+` and the key `<batch id>-<row id>`; the row stored the real message id. Passed |
+| Quota | One **Get Quota** read in the run (`GET .../messages/quota`, `200`, keys `cycle_end, cycle_start, number_alias, quota, remaining, resets_at, tier, used`, `tier` in capitals). Requests of the run: two event reads by the trigger, the quota read and the send. Get Status was never called. Passed |
+| Polling Trigger | The live trigger received the real `message.delivered` (inbound, native, `data.id` is our message id): the row stayed `sent` for about 30 seconds and showed `delivered` with `delivered_at` at the next minute tick (about 40 seconds after the send). Passed |
+| Read | The owner's phone read the message about 45 seconds after the delivery and the live trigger moved the row to `read` with `read_at` set (a row stays `read`). Passed |
+| Summary | The owner received **one** summary for the batch ("3 people, delivered 1 (read so far 0), invalid number 1, duplicate 1", the quota left without a plan name, the snapshot sentence). It was sent at the delivery, before the read, as designed: the table moved on after it. Passed |
+| Resubmit | The same list again: `duplicate`, `duplicate`, `invalid_phone` and **nothing** sent. The hourly check then sent the one summary of that all-duplicate batch, and a second hourly run sent nothing. Passed |
+| Failure path (`real-failure.mjs`, 15 assertions) | A text of 4097 characters: the node refused it before any request (no send reached the API), the row was `failed` with `'Text' is too long (4097 characters, the limit is 4096)...`, and the owner summary listed it with one full stop. Probes through the guard: a phone with a letter gets `400 {"error":"invalid_phone_number"}`; the owner number **without** `+` is accepted (`202`), so only the node's own check keeps a phone without `+` from going out. Passed |
 
-Not seen on the real API: the `message.read` event (the phone did not open the chat in 3 minutes), a `message.send.failed` event, the two `429` holds, the Free plan limits, a real batch of many rows paced at about 15 seconds per message, and a second hourly run sending nothing after a duplicates only batch (the scenario asserts it now; it has not been run against the real API).
+What did not go to plan, and what was done:
 
-Rerun (it sends about 3 real messages; the number comes from the environment, the key from a file, neither is in the repository):
+* **First attempt**, same day: n8n answered `500 Expression timed out` (5000 ms limit of its expression runtime) when the workflow was activated, while the host was heavily loaded by other containers. It happened before any request to the API: 0 messages. The run was repeated once on a quieter host and did not recur.
+* **One assertion of the scenario was wrong, not the workflow.** The last step compared the number of messages the real API lists in the time window with the number the harness counted, and another run using the same key had sent a message to the same number in that window (the listing showed 4, the harness had counted 3, none of them from this workflow). The step now checks by message id (every message the harness counted is listed and went to the test number) and records how many messages of other runs were in the window. Steps 0 to 3c passed in that run (60 assertions); the corrected last step was **not run again**, because a second run would exceed the budget of real messages.
+
+Real messages: 3 in the final run (the notice, its summary and the summary of the resubmitted batch) and 2 in the failure run (the summary of the failed batch and the accepted probe without `+`), 5 in all, inside the budgets of 4 and 3. All were deleted for everyone.
+
+Differences from the simulation: the receipt takes the polling interval (about 40 seconds here, the simulation's trigger runs are pinned or polled at once); a `read` receipt really arrives only when a person opens the chat; the real API rejects a letter in the phone and accepts a phone without `+`; the real quota is a plan of 10 million messages (the simulation uses 500, so the quota shortfall branches stay simulation only); sends are paced by the real number (the simulation answers at once).
+
+Not proven by the real runs: a `message.send.failed` event (none was produced, the failure row of the failure run came from the node's own refusal), the two `429` holds, the Free plan limits, a batch of many rows paced at about 15 seconds per message (only one notice was sent), the stale handling, the stop list, the daily cap and the other Settings caps, and the corrected last step of the scenario.
+
+Earlier real runs (2026-11-17, earlier revisions of this workflow: revision 1 with Get Status every 15 minutes, revision 2 with the Polling Trigger, SHA-256 `b4b1dc94474ceb55e35f33ea36ed511f73375302e3e697ffe56bcd77fa6a2d32`) showed the same contract: `message.delivered` as an inbound native event with `data.id` equal to our message id, a pending message that cannot be deleted (`400`), sends paced per number (about 15 seconds apart in a burst) and the node refusing a phone without `+` itself.
+
+Rerun (it sends about 3 real messages, then 2; the number comes from the environment, the key from a file, neither is in the repository):
 
 ```bash
 export TN_REAL_OWNER_PHONE='+<your test number>'
@@ -261,5 +273,3 @@ node templates/harness/run-template.mjs templates/bulk-notices-with-delivery-tra
   --real-api --api-key-file <same file> --max-sends 3 \
   --scenario templates/bulk-notices-with-delivery-tracking/test/real-failure.mjs --image n8nio/n8n:2.45.5
 ```
-
-`real.mjs` and `real-failure.mjs` were updated to this revision of the workflow and have not been run against it.

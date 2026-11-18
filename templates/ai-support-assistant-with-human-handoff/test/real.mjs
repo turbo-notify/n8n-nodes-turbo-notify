@@ -15,9 +15,12 @@
  *     --scenario templates/ai-support-assistant-with-human-handoff/test/real.mjs --image n8nio/n8n:2.45.5 \
  *     --run-id t3real --ports 5693,9221
  *
- * Messages: the customer's question, its STOP, its second question (and START when the budget allows), plus every
- * reply of the assistant. A handover cannot be exercised for real without a third owned number (the owner alert would
- * go to a number that may not receive anything): owner_phone is number A itself, so the guard refuses an alert.
+ * Messages (budget 7): the customer's question, its STOP, its second question, its request for a person, plus the
+ * three replies of the assistant (answer, opt-out confirmation, handover text); START is fed as a pinned event against
+ * the real state row because the budget is used. A handover cannot deliver its owner alert for real without a third
+ * owned number: owner_phone is number A itself, so the guard refuses the alert and the contact card (403, never
+ * forwarded, not counted), and the scenario asserts those two refusals, the real handover text and the error the run
+ * ends with.
  *
  * The model: n8n's OpenAI credential pointed at an OpenAI compatible endpoint (T3_LLM_BASE_URL, default Groq) with the
  * model T3_LLM_MODEL, and "Use Responses API" switched off (T3_RESPONSES_API_OFF=1). Groq's openai/gpt-oss models do not
@@ -39,8 +42,10 @@ const BUSINESS_FACTS = 'Open Monday to Saturday, 7am to 7pm, closed on Sunday. C
 function llmKey() {
 	const file = process.env.T3_LLM_KEY_FILE;
 	if (!file) throw new Error('set T3_LLM_KEY_FILE to a file that holds the Groq key');
-	const match = fs.readFileSync(file, 'utf8').match(/(?:gsk_|sk-or-v1-)[A-Za-z0-9_-]+/);
-	if (!match) throw new Error('no gsk_ or sk-or-v1- key in T3_LLM_KEY_FILE');
+	// the file may hold several providers (an .env file): take the key of the provider the base URL names
+	const wanted = /openrouter/i.test(GROQ) ? /sk-or-v1-[A-Za-z0-9_-]+/ : /gsk_[A-Za-z0-9_-]+/;
+	const match = fs.readFileSync(file, 'utf8').match(wanted);
+	if (!match) throw new Error('no key of the provider named by T3_LLM_BASE_URL (sk-or-v1- for OpenRouter, gsk_ for Groq) in T3_LLM_KEY_FILE');
 	registerSecret(match[0]);
 	return match[0];
 }
@@ -113,6 +118,8 @@ export default async function scenario(t) {
 	const sendsSince = async (mark) => real.guard.sends({ since: mark });
 	const stateOf = async () => (await t.tables.rows('contacts_state', { where: { phone: CUSTOMER } }))[0];
 	const budgetLeft = () => real.maxSends - real.guard.messagesAccepted - customer.count;
+		const HANDOVER_RESERVE = 2; // the handover step: the customer's message and the fixed "a person will answer" reply (the alert and the card are refused by the guard and never count)
+		const settingsOf = () => Object.fromEntries(t.workflow.node('Your settings').parameters.assignments.assignments.map((a) => [a.name, a.value]));
 	const secs = (ms) => Math.round(ms / 100) / 10;
 
 	/** Waits until `predicate()` is truthy (polls every 5 s) or the time is up; returns what it returned. */
@@ -339,7 +346,7 @@ export default async function scenario(t) {
 
 	await t.step('5 the customer asks again while opted out: the workflow stays silent (no model call, no message)', async () => {
 		const mark = await real.guard.mark();
-		if (budgetLeft() >= 1) {
+		if (budgetLeft() - HANDOVER_RESERVE >= 1) {
 			// over the wire: a real second question
 			const since = await t.executionMark();
 			await customerWrites('And what time do you close?');
@@ -367,10 +374,10 @@ export default async function scenario(t) {
 		assert.count(await sendsSince(mark), 0, 'nothing was sent to the customer');
 	});
 
-	await t.step('6 START brings the chat back (real when the budget allows its message and the confirmation, else pinned)', async () => {
+	await t.step('6 START brings the chat back (real when the budget allows its message and the confirmation after the handover reserve, else pinned)', async () => {
 		const optinReply = Object.fromEntries(t.workflow.node('Your settings').parameters.assignments.assignments.map((a) => [a.name, a.value])).optin_reply;
 		const mark = await real.guard.mark();
-		if (budgetLeft() >= 2) {
+		if (budgetLeft() - HANDOVER_RESERVE >= 2) {
 			await customerWrites('START');
 			await until(async () => (await sendsSince(mark)).length >= 1, 6 * 60_000, 'the opt-in confirmation to be sent');
 			const sends = await sendsSince(mark);
@@ -389,15 +396,64 @@ export default async function scenario(t) {
 		await until(async () => (await stateOf())?.opted_out === false, 60_000, 'opted_out to be cleared');
 	});
 
+	await t.step('6b the customer asks for a person: the fixed handover text reaches the customer for real, the owner alert and the contact card are tried and refused by the guard (owner_phone is the assistant number itself, not the allowed one)', async () => {
+		const handoffReply = settingsOf().handoff_reply;
+		const question = 'I want to speak to a person';
+		const mark = await real.guard.mark();
+		const since = await t.executionMark();
+		await customerWrites(question);
+		const execution = await until(async () => handled(since, question), 6 * 60_000, 'the poller to hand over the request for a person and the workflow to finish');
+		t.note('handoverExecution', { status: execution.status, nodes: execution.nodesRun });
+		assert.equal(execution.ran('Support AI Agent'), false, 'a handoff word hands over before the model is called');
+		assert.equal(execution.first('Decide how to handle the message')?.route, 'handoff', 'the handoff route');
+		assert.equal(execution.ran('Tell the customer a person will answer'), true, 'the customer is told');
+		assert.equal(execution.ran('Alert the owner'), true, 'the owner alert was tried');
+		assert.equal(execution.ran('Send the customer contact card to the owner'), true, 'the contact card was tried');
+
+		const posts = (await real.guard.requests({ method: 'POST', since: mark })).filter((e) => /\/messages(\/msg_\w+\/reply)?$/.test(e.path));
+		const accepted = posts.filter((e) => e.status === 202 || e.status === 200);
+		const refused = posts.filter((e) => e.blocked === 'recipient');
+		t.note('handoverRequests', { accepted: accepted.length, refusedByGuard: refused.length, others: posts.length - accepted.length - refused.length });
+		assert.count(accepted, 1, 'exactly one message reached the API: the fixed text to the customer');
+		assert.ok(/\/reply$/.test(accepted[0].path), 'it is a Reply (quotes the customer message)');
+		assert.equal(digits(accepted[0].verifiedTo?.number), digits(CUSTOMER), 'to the customer');
+		assert.equal(accepted[0].body?.content?.text, handoffReply, 'the fixed handover text, not model text');
+		assert.count(refused, 2, 'the alert and the contact card were tried and refused by the guard');
+		for (const r of refused) assert.equal(digits(r.body?.to?.number), digits(UNDER), 'both are addressed to owner_phone, the assistant number');
+		const alert = refused.find((r) => typeof r.body?.content?.text === 'string');
+		const card = refused.find((r) => typeof r.body?.content?.text !== 'string');
+		assert.ok(alert && card, 'one is a text and the other a contact card');
+		assert.match(alert.body.content.text, /speak to a person/i, 'the alert quotes the last message of the customer');
+		t.note('ownerAlert', { textLength: alert.body.content.text.length, mentionsReason: /reason|handoff|asked/i.test(alert.body.content.text) });
+		t.note('contactCard', { contentKeys: bodyKeys(card.body.content), mentionsCustomerNumber: digits(JSON.stringify(card.body.content)).includes(digits(CUSTOMER).slice(-8)) });
+		// the refusals make the run end in an error that names the owner alert, as designed
+		assert.equal(execution.status, 'error', 'the run ends in an error because the owner could not be alerted');
+		assert.match(String(execution.describe()), /could not be alerted/i, 'the error says the owner could not be alerted');
+
+		const arrived = await until(async () => {
+			const list = await customer.list('direction=inbound&limit=10');
+			return list.data.find((m) => m.content_type === 'text' && digits(m.from?.number) === digits(UNDER) && (m.preview ?? '').startsWith(handoffReply.slice(0, 30)));
+		}, 90_000, 'the handover text to show up in the customer organization as a received message');
+		t.note('handoverTextArrivedAtCustomer', { id: Boolean(arrived.id) });
+		const state = await stateOf();
+		const until_ = state?.human_until ? new Date(state.human_until).getTime() : 0;
+		t.note('handoverState', { heldForHours: Math.round(((until_ - Date.now()) / 3_600_000) * 10) / 10, opted_out: state?.opted_out });
+		assert.ok(until_ > Date.now() + 3 * 3_600_000, 'the chat is held for a person (human_until about human_hours ahead)');
+		// one more poll tick: the echo of the reply is read and nothing else is sent
+		await t.sleep(70_000);
+		assert.count((await real.guard.requests({ method: 'POST', since: mark })).filter((e) => /\/messages(\/msg_\w+\/reply)?$/.test(e.path) && e.status < 300), 1, 'nothing else was sent after the handover');
+	});
+
 	await t.step('7 the whole run: only the customer was messaged, inside the budget, nothing blocked', async () => {
 		await t.deactivate();
 		const total = real.guard.messagesAccepted + customer.count;
 		t.note('messages', { byAssistant: real.guard.messagesAccepted, byCustomer: customer.count, total });
 		assert.ok(total <= real.maxSends, `inside the budget (${total} of ${real.maxSends})`);
 		const all = (await real.guard.requests({ method: 'POST' })).filter((e) => /\/messages(\/msg_\w+\/reply)?$/.test(e.path));
-		assert.ok(all.every((e) => e.status < 300 || e.status === 429), 'every send was accepted (a 429 spacing is retried by the node)');
+		assert.ok(all.every((e) => e.status < 300 || e.status === 429 || e.blocked === 'recipient'), 'every send was accepted, or refused by the guard as a recipient other than the customer (a 429 spacing is retried by the node)');
 		t.note('guard', { blockedCalls: real.guard.blocked, requests: (await real.guard.requests()).length });
-		assert.equal(real.guard.blocked, 0, 'the guard blocked nothing: the assistant never tried another number');
+		assert.equal(real.guard.blocked, 2, 'the guard refused exactly the two owner messages of the handover (alert and contact card), nothing else');
+		assert.ok((await real.guard.requests()).filter((e) => e.blocked).every((e) => digits(e.body?.to?.number) === digits(UNDER)), 'and both were addressed to owner_phone, never to a stranger');
 	});
 }
 
