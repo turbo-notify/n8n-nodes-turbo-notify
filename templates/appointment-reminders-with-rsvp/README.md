@@ -222,10 +222,10 @@ Tested end to end in **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, 2026-11-17) with 
 events and errors as the public contract). **No message was sent to WhatsApp in this run.**
 
 SHA-256 of the tested `workflow.json`:
-`d64f75e4d40ba4cfcc01af765581d2d7a92f80bc652de5e00dd464bb4be35f57`
+`016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`
 
 The exact `workflow.json` of this folder was imported into a fresh n8n instance, with no other change than the patch
-listed below, and the scenario `test/scenario.mjs` ran it: 502 assertions passed, 0 failed, 60 executions observed, 410 seconds (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
+listed below, and the scenario `test/scenario.mjs` ran it: 563 assertions passed, 0 failed, 32 steps, about 7 minutes (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
 14:30 was checked to be stored as 17:30 UTC. 26 working nodes, 11 sticky notes (37 in all).
 
 | Branch | What ran | What it proved |
@@ -283,8 +283,10 @@ what the nodes call; the real runs below used a key with more scopes, so a key w
 
 2026-11-17 (evening, `America/Sao_Paulo`), **n8n 2.45.5**, package **1.5.15**, against `https://api.turbonotify.com`
 with a production key, one run, **156 assertions passed, 0 failed**, 529 seconds. The `workflow.json` of this run is the
-one described by the SHA-256 `d64f75e4d40ba4cfcc01af765581d2d7a92f80bc652de5e00dd464bb4be35f57` (the same file as the
-simulated run above, with only the `owner_phone` value patched to the owner's test number). The plan of the key's
+one described by the SHA-256 `d64f75e4d40ba4cfcc01af765581d2d7a92f80bc652de5e00dd464bb4be35f57`. The file tested above
+(`016e80f7...`) differs from it only in the example text of the form placeholder and of three error messages (an
+obviously fake number pattern replaced a realistic looking example), so the real run still describes it, with only the
+`owner_phone` value patched to the owner's test number. The plan of the key's
 organization was **CUSTOM**, not Free.
 
 **Messages:** 7 real messages sent, inside the budget of 8 (2 calendar invitations, 1 owner message listing two
