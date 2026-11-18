@@ -57,6 +57,8 @@ export function createGuardProxy({ upstream = REAL_API_URL, allowedNumber, maxSe
 	if (!allowed) throw new Error('the guard needs the one number that may receive messages (TN_REAL_OWNER_PHONE)');
 	const entries = [];
 	const acceptedMessageIds = new Set();
+	/** Group ids (of the number under test) a plain text may be written into: only those the run was told with --allow-group. */
+	const allowedGroups = new Set();
 	let seq = 0;
 	let blocked = 0;
 	let chain = Promise.resolve();
@@ -108,7 +110,17 @@ export function createGuardProxy({ upstream = REAL_API_URL, allowedNumber, maxSe
 		const isReply = req.method === 'POST' && REPLY_PATH.test(path);
 		const isSend = req.method === 'POST' && (SEND_PATH.test(path) || isReply);
 		const isTyping = req.method === 'POST' && TYPING_PATH.test(path);
-		if (isSend && !isReply) {
+		if (isSend && !isReply && parsed?.to?.group_id !== undefined) {
+			// The one exception to "owner number only": a plain text into the one allowed test group. A group is never
+			// reached by a typing indicator or a reply, and never with media, a card or any other content.
+			const to = parsed.to;
+			const content = parsed.content;
+			const plainText = Object.keys(to).every((k) => k === 'group_id') && content && typeof content.text === 'string' && Object.keys(content).every((k) => k === 'text');
+			if (!allowedGroups.has(String(to.group_id)) || !plainText) {
+				blocked += 1;
+				return finish(refuse(res, 403, 'harness_recipient_blocked', 'this real run may only write plain text into the one allowed test group'), { blocked: 'recipient' });
+			}
+		} else if (isSend && !isReply) {
 			const to = parsed?.to;
 			const target = digits(to?.number);
 			if (!target || target !== allowed) {
@@ -195,6 +207,10 @@ export function createGuardProxy({ upstream = REAL_API_URL, allowedNumber, maxSe
 		},
 		acceptedMessageIds: () => [...acceptedMessageIds],
 		maxSends,
+		/** Allows plain text sends into this group id (of the number under test). */
+		allowGroup(id) {
+			allowedGroups.add(String(id));
+		},
 		async start(port, host) {
 			server = http.createServer((req, res) => {
 				handle(req, res).catch((error) => {
@@ -352,8 +368,9 @@ export { waitFor };
  * text to one number (the number under test) from its own main number, and nothing else. Counted in the same budget
  * as the guard. The sending number must be the allowed one of the guard (checked once with a read).
  */
-export function createCustomerSender({ apiKey, to, expectedFrom, maxSends, guard, baseUrl = REAL_API_URL }) {
+export function createCustomerSender({ apiKey, to, expectedFrom, maxSends, guard, baseUrl = REAL_API_URL, groupName }) {
 	const target = digits(to);
+	let ownGroupId = null;
 	const ids = [];
 	const client = realClient({ baseUrl, apiKey });
 	const api = {
@@ -375,6 +392,28 @@ export function createCustomerSender({ apiKey, to, expectedFrom, maxSends, guard
 			const res = await client.call('POST', '/v1/messages', { to: { number: `+${target}` }, content: { text } });
 			void idempotencyKey;
 			if (!res.ok || !res.body?.message_id) throw new Error(redact(`the customer send failed: ${res.status} ${JSON.stringify(res.body)}`));
+			ids.push(res.body.message_id);
+			return { id: res.body.message_id, status: res.body.status };
+		},
+		/**
+		 * Two-number scenarios with a group (`--allow-group`): finds, with the customer's own key, the id that the SAME
+		 * group has on the customer's number (ids are per number). Exactly one active group must carry the name.
+		 */
+		async resolveGroup() {
+			if (!groupName) throw new Error('no test group: pass --allow-group');
+			const list = (await client.get(`/v1/numbers/main/groups?name=${encodeURIComponent(groupName)}`)).data ?? [];
+			const exact = list.filter((g) => g.name === groupName && g.is_active);
+			if (exact.length !== 1) throw new Error(`the customer number must see exactly one active group with the test group name (saw ${exact.length})`);
+			ownGroupId = exact[0].id;
+			return { id: ownGroupId, participantsCount: exact[0].participants_count };
+		},
+		/** One plain text, written by the customer number INTO the allowed test group and nowhere else. */
+		async sendToGroup(text) {
+			if (!ownGroupId) throw new Error('call resolveGroup() first');
+			if (typeof text !== 'string' || !text.length || text.length > 500) throw new Error('the customer sender sends plain text only (1 to 500 characters)');
+			if (guard.messagesAccepted + ids.length >= maxSends) throw new Error(`the real run budget of ${maxSends} messages is used`);
+			const res = await client.call('POST', '/v1/messages', { to: { group_id: ownGroupId }, content: { text } });
+			if (!res.ok || !res.body?.message_id) throw new Error(redact(`the customer group send failed: ${res.status} ${JSON.stringify(res.body)}`));
 			ids.push(res.body.message_id);
 			return { id: res.body.message_id, status: res.body.status };
 		},

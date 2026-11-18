@@ -25,6 +25,7 @@
  *   --api-key-file <f>   file with the line `- Value: tn_live_...` (required with --real-api; the key is never printed)
  *   --max-sends <n>      hard budget of accepted sends, default 8
  *   --keep-messages      do not delete the messages this run sent when it ends (by default every one is deleted for everyone)
+ *   --allow-group <grp_id|name>  the ONE group (of the number under test) that plain text may be written into, by the workflow and by the customer sender; its id and name are masked
  *   --no-guard           n8n talks to the API directly (no recipient check, no budget, no request log): not recommended
  *   env TN_REAL_OWNER_PHONE  the ONE number that may receive messages (with +); required with --real-api
  *
@@ -84,7 +85,7 @@ const report = await runTemplate({
 	timezone: args.tz,
 	llm: Boolean(args.llm),
 	realApi: args['real-api']
-		? { keyFile: path.resolve(args['api-key-file'] ?? ''), customerKeyFile: args['customer-key-file'] ? path.resolve(args['customer-key-file']) : undefined, maxSends: args['max-sends'] ? Number(args['max-sends']) : 8, guard: !args['no-guard'], keepMessages: Boolean(args['keep-messages']) }
+		? { allowGroup: args['allow-group'], keyFile: path.resolve(args['api-key-file'] ?? ''), customerKeyFile: args['customer-key-file'] ? path.resolve(args['customer-key-file']) : undefined, maxSends: args['max-sends'] ? Number(args['max-sends']) : 8, guard: !args['no-guard'], keepMessages: Boolean(args['keep-messages']) }
 		: undefined,
 });
 

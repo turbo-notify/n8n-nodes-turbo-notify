@@ -12,7 +12,7 @@ import { AssertionFailure, createAssert } from './assert.mjs';
 import { mockClient } from './mock-client.mjs';
 import { REAL_API_URL, createCustomerSender, createGuardProxy, guardClient, readApiKey, realClient } from './real.mjs';
 import { N8nInstance, PACKAGE_DIR, makeTempHome } from './n8n.mjs';
-import { deepClone, fillTokens, firstFreePort, log, randomHex, range, redact, registerPhone, run, sleep, waitFor } from './util.mjs';
+import { deepClone, fillTokens, firstFreePort, log, randomHex, range, redact, registerGroup, registerPhone, run, sleep, waitFor } from './util.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const PACKAGE_ROOT = path.resolve(HERE, '../../..');
@@ -206,18 +206,37 @@ export async function runTemplate(options) {
 				return { status: res.status, ok: res.ok, body: json };
 			};
 			real = { ...direct, throughGuard, guard: guardClient(guard), ownerPhone, upstream, maxSends: guard.maxSends, startedAt: new Date().toISOString(), guarded: ro.guard !== false };
+			// --allow-group: the ONE group a plain text may be written into (besides the owner number). Resolved with the key
+			// of the number under test; its id and name are masked in all output.
+			if (ro.allowGroup) {
+				if (ro.guard === false) throw new Error('--allow-group needs the guard (it cannot be combined with --no-guard)');
+				const wanted = String(ro.allowGroup);
+				let found;
+				if (/^grp_[0-9a-f]{32}$/.test(wanted)) {
+					found = await direct.get(`/v1/numbers/main/groups/${wanted}`);
+				} else {
+					const list = (await direct.get(`/v1/numbers/main/groups?name=${encodeURIComponent(wanted)}`)).data ?? [];
+					const exact = list.filter((g) => g.name === wanted && g.is_active);
+					if (exact.length !== 1) throw new Error(`--allow-group: ${exact.length} active groups carry that name on the number under test, expected exactly one`);
+					found = exact[0];
+				}
+				if (!found?.is_active) throw new Error('--allow-group: the group is not active on the number under test');
+				registerGroup({ id: found.id, name: found.name });
+				guard.allowGroup(found.id);
+				real.testGroup = { id: found.id, name: found.name, participantsCount: found.participants_count };
+			}
 			api = new Proxy({}, {
 				get() {
 					throw new Error('t.mock is not available in a --real-api run: use t.real');
 				},
 			});
-			report.realApi = { upstream, guard: ro.guard !== false, maxSends: guard.maxSends, ownerNumber: '<owner test number, masked>' };
+			report.realApi = { upstream, guard: ro.guard !== false, maxSends: guard.maxSends, ownerNumber: '<owner test number, masked>', testGroup: real.testGroup ? '<test group>' : undefined };
 			// Two-number scenarios: a second organization's key plays the customer who writes to the number under test.
 			if (ro.customerKeyFile) {
 				const personal = process.env.TN_REAL_PERSONAL_PHONE;
 				if (!personal) throw new Error('--customer-key-file needs TN_REAL_PERSONAL_PHONE (the number under test, with +)');
 				registerPhone(personal, 'number under test');
-				customer = createCustomerSender({ apiKey: readApiKey(ro.customerKeyFile), to: personal, expectedFrom: ownerPhone, maxSends: guard.maxSends, guard, baseUrl: upstream });
+				customer = createCustomerSender({ apiKey: readApiKey(ro.customerKeyFile), to: personal, expectedFrom: ownerPhone, maxSends: guard.maxSends, guard, baseUrl: upstream, groupName: real.testGroup?.name });
 				guard.extraCount = () => customer.count;
 				real.customer = customer;
 				report.realApi.customerSender = true;
@@ -302,7 +321,7 @@ export async function runTemplate(options) {
 
 		/* ---- the scenario may fill in the values the user would type */
 		let prepared = deepClone(workflowJson);
-		const context0 = { urls: tokens, credentials: Object.fromEntries([...credentialByType].map(([k, v]) => [k, v])), tables: Object.fromEntries([...tableByName].map(([k, v]) => [k, v.id])), workflow: prepared };
+		const context0 = { urls: tokens, credentials: Object.fromEntries([...credentialByType].map(([k, v]) => [k, v])), tables: Object.fromEntries([...tableByName].map(([k, v]) => [k, v.id])), workflow: prepared, realGroup: real?.testGroup ? { id: real.testGroup.id } : undefined };
 		if (typeof scenarioModule.prepare === 'function') {
 			const result = await scenarioModule.prepare(prepared, context0);
 			if (result) prepared = result;

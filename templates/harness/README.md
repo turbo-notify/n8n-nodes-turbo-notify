@@ -171,6 +171,7 @@ node templates/harness/run-template.mjs templates/<slug>/workflow.json \
 | `--max-sends <n>` | hard budget of accepted sends (default 8). A replay of an idempotent send returns the same message id and does not count |
 | `--keep-messages` | by default every message the run created is deleted for everyone when it ends, also after a failure |
 | `--customer-key-file <file>` | two-number scenarios (T3): the key of ANOTHER organization whose main number plays the customer who writes to the number under test. Needs env `TN_REAL_PERSONAL_PHONE` (the number under test, with `+`) and `TN_REAL_OWNER_PHONE` set to the customer number. The key file may use `- Value:` or `- Key:` |
+| `--allow-group <grp_id or name>` | the ONE group (of the number under test) that plain text may be written into, besides the owner number: the digest posted in group mode, and the posts of the customer helper. See "A test group" below |
 | `--no-guard` | n8n talks to the API directly: no recipient check, no budget, no request log. Not recommended |
 | env `TN_REAL_OWNER_PHONE` | the only number that may receive a message, with `+`. Never write it into a file of the repository |
 
@@ -187,6 +188,8 @@ every call to the real API unchanged and answers with what the API answered. The
 - stops at `--max-sends` accepted messages (429 `harness_budget_exhausted`),
 - records every request and response (without the `Authorization` header), the equivalent of the mock request log:
   `t.real.guard.requests()`, `.sends()`, `.mark()`, `.messagesAccepted`, `.blocked`.
+
+**A test group (`--allow-group`).** Templates that read or write a WhatsApp group (T5) need a group made by hand: the API cannot create one. Pass the `grp_` id (as the number under test sees it) or the exact name of ONE active group; the harness resolves it with the key of the number under test (a name must match exactly one active group). The guard then also accepts a send whose `to` is exactly `{ group_id }` of that group and whose `content` is exactly `{ text }`, and nothing else: another group id, media, a card, a number next to the group id, a typing indicator or a reply into a group are still refused (403). With `--customer-key-file`, `t.real.customer.resolveGroup()` finds the id the same group has on the customer's number (ids are per number) and `t.real.customer.sendToGroup(text)` writes a plain text into it (counted in the same `--max-sends` budget). `t.real.testGroup` holds `{ id, name, participantsCount }` for the scenario and `prepare(workflow, ctx)` gets `ctx.realGroup.id`. The group id and name are masked in every output as `<test group id>` and `<test group>`. The API cannot list the members of a group: check who is in it before the run (the participant count and who wrote in it) and tell them that test messages will arrive.
 
 **Masking.** The key and the owner number are registered as secrets: every line the harness prints, the JSON report and
 the `--report` file replace them with `tn_live_***MASKED***` and `<owner test number>` (the number under test of a

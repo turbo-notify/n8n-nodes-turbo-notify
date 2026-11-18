@@ -19,8 +19,27 @@ export function registerPhone(value, label = 'owner test number') {
 	phones.set(d, label);
 	if (d.startsWith('55') && d.length >= 12) phones.set(d.slice(2), label);
 }
+const groupIds = new Set();
+const groupNames = new Set();
+/**
+ * The one test group of a real run (`--allow-group`): its ids (`grp_` + 32 hex, also the dashed UUID form that appears in
+ * media URLs) and its name are masked in every line the harness prints or writes. The name is masked as a whole word,
+ * case sensitive, because it can be short.
+ */
+export function registerGroup({ id, name }) {
+	if (id) {
+		const hex = String(id).replace(/^grp_/, '');
+		groupIds.add(String(id));
+		groupIds.add(hex);
+		if (/^[0-9a-f]{32}$/.test(hex)) groupIds.add(`${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`);
+	}
+	if (name && String(name).length >= 2) groupNames.add(String(name));
+}
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 export function redact(text) {
 	let out = String(text);
+	for (const id of groupIds) out = out.split(id).join('<test group id>');
+	for (const name of groupNames) out = out.replace(new RegExp(`(?<![\\p{L}\\p{N}_])${escapeRegExp(name)}(?![\\p{L}\\p{N}_])`, 'gu'), '<test group>');
 	for (const [d, label] of phones) out = out.split(`+${d}`).join(`<${label}>`).split(d).join(`<${label}>`);
 	for (const secret of secrets) out = out.split(secret).join('tn_live_***MASKED***');
 	return out.replace(/tn_(live|test)_[A-Za-z0-9_-]{12,}/g, 'tn_$1_***MASKED***').replace(/gsk_[A-Za-z0-9]{20,}/g, 'gsk_***MASKED***').replace(/sk-or-v1-[A-Za-z0-9]{20,}/g, 'sk-or-***MASKED***');
