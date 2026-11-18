@@ -218,8 +218,8 @@ Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh thr
 | | |
 |---|---|
 | Date | 2026-11-18 |
-| `workflow.json` | SHA-256 `ca3cb2aab2f4967764221c04c866d4666d2fa637fd776b44930ef96f3af73a2a` (`shasum -a 256 workflow.json`) |
-| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 616 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b`, and the real API runs below were made on it. `workflow.png` was not regenerated and still shows the previous notes. |
+| `workflow.json` | SHA-256 `b54e0fc2f68c92b3d23e2cddb77e955cdc771a3bb99c7934fefa3141ee9783c4` (`shasum -a 256 workflow.json`) |
+| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 616 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b`, and the real API runs below were made on it. `workflow.png` was retaken on 2026-11-18 in the n8n 2.45.5 editor and shows the reformatted notes. The overview note height was trimmed afterwards, after a look at the canvas in n8n 2.45.5 (only the size of that note changed, so the mock scenario was not run again). |
 | n8n | 2.45.5 (image `n8nio/n8n:2.45.5`, id `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`) |
 | Package | `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15 (built from this repository) |
 | Mock API | `templates/harness/mock-api.mjs`, same routes, answers, events and errors as `public-docs-web/public/openapi.json` |

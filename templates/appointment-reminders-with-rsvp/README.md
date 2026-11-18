@@ -235,7 +235,7 @@ events and errors as the public contract). **No message was sent to WhatsApp in 
 SHA-256 of the tested `workflow.json`:
 `ef2053f8115b98a75940279c0112b29c0b987501e87b30ad474834ce6bf93b5b`
 
-Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 617 assertions, 0 failed (n8n 2.45.5, package build 1.5.16 of this module). The previous SHA-256 of the file (before the notes were reformatted) was `016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`; the real API runs below were made on files that differ only in sticky notes or in the text noted there. `workflow.png` was not regenerated and still shows the previous notes.
+Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 617 assertions, 0 failed (n8n 2.45.5, package build 1.5.16 of this module). The previous SHA-256 of the file (before the notes were reformatted) was `016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`; the real API runs below were made on files that differ only in sticky notes or in the text noted there. `workflow.png` was retaken on 2026-11-18 in the n8n 2.45.5 editor and shows the reformatted notes.
 
 The exact `workflow.json` of this folder was imported into a fresh n8n instance, with no other change than the patch
 listed below, and the scenario `test/scenario.mjs` ran it: 617 assertions passed, 0 failed, 32 steps, about 7.5 minutes (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's

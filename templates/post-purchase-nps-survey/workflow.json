@@ -1358,7 +1358,7 @@
     {
       "parameters": {
         "content": "### How it works\nYour shop posts a JSON order event (order_id, phone, status, customer_name) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one WhatsApp question, 0 to 10, inside your sending hours.\n\nA 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, and a 0 to 6 is asked what went wrong while you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. It is not a chatbot.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15).\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once.\n4. In Your settings type owner_phone (not the number linked to Turbo Notify) and business_name, then check start_statuses, time zone, hours and texts.\n5. Activate, test with your own phone, then point your shop at the Production URL.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. On a small n8n Cloud plan slow the timer and the poll down.",
-        "height": 560,
+        "height": 470,
         "width": 560,
         "color": 1
       },

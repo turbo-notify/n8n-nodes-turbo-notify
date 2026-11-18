@@ -167,8 +167,8 @@ Tested on 2026-11-17, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, digest `sha256:9
 
 | | |
 |---|---|
-| `workflow.json` | SHA-256 `222861f7e4707b72a7b4b38a1ac213b83922a69a772920da710657ecc9ebddce` (the exact file the mock run below imported) |
-| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 635 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`, and the real API runs below were made on it. `workflow.png` was not regenerated and still shows the previous notes. |
+| `workflow.json` | SHA-256 `4b41ee99d0cecc12e4e37de8ab6229e452719bdb37de31683197735ddaf959af` (the exact file the mock run below imported) |
+| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 635 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`, and the real API runs below were made on it. `workflow.png` was retaken on 2026-11-18 in the n8n 2.45.5 editor and shows the reformatted notes. The overview note height was trimmed afterwards, after a look at the canvas in n8n 2.45.5 (only the size of that note changed, so the mock scenario was not run again). |
 | Method | a stateful simulation of the Turbo Notify public API (`templates/harness`, built from `openapi.json`), driven over HTTP, plus live round trips of the Polling Trigger |
 | Result | passed on the final file: 24 steps, 635 assertions, 0 failed, 188 s (run again on 2026-11-17 after the last change of the canvas layout; `workflow.png` is a screenshot of this file in the n8n 2.45.5 editor) |
 

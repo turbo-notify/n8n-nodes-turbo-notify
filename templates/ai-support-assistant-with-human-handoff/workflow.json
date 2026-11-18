@@ -1281,7 +1281,7 @@
 		{
 			"parameters": {
 				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
-				"height": 570,
+				"height": 500,
 				"width": 560
 			},
 			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",

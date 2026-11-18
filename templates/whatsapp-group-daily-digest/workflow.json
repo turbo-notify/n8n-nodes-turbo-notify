@@ -1046,7 +1046,7 @@
 			"parameters": {
 				"content": "### How it works\nFor a busy WhatsApp group of a team, school or community.\n\nWhile active, the workflow stores the text of the groups you list in a Data Table, because Turbo Notify keeps message text 1 hour by default on every plan. Every hour from digest_hour, a group with enough messages gets an AI digest of the last 24 hours: topics, decisions, open questions, dates and links. The answer is checked, and a plain digest replaces a bad one.\n\nIt goes to you, once per group per day. One button builds a digest now.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15).\n2. Create a Turbo Notify API credential (scopes events:read, messages:read, messages:send, groups:read) and a chat model credential. Other OpenAI compatible providers need Use Responses API off.\n3. Run the manual branch once to create the tables.\n4. In Your settings replace watch_groups (the number must already be a member) and owner_phone (another phone than the number linked to Turbo Notify).\n5. Activate, write a few messages, then press Run now.\n\n### Customization\nPrompt, texts and limits are in Your settings. n8n Cloud counts executions: the poll runs every 10 minutes and the timer every hour, so lengthen them on a small plan.",
 				"width": 560,
-				"height": 590
+				"height": 500
 			}
 		},
 		{

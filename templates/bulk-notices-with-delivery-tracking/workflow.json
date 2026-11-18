@@ -5,7 +5,7 @@
 			"id": "7af2e7b3-0d6e-4cb6-872f-2b3975aebd5b",
 			"parameters": {
 				"content": "### How it works\nSend one notice to a list of people and see what happened to each message.\n\nA password protected form takes name and phone (two columns copied from a sheet work) and the text, with {name} where the name goes. The workflow cleans the numbers, drops duplicates and your stop list, checks your quota and sends in paced batches from your own number.\n\nA Polling Trigger writes delivered, read and failed into the notices data table. You get ONE WhatsApp summary per batch, when everyone has a receipt or after report_after_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential with the scopes messages:send, messages:read and events:read, and select it in all four Turbo Notify nodes.\n3. Create a Basic Auth credential for the form.\n4. Run \"Create the notices table\" once.\n5. In Settings set owner_phone: your own number, not the one linked to Turbo Notify.\n6. Activate, then test with two rows to yourself.\n\n### Customization\nTo send from another number, set number in Settings and pick the same number in the Polling Trigger options. Batch size, pause and caps are also in Settings.",
-				"height": 600,
+				"height": 520,
 				"width": 560
 			},
 			"name": "Overview note",
