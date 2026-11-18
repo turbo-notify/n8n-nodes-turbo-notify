@@ -1198,7 +1198,7 @@ export default async function scenario(t) {
 		const since = await t.executionMark();
 		await incoming(phone(1), '3');
 		await t.waitFor(async () => (await rowOf('http-2')).score === 3, { timeoutMs: 400_000, message: 'the poller (every 5 minutes) to read the reply' });
-		await t.waitFor(async () => (await sendsSince(mark)).length >= 3, { timeoutMs: 30_000, message: 'the alert, the card and the apology' });
+		await t.waitFor(async () => (await sendsSince(mark)).length >= 3, { timeoutMs: 120_000, message: 'the alert, the card and the apology' });
 		await t.waitFor(async () => (await liveRuns(since)).some((r) => r.ran(POLL)), { timeoutMs: 120_000, message: 'the run of the poller to finish' });
 		await t.sleep(330_000); // longer than one poll tick (5 minutes)
 		const count = distinct(await sendsSince(mark)).length;
@@ -1225,6 +1225,7 @@ export default async function scenario(t) {
 		const since = await t.executionMark();
 		await t.waitFor(async () => (await rowOf('timer-1')).status === 'asked', { timeoutMs: 33 * 60_000, message: 'the 30 minute timer to ask the survey' });
 		assert.equal(to(await sendsSince(mark), phone(2)).map((s) => s.key), ['nps-question-timer-1'], 'asked once, by the clock');
+		await t.waitFor(async () => (await liveRuns(since)).some((r) => r.ran(TIMER)), { timeoutMs: 120_000, message: 'the timer run to finish' });
 		assert.ok((await liveRuns(since)).some((r) => r.ran(TIMER)), 'the timer started the run');
 		await configure({ cooldown_days: 30 });
 	});

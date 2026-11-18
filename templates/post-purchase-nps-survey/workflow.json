@@ -1357,9 +1357,9 @@
     },
     {
       "parameters": {
-        "content": "### How it works\nNeeds Lone Wolf or higher in practice: every customer is a contact. Your shop posts a JSON order event (order_id, phone, status, customer_name; field_* settings rename them) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one WhatsApp question, 0 to 10, inside your sending hours. A 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, a 0 to 6 is asked what went wrong and you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. Not a chatbot. Other NPS templates exist (20880, 22663, 4686, Google Sheets based): this one adds STOP, reply matching, cooldown, daily cap and re-ask.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15), see [installing community nodes](https://docs.n8n.io/integrations/community-nodes/installation/). Works on n8n Cloud and self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once. In Your settings type owner_phone (a different phone from the number linked to Turbo Notify; Free allows 2 contacts per cycle) and business_name. Check start_statuses, time zone, hours and texts.\n4. Activate, test with your own phone, then point your shop at the Production URL. It must send a fixed custom header: Shopify and WooCommerce native webhooks usually cannot, so use a relay. Outside Brazil send numbers with + and the country code.\n5. Set an Error workflow.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. n8n Cloud counts executions: the 30 minute timer is about 1,440 a month and the 5 minute poll up to 8,640. Slow them down on a small plan.",
-        "height": 780,
-        "width": 640,
+        "content": "### How it works\nYour shop posts a JSON order event (order_id, phone, status, customer_name) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one WhatsApp question, 0 to 10, inside your sending hours.\n\nA 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, and a 0 to 6 is asked what went wrong while you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. It is not a chatbot.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15).\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once.\n4. In Your settings type owner_phone (not the number linked to Turbo Notify) and business_name, then check start_statuses, time zone, hours and texts.\n5. Activate, test with your own phone, then point your shop at the Production URL.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. On a small n8n Cloud plan slow the timer and the poll down.",
+        "height": 560,
+        "width": 560,
         "color": 1
       },
       "id": "46b13ac2-0a8a-48e9-a50b-30dd709b04ce",
@@ -1373,9 +1373,9 @@
     },
     {
       "parameters": {
-        "content": "## Four ways in\nAn order from your shop, a reply, a timer every 15 minutes, a weekly timer.",
-        "height": 960,
-        "width": 380,
+        "content": "## Four ways in\n\nAn order from your shop, a reply, a timer every 30 minutes and a weekly timer.",
+        "height": 904,
+        "width": 300,
         "color": 7
       },
       "id": "e5f83cc9-5754-44ff-a1c2-537ad924ca47",
@@ -1383,15 +1383,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        -110
+        -100,
+        -132
       ]
     },
     {
       "parameters": {
-        "content": "## Check, then read the table\nStops on a sample setting. Reads the survey rows once.",
-        "height": 360,
-        "width": 420,
+        "content": "## Check, then read the table\n\nStops on a sample setting, then reads the survey rows once.",
+        "height": 285,
+        "width": 440,
         "color": 7
       },
       "id": "76794e65-476b-4872-a304-4fa1a6f55854",
@@ -1399,15 +1399,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        910,
+        187
       ]
     },
     {
       "parameters": {
-        "content": "## Decide what to do\nQueue an order, ask what is due, report the week, clear old rows, or judge a reply read in full.",
-        "height": 860,
-        "width": 900,
+        "content": "## Decide what to do\n\nQueue an order, ask what is due, report the week, clear old rows or judge a reply.",
+        "height": 785,
+        "width": 920,
         "color": 7
       },
       "id": "3b19772c-fb6e-4514-ad9d-14334dcc5d1b",
@@ -1415,15 +1415,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1400,
-        -70
+        1390,
+        -73
       ]
     },
     {
       "parameters": {
-        "content": "## Save, then write\nThe row is saved before anything is sent. Then every text is made from your settings.",
-        "height": 360,
-        "width": 420,
+        "content": "## Save, then write\n\nThe row is saved before anything is sent. Every text comes from your settings.",
+        "height": 304,
+        "width": 440,
         "color": 7
       },
       "id": "06f54c23-cadb-45ae-a0db-b96bfb6812e8",
@@ -1431,15 +1431,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2420,
-        190
+        2410,
+        168
       ]
     },
     {
       "parameters": {
-        "content": "## Send\nText, review button or contact card. A refused send never stops the others.",
-        "height": 760,
-        "width": 660,
+        "content": "## Send\n\nText, review button or contact card. A refused send never stops the others.",
+        "height": 685,
+        "width": 680,
         "color": 7
       },
       "id": "12a6034f-b545-403e-aac1-d82d7ac773d1",
@@ -1447,15 +1447,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2900,
-        -10
+        2890,
+        -13
       ]
     },
     {
       "parameters": {
-        "content": "## Record and report\nThe message id or the failure goes into the row. A refusal then fails the run.",
-        "height": 360,
-        "width": 660,
+        "content": "## Record and report\n\nThe message id or the failure goes into the row. A refusal then fails the run.",
+        "height": 285,
+        "width": 680,
         "color": 7
       },
       "id": "9ea6eea7-b599-4397-a110-c706af730228",
@@ -1463,15 +1463,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3620,
-        190
+        3610,
+        187
       ]
     },
     {
       "parameters": {
-        "content": "## Run once: create the table\nCreates surveys when missing. Safe to run again.",
-        "height": 360,
-        "width": 420,
+        "content": "## Run once: create the table\n\nCreates surveys when missing. Safe to run again.",
+        "height": 285,
+        "width": 440,
         "color": 7
       },
       "id": "6bce7597-f51f-464b-a779-029a3721fb97",
@@ -1479,15 +1479,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        890
+        -50,
+        887
       ]
     },
     {
       "parameters": {
-        "content": "**Replace the samples before you activate**\nWhile owner_phone or business_name is a sample the workflow stops and asks nobody. owner_phone must not be the number linked to Turbo Notify. Every value in Your settings is explained under the node.",
-        "height": 800,
-        "width": 460,
+        "content": "**Replace the samples before you activate.** While owner_phone or business_name is a sample, the workflow asks nobody.",
+        "height": 281,
+        "width": 300,
         "color": 3
       },
       "id": "4733c497-55f0-4793-a01d-26f12fc2d289",
@@ -1495,8 +1495,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        420,
-        130
+        380,
+        191
       ]
     }
   ],

@@ -22,6 +22,17 @@ A silent phone cannot be woken by a workflow, but you can make it much harder to
 - **Send a weekly test alert** (a firing alert with a test id, answered with OK, then resolved), so a broken number, a revoked key or a phone that stopped notifying shows up on a quiet day.
 - **A number used only to page sends far more than it receives.** Turbo Notify refuses sends with `429 reply_ratio_too_low` when a number sends far more than it gets back, a sign of unsolicited sending (see [Rate limits](https://docs.turbonotify.com/en/messages/rate-limits/) and [Protect your number](https://docs.turbonotify.com/en/general/abuse/)). Every "OK" and every test answer is a reply that helps. If you page many people about many alerts and almost nobody writes back, the sends can be refused, and the workflow then fails the run with that reason. It cannot get around the limit and is not meant to. This refusal exists in the documentation and could not be provoked in the tests.
 
+## Before you use it
+
+The note on the canvas is short on purpose. What did not fit in it is here.
+
+- **Install.** Settings > Community Nodes, see [installing community nodes](https://docs.n8n.io/integrations/community-nodes/installation/). It works on n8n Cloud (verified node) and self-hosted, tested on n8n 2.45.5.
+- **Free plan.** Use at most two different phones in all: `owner_phone` equal to `oncall_phone_2`, or `oncall_phone_2` empty. See "Plans, quota and pace".
+- **Polling.** Replies are read by polling, so a confirmation can take up to a minute.
+- **Executions.** The one-minute timer runs 1,440 times a day. Check your plan, or set the Schedule Trigger to every 2 or 5 minutes.
+- **Error workflow.** Set one, so that you hear about a failed page.
+- **The alert body.** See "What your monitoring tool posts".
+
 ## What it does
 
 - **Entry (A).** A Webhook receives a JSON alert. It requires a Header Auth credential: a request without the right header is answered `403` by n8n (the same answer for a missing and for a wrong value) and never starts a run. Fields are mapped from names you set (`field_alert_id`, `field_service`, `field_severity`, `field_status`, `field_message`, `field_runbook_url`), so any tool that can post a flat JSON body works. Text is cut (message at `max_text_length`, 300 by default; service at 80), control and direction characters are removed, and a runbook link that is not `http://` or `https://` (or is longer than 500 characters) is dropped. An alert below `min_severity` is ignored. A severity the list does not know, or none, is never ignored.
@@ -207,7 +218,8 @@ Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh thr
 | | |
 |---|---|
 | Date | 2026-11-18 |
-| `workflow.json` | SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b` (`shasum -a 256 workflow.json`) |
+| `workflow.json` | SHA-256 `ca3cb2aab2f4967764221c04c866d4666d2fa637fd776b44930ef96f3af73a2a` (`shasum -a 256 workflow.json`) |
+| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 616 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b`, and the real API runs below were made on it. `workflow.png` was not regenerated and still shows the previous notes. |
 | n8n | 2.45.5 (image `n8nio/n8n:2.45.5`, id `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`) |
 | Package | `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15 (built from this repository) |
 | Mock API | `templates/harness/mock-api.mjs`, same routes, answers, events and errors as `public-docs-web/public/openapi.json` |
@@ -265,7 +277,7 @@ Branches run (each step asserts the requests the mock received and the rows in t
 
 ### Real API run
 
-Run from the exact `workflow.json` (SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b`) on 2026-11-18 (UTC), in a throwaway n8n 2.45.5 with package `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15, against the real Turbo Notify API with real WhatsApp delivery (`test/real.mjs`, harness real mode with the guard on and a budget). Two numbers owned by the same person, on two organizations: the number under test sent the pages, and the on-call person (level 1 and owner at once, levels 2 and 3 empty) was the other number, which answered with its own key. Only the values typed in `Your settings` were patched. The final run passed: 7 steps, 30 assertions, 0 failed, 230 s.
+Run from the exact `workflow.json` (SHA-256 `4bfede4d9ea01a6149f31b1e335ca9fb83385a3cb3c292562bd03d14634fb27b`) (the file before the notes were reformatted on 2026-11-18; only sticky notes differ from the current file) on 2026-11-18 (UTC), in a throwaway n8n 2.45.5 with package `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15, against the real Turbo Notify API with real WhatsApp delivery (`test/real.mjs`, harness real mode with the guard on and a budget). Two numbers owned by the same person, on two organizations: the number under test sent the pages, and the on-call person (level 1 and owner at once, levels 2 and 3 empty) was the other number, which answered with its own key. Only the values typed in `Your settings` were patched. The final run passed: 7 steps, 30 assertions, 0 failed, 230 s.
 
 | Step | Result on the real API |
 |---|---|

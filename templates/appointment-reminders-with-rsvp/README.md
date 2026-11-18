@@ -42,6 +42,17 @@ verified by n8n and listed in its catalog: an admin enables Verified Community N
   in your n8n and sends them a reminder. Tell your customers that you do, and delete old rows (Data tables tab:
   `appointments`) when you no longer need them. This is not legal advice; check what LGPD or GDPR asks of you.
 
+## Before you use it
+
+The note on the canvas is short on purpose. What did not fit in it is here.
+
+- **Plan limits.** The Free plan reaches 2 different contacts per billing cycle (you, the owner who gets the report, count as one) and Lone Wolf reaches 100. See "Plans, limits and caveats".
+- **Stored data.** The Data Table holds the name and the phone of each customer. Tell your customers, and delete old rows when you no longer need them.
+- **Error workflow.** A disconnected number makes reminders fail and the rows turn `send_failed` until you set them back to `scheduled`. Set an Error workflow so that you hear about it.
+- **n8n must be running** for reminders to go out. Answers given while it was off are handled at the next poll.
+- **The form.** Share its link only with staff, and protect it with the Basic Auth credential.
+- **Tested on** n8n 2.45.5, on n8n Cloud and self-hosted.
+
 ## What it does
 
 | Entry point | When | What happens |
@@ -222,10 +233,12 @@ Tested end to end in **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, 2026-11-17) with 
 events and errors as the public contract). **No message was sent to WhatsApp in this run.**
 
 SHA-256 of the tested `workflow.json`:
-`016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`
+`ef2053f8115b98a75940279c0112b29c0b987501e87b30ad474834ce6bf93b5b`
+
+Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 617 assertions, 0 failed (n8n 2.45.5, package build 1.5.16 of this module). The previous SHA-256 of the file (before the notes were reformatted) was `016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`; the real API runs below were made on files that differ only in sticky notes or in the text noted there. `workflow.png` was not regenerated and still shows the previous notes.
 
 The exact `workflow.json` of this folder was imported into a fresh n8n instance, with no other change than the patch
-listed below, and the scenario `test/scenario.mjs` ran it: 563 assertions passed, 0 failed, 32 steps, about 7 minutes (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
+listed below, and the scenario `test/scenario.mjs` ran it: 617 assertions passed, 0 failed, 32 steps, about 7.5 minutes (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
 14:30 was checked to be stored as 17:30 UTC. 26 working nodes, 11 sticky notes (37 in all).
 
 | Branch | What ran | What it proved |

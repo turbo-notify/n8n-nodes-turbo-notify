@@ -1248,9 +1248,9 @@
 				-550
 			],
 			"parameters": {
-				"content": "### How it works\nFor clinics, salons and studios. Staff add appointments with a form. Every hour the workflow sends each customer whose appointment is coming up a native WhatsApp calendar invitation, once. A Polling Trigger reads the answers from the documented message.calendar_responded event, records Going, Maybe or Not going, thanks the customer and, on a decline, texts you with the customer's contact card. Each run sends you ONE message listing only exceptions: reminders that could not go out and customers who have not tapped. Guests on personal WhatsApp accounts see the invitation without the time card, so the text repeats it. n8n must be running for reminders to go out; answers given while it was off are handled at the next poll.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. In the Turbo Notify dashboard create an API key with the scopes messages:send, messages:read and events:read (chosen when the key is created). Make a Turbo Notify API credential with it, and a Basic Auth credential \"Form access (Basic Auth)\". Share the form link only with staff.\n3. In Your settings set owner_phone (not the number linked to Turbo Notify) and expected_timezone, then set the same time zone in Workflow settings, Timezone.\n4. Run \"Run once: create the table\", add a first row with the form, then activate.\n5. Set an Error workflow: a disconnected number fails reminders and rows turn send_failed until you set them back to scheduled.\nFree reaches 2 different contacts per cycle, Lone Wolf 100. The table holds names and phones: tell your customers, delete old rows. Tested on n8n 2.45.5.\n\n### Customization\nEdit the texts and the date format in Your settings. A row marked not_reminded, send_failed or invalid_phone shows why: fix it, set it back to scheduled.",
-				"width": 640,
-				"height": 1120
+				"content": "### How it works\nFor clinics, salons, tutors and studios. Staff add appointments with a form. Every hour, each customer whose appointment is coming up gets a native WhatsApp calendar invitation, once.\n\nThe customer taps Going, Maybe or Not going. The workflow records the answer and thanks them. A decline texts you with the customer's contact card.\n\nEach hourly run sends you ONE message listing only what needs you: reminders that failed and customers who have not answered. Guests on personal WhatsApp accounts see the invitation without the time card, so the text repeats it.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential with the scopes messages:send, messages:read and events:read, and a Basic Auth credential for the form.\n3. In Your settings set owner_phone (not the number linked to Turbo Notify) and expected_timezone, the same zone as in Workflow settings.\n4. Run \"Run once: create the table\", add a first row with the form, then activate.\n\n### Customization\nEdit the texts and the date format in Your settings. A row marked not_reminded, send_failed or invalid_phone shows why: fix it and set it back to scheduled.",
+				"width": 560,
+				"height": 570
 			}
 		},
 		{
@@ -1259,13 +1259,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-40,
-				-550
+				-50,
+				-552
 			],
 			"parameters": {
-				"content": "## Create the table (run once)\nCreates the appointments Data Table if it is missing. Then add a first row with the form.",
+				"content": "## Create the table (run once)\n\nSets up the appointments table the first time. Then add a row with the form.",
 				"width": 480,
-				"height": 290,
+				"height": 304,
 				"color": 7
 			}
 		},
@@ -1275,13 +1275,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-40,
-				-90
+				-100,
+				-92
 			],
 			"parameters": {
-				"content": "## Entry points\nThe form, the hourly timer and the Polling Trigger all pass through Your settings.",
-				"width": 200,
-				"height": 1380,
+				"content": "## Entry points\n\nThree ways in: the form, the hourly timer and the answers.",
+				"width": 300,
+				"height": 1394,
 				"color": 7
 			}
 		},
@@ -1291,13 +1291,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				760,
-				-190
+				750,
+				-173
 			],
 			"parameters": {
-				"content": "## Add appointments\nStaff use the form. A valid entry is saved, a rejected one is explained to the person who typed it.",
-				"width": 1300,
-				"height": 390,
+				"content": "## Add appointments\n\nStaff add a booking with the form. A valid one is saved, a rejected one is explained.",
+				"width": 1320,
+				"height": 385,
 				"color": 7
 			}
 		},
@@ -1307,13 +1307,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				760,
-				390
+				750,
+				388
 			],
 			"parameters": {
-				"content": "## Read the quota and the due rows\nOne message of the quota stays free for you. Only rows inside the reminder window are read.",
-				"width": 540,
-				"height": 290,
+				"content": "## Read the quota and the due rows\n\nKeeps one message free for your report and reads only rows inside the reminder window.",
+				"width": 480,
+				"height": 304,
 				"color": 7
 			}
 		},
@@ -1323,13 +1323,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1320,
-				370
+				1260,
+				392
 			],
 			"parameters": {
-				"content": "**Personal WhatsApp accounts** see the invitation without the time card, so the text repeats the date and time. `expected_timezone` must match the time zone of this workflow, or the run stops.",
-				"width": 250,
-				"height": 310,
+				"content": "**Personal accounts** see the invitation without the time card. `expected_timezone` must match the time zone of this workflow.",
+				"width": 300,
+				"height": 300,
 				"color": 3
 			}
 		},
@@ -1340,12 +1340,12 @@
 			"typeVersion": 1,
 			"position": [
 				1590,
-				390
+				388
 			],
 			"parameters": {
-				"content": "## Send and record\nEach invitation goes out once. The row keeps the message id, or the reason it failed.",
-				"width": 470,
-				"height": 290,
+				"content": "## Send and record\n\nEach invitation goes out once. The row keeps the message id or the reason it failed.",
+				"width": 480,
+				"height": 304,
 				"color": 7
 			}
 		},
@@ -1355,13 +1355,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				520,
-				700
+				510,
+				717
 			],
 			"parameters": {
-				"content": "## Wait for the sends, then list what needs you\nThe Merge waits until every invitation is sent. Rows not reminded, failed sends and customers who have not tapped become one message.",
-				"width": 980,
-				"height": 290,
+				"content": "## Wait, then report\n\nWaits for every invitation, then tells you only what needs you in one message.",
+				"width": 1000,
+				"height": 275,
 				"color": 7
 			}
 		},
@@ -1371,13 +1371,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				760,
-				1000
+				750,
+				1017
 			],
 			"parameters": {
-				"content": "## Record the answers\nThe Polling Trigger reads Going, Maybe and Not going, or a failed delivery.",
+				"content": "## Record the answers\n\nRecords Going, Maybe, Not going or a failed delivery.",
 				"width": 480,
-				"height": 290,
+				"height": 285,
 				"color": 7
 			}
 		},
@@ -1387,13 +1387,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1560,
-				820
+				1590,
+				837
 			],
 			"parameters": {
-				"content": "## Texts and contact card\nOne node sends every text. A decline also sends the customer's contact card to the owner.",
-				"width": 800,
-				"height": 290,
+				"content": "## Texts and contact card\n\nThanks the customer. A decline also sends you the contact card.",
+				"width": 760,
+				"height": 285,
 				"color": 7
 			}
 		},
@@ -1403,13 +1403,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				240,
-				400
+				230,
+				388
 			],
 			"parameters": {
-				"content": "## Your settings and routing\nEvery run starts here. Edit your values in Your settings. The switch then sends the run to the form, the hourly report or the answers.",
-				"width": 460,
-				"height": 280,
+				"content": "## Your settings and routing\n\nEvery run starts with your values, then goes to the form, the report or the answers.",
+				"width": 480,
+				"height": 304,
 				"color": 7
 			}
 		}

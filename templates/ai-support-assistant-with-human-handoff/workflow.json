@@ -1280,9 +1280,9 @@
 		},
 		{
 			"parameters": {
-				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. It answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START. A model can be wrong.\n\nWhen the assistant hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant only goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15), on n8n Cloud or self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node. OpenAI needs an API account with billing (a ChatGPT subscription is not an API key). Other OpenAI compatible providers need Use Responses API off (verified: an OpenRouter free model worked, Groq gpt-oss did not).\n3. Run the manual branch once: it creates the tables (Data tables tab) and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Workflow settings > Error workflow: pick a second workflow with an Error Trigger and a mail or Slack node. Otherwise a failed reply only shows in Executions.\n6. Test from another phone, then activate.\n\nFree: 2 contacts per cycle (you count as one); Lone Wolf: 100. Typing needs Lone Wolf. Voice notes get a fixed text, or a handover with audio_to_person.",
-				"height": 510,
-				"width": 720
+				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
+				"height": 570,
+				"width": 560
 			},
 			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",
 			"name": "Overview",
@@ -1295,9 +1295,9 @@
 		},
 		{
 			"parameters": {
-				"content": "## Listen and check\nPolls your number every minute and stops while the settings or the FAQ are still samples. Groups, your own messages, ignore_phones and the owner phone are skipped.",
-				"height": 388,
-				"width": 1220,
+				"content": "## Listen and check\n\nPolls your number every minute and stops while the settings or the FAQ are still samples.",
+				"height": 285,
+				"width": 1160,
 				"color": 7
 			},
 			"id": "f4f7b260-1505-41d3-8956-ce7777a7e0dd",
@@ -1305,15 +1305,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				650,
-				-110
+				660,
+				-113
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Rules before the AI\nSTOP and START words, a person in the chat, non-text messages, handoff words and the hourly cap are decided in code, never by the model.",
-				"height": 625,
-				"width": 1000,
+				"content": "## Rules before the AI\n\nSTOP words, a person in the chat, non-text messages, handoff words and the hourly cap are decided in code, never by the model.",
+				"height": 617,
+				"width": 920,
 				"color": 7
 			},
 			"id": "10241d8d-49e7-4265-8a69-c212b51452e6",
@@ -1321,15 +1321,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1950,
-				-110
+				1960,
+				-145
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Ask the AI\nThe agent is told to answer only from the FAQ table and your facts, and returns a decision with a confidence. Anything unclear becomes a handoff.",
-				"height": 570,
-				"width": 1060,
+				"content": "## Ask the AI\n\nAnswers only from the FAQ table and your facts. Anything unclear becomes a handoff.",
+				"height": 575,
+				"width": 1020,
 				"color": 7
 			},
 			"id": "94c95ee4-8715-4e11-86b5-cb0942e0f7a9",
@@ -1338,14 +1338,14 @@
 			"typeVersion": 1,
 			"position": [
 				3170,
-				-110
+				-113
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Reply\nThe contact state is saved first, then the answer goes out quoting the customer message.",
-				"height": 340,
-				"width": 520,
+				"content": "## Reply\n\nThe contact state is saved first, then the answer goes out.",
+				"height": 285,
+				"width": 440,
 				"color": 7
 			},
 			"id": "70304a48-d67b-4061-8009-c045e90a6755",
@@ -1353,15 +1353,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				3170,
-				675
+				3140,
+				687
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Hand over to a person\nPauses the assistant in this chat, tells the customer, then sends you the reason, the last message and the contact card.",
-				"height": 340,
-				"width": 1180,
+				"content": "## Hand over to a person\n\nPauses the assistant in this chat, tells the customer, then sends you the reason and the contact card.",
+				"height": 285,
+				"width": 1160,
 				"color": 7
 			},
 			"id": "34d88ea7-3ea8-4278-8785-c105954ba0b2",
@@ -1369,14 +1369,14 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				3170,
-				1045
+				3140,
+				1057
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Report what failed\nEvery event ends here and notes a reply or an owner alert that failed. When all events are done, the run fails with that list.",
-				"height": 360,
+				"content": "## Report what failed\n\nNotes a reply or an alert that failed. When all events are done, the run fails with that list.",
+				"height": 304,
 				"width": 440,
 				"color": 7
 			},
@@ -1385,15 +1385,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1200,
-				545
+				1170,
+				558
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Run once: tables and samples\nCreates the faq and contacts_state tables if they are missing, then adds four sample FAQ rows flagged sample. Delete them before you activate.",
-				"height": 300,
-				"width": 1300,
+				"content": "## Run once: tables and samples\n\nCreates the faq and contacts_state tables, then adds four sample FAQ rows. Delete them before you activate.",
+				"height": 285,
+				"width": 1240,
 				"color": 7
 			},
 			"id": "26c2322d-1d91-42f4-845f-c7186f53005d",
@@ -1401,15 +1401,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				740,
-				-750
+				750,
+				-733
 			]
 		},
 		{
 			"parameters": {
-				"content": "**Replace these before you activate**\nowner_phone, business_name, business_facts and the sample FAQ rows. Until then the workflow stops with a message and answers nobody.\nCustomer text goes to your AI provider: tell your customers.",
-				"height": 365,
-				"width": 400,
+				"content": "**Replace these before you activate:** owner_phone, business_name, business_facts and the sample FAQ rows. Until then the workflow answers nobody.",
+				"height": 300,
+				"width": 300,
 				"color": 3
 			},
 			"id": "a3d1c463-d884-4bc7-8035-ca9c2bba0a01",
@@ -1417,8 +1417,8 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				210,
-				-180
+				260,
+				-128
 			]
 		},
 		{

@@ -12,6 +12,17 @@ A small business answers WhatsApp support chats with an AI agent that is told to
 - **Real ceilings of your plan.** Free: 2 distinct contacts per billing cycle, and you (the owner who gets the alerts) count as one, so one customer. Lone Wolf: 100 distinct contacts and 1,800 messages per cycle, per number. Source: [Quota and usage](https://docs.turbonotify.com/en/usage/quota/) and [Rate limits](https://docs.turbonotify.com/en/messages/rate-limits/). A handover costs three messages (the fixed text, the alert, the contact card). When a limit is reached the send is refused: the workflow does not hide it, see "When a reply cannot be sent".
 - **Messages while the workflow is off.** While the workflow is inactive nothing is answered. When you activate it again the poll hands over what arrived in the meantime (Turbo Notify keeps events for 90 days) and each one is answered late. A message whose text has already expired (content is kept 1 hour by default, up to 7 hours on Lone Wolf) becomes a handover with the fixed "a person will answer" text, never a guess. Look at the executions after any downtime and write to long-waiting customers yourself.
 
+## Before you use it
+
+The note on the canvas is short on purpose. What did not fit in it is here.
+
+- **Chat model.** OpenAI needs an API account with billing (a ChatGPT subscription is not an API key). Other OpenAI compatible providers need Use Responses API off (verified: an OpenRouter free model worked, Groq gpt-oss did not).
+- **Error workflow.** In Workflow settings pick a second workflow with an Error Trigger and a mail or Slack node. Otherwise a failed reply only shows in Executions.
+- **Plan limits.** Free reaches 2 contacts per billing cycle (you count as one), Lone Wolf 100. The typing indicator needs Lone Wolf. See "Plans, quota and pace".
+- **Voice notes.** They get a fixed text, or a handover when `audio_to_person` is on.
+- **Customer data.** The text of your customers goes to your AI provider: tell your customers.
+- **Install and tested on.** It works on n8n Cloud and self-hosted, tested on n8n 2.45.5.
+
 ## What it does
 
 - Checks your WhatsApp numbers every minute (WhatsApp by Turbo Notify Polling Trigger on `message.received`, `message.replied` and `message.sent`). It works on every plan and needs no public address. On the Lone Wolf plan the instant WhatsApp by Turbo Notify Trigger can replace it.
@@ -163,7 +174,8 @@ Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh thr
 | | |
 |---|---|
 | Date | 2026-11-17 |
-| `workflow.json` | SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8` (`shasum -a 256 workflow.json`) |
+| `workflow.json` | SHA-256 `b5a699235c79a354d7227277ba1a794c6dc0c424b3982e7bdc7e00bfc803ae2d` (`shasum -a 256 workflow.json`) |
+| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 776 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8`, and the real API runs below were made on it. `workflow.png` was not regenerated and still shows the previous notes. |
 | n8n | 2.45.5 (image `n8nio/n8n:2.45.5`, id `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`) |
 | Package | `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15 (built from this repository) |
 | Mock API | `templates/harness/mock-api.mjs`, same routes, answers, events and errors as `public-docs-web/public/openapi.json` |
@@ -280,7 +292,7 @@ question over the wire, memory across turns with a real model.
 #### Real API run on this version
 
 2026-11-18, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`), package **@turbo-notify/n8n-nodes-turbo-notify 1.5.15**,
-`workflow.json` SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8` (the final file, checked with
+`workflow.json` SHA-256 `3d8a9906543d5949220333af8cca849db7b1a74297f34d3da6c29d627bcdadd8` (the final file before the notes were reformatted on 2026-11-18, which differs from the current file only in sticky notes, checked with
 `shasum -a 256` before the run), real Turbo Notify API, real WhatsApp delivery, real chat model
 (OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free` through n8n's OpenAI credential with the base URL changed and **Use
 Responses API** off). Same setup as the first run: the assistant on one number, the "customer" on the other number of the

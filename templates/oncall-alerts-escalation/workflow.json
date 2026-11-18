@@ -1090,9 +1090,9 @@
 		},
 		{
 			"parameters": {
-				"content": "### How it works\nA WhatsApp page next to your paging tool. Your monitoring tool posts a JSON alert to a protected webhook. The workflow pages on-call level 1 with the service, the severity, a 4 character code and, when the alert has a link, a runbook button. A reply such as \"OK 7K2F\" takes the alert and tells the other levels. If nobody answers within ack_minutes the next level is paged, then one final message goes to everybody. A resolved alert closes it. State is kept in the Data Table oncall_alerts. Replies are read by polling, so a confirmation can take up to a minute. The one-minute timer runs 1,440 times a day: check your plan, or set the Schedule Trigger to every 2 or 5 minutes. WhatsApp is an extra channel, not a replacement for a paging service.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15): Settings > Community Nodes, see https://docs.n8n.io/integrations/community-nodes/installation/. Works on n8n Cloud (verified node) and self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential (scopes messages:send and events:read) and a Header Auth credential \"Alert access (Header Auth)\": your tool must send exactly that header.\n3. Select the credentials on the Webhook, the Polling Trigger and both send nodes.\n4. Run the manual branch once to create the table.\n5. In Your settings type the on-call and owner numbers. None may be the phone linked to Turbo Notify. On Free use at most two different phones in all: owner_phone equal to oncall_phone_2, or oncall_phone_2 empty.\n6. POST JSON with a required alert_id (status \"resolved\" closes it) to the Production URL over HTTPS. See the README for the body and the Error workflow.\n7. Set an Error workflow, then activate.\n\n### Customization\nTexts, severities and times are in Your settings.",
-				"height": 1060,
-				"width": 640
+				"content": "### How it works\nA WhatsApp page next to your paging tool. Your monitoring tool posts a JSON alert to a protected webhook.\n\nThe workflow pages on-call level 1 with the service, the severity, a 4 character code and, when the alert has a link, a runbook button. A reply such as \"OK 7K2F\" takes the alert and tells the other levels.\n\nIf nobody answers within ack_minutes the next level is paged, then one final message goes to everybody. A resolved alert closes it. WhatsApp is an extra channel, not a paging service.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential (scopes messages:send and events:read) and a Header Auth credential \"Alert access (Header Auth)\".\n3. Select the credentials on the Webhook, the Polling Trigger and both send nodes.\n4. Run the manual branch once.\n5. In Your settings type the on-call and owner numbers (none may be the phone linked to Turbo Notify).\n6. POST a JSON alert with a required alert_id to the Production URL over HTTPS, then activate.\n\n### Customization\nTexts, severities and times are in Your settings. On a small plan, slow the one-minute timer down.",
+				"height": 620,
+				"width": 560
 			},
 			"id": "86046ca1-047c-4cd0-aaf8-cfb5fb49659a",
 			"name": "Overview",
@@ -1105,9 +1105,9 @@
 		},
 		{
 			"parameters": {
-				"content": "## Three ways in\nAn alert from your monitoring tool, a reply from your on-call people, and a timer that runs every minute.",
-				"height": 740,
-				"width": 580,
+				"content": "## Three ways in\n\nAn alert from your monitoring tool, a reply from your on-call people, and a timer every minute.",
+				"height": 711,
+				"width": 300,
 				"color": 7
 			},
 			"id": "6ff67daf-71a8-4c77-a113-83d7a34e93d2",
@@ -1115,15 +1115,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-160,
-				-110
+				-100,
+				-139
 			]
 		},
 		{
 			"parameters": {
-				"content": "**Replace the phone numbers before you activate**\nWhile a number is a placeholder the workflow stops and pages nobody. Never use the phone linked to Turbo Notify: it cannot page itself.",
-				"height": 390,
-				"width": 360,
+				"content": "**Replace the phone numbers before you activate.** While one is a placeholder the workflow stops and pages nobody.",
+				"height": 281,
+				"width": 300,
 				"color": 3
 			},
 			"id": "d29cfeee-f8a2-4ccf-a45f-43cadaf46979",
@@ -1132,14 +1132,14 @@
 			"typeVersion": 1,
 			"position": [
 				460,
-				-10
+				91
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Your settings\nEvery value you change lives in this node. Read its Notes.",
-				"height": 100,
-				"width": 360,
+				"content": "## Your settings\n\nEvery value you change lives in this node.",
+				"height": 118,
+				"width": 300,
 				"color": 7
 			},
 			"id": "649fb797-53f5-40f6-b8fe-8b06cc34f610",
@@ -1148,14 +1148,14 @@
 			"typeVersion": 1,
 			"position": [
 				460,
-				-120
+				-47
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Check, then route\nStops on a placeholder, then sends an alert one way and replies or the timer the other.",
-				"height": 320,
-				"width": 520,
+				"content": "## Check, then route\n\nStops on a placeholder, then sends an alert one way and replies or the timer the other.",
+				"height": 304,
+				"width": 460,
 				"color": 7
 			},
 			"id": "23e09913-bf7e-4cd0-a59f-247b53ba8e0c",
@@ -1163,15 +1163,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				940,
-				90
+				970,
+				68
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Decide what is needed\nA new alert opens or closes an incident. A reply takes one. The timer finds the alert nobody took in time.",
-				"height": 620,
-				"width": 780,
+				"content": "## Decide what is needed\n\nA new alert opens or closes an incident, a reply takes one, and the timer finds the alert nobody took.",
+				"height": 604,
+				"width": 720,
 				"color": 7
 			},
 			"id": "b74ab88c-6a30-462f-aa23-04b4e5ce2b67",
@@ -1179,15 +1179,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1500,
-				-110
+				1530,
+				-132
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Write and send\nOne place writes every message. A page with a runbook link gets a button. A refused send never stops the others.",
-				"height": 520,
-				"width": 1020,
+				"content": "## Write and send\n\nOne place writes every message. A refused send never stops the others.",
+				"height": 485,
+				"width": 980,
 				"color": 7
 			},
 			"id": "f6bc1eed-6992-40db-ab5c-95e244c58c29",
@@ -1195,15 +1195,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				2380,
-				-60
+				2390,
+				-63
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Record and report\nEach alert row gets the message id or the failure. The run then fails loudly if nobody could be paged.",
-				"height": 340,
-				"width": 780,
+				"content": "## Record and report\n\nEach alert row keeps the message id or the failure. The run fails if nobody could be paged.",
+				"height": 285,
+				"width": 720,
 				"color": 7
 			},
 			"id": "d84ad9bd-b5fb-4c67-a85a-cd6c75ae240d",
@@ -1211,15 +1211,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				3500,
-				40
+				3510,
+				37
 			]
 		},
 		{
 			"parameters": {
-				"content": "## Run once: create the table\nCreates oncall_alerts when it is missing. Safe to run again.",
-				"height": 300,
-				"width": 600,
+				"content": "## Run once: create the table\n\nCreates oncall_alerts when it is missing. Safe to run again.",
+				"height": 285,
+				"width": 460,
 				"color": 7
 			},
 			"id": "4c47cd9e-ea91-4831-abbf-a6295ab45cfd",
@@ -1227,8 +1227,8 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-160,
-				690
+				-50,
+				687
 			]
 		}
 	],

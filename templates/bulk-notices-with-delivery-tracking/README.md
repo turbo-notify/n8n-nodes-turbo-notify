@@ -15,6 +15,16 @@ Not affiliated with Meta or WhatsApp. It uses the [Turbo Notify](https://turbono
 * **`no_receipt`** is the status of a message WhatsApp has told nothing about (no delivered, no read, no failure) for `report_after_hours`. It is not a failure: the phone may simply have been off. If the news arrives later, the row moves to `delivered` or `read`.
 * A **receipt** is the news that a message was delivered to the phone or read.
 
+## Before you use it
+
+The note on the canvas is short on purpose. What did not fit in it is here.
+
+- **Plan limits.** The Free plan reaches 2 contacts per billing cycle (yours counts, so one customer in practice) and Lone Wolf reaches 100. See "Plan and limits".
+- **API key scopes.** Choose `messages:send`, `messages:read` and `events:read` when you create the key: the scopes of a key cannot be changed afterwards.
+- **n8n must be reachable and active.** The people who use the form need a public HTTPS address of your n8n, and the workflow must stay active. After a pause the Polling Trigger catches up.
+- **People who ask to stop.** End your text with "Reply STOP if you do not want these notices", add anyone who asks to stop to `stop_list`, tell people why they get these messages and delete old rows from the table. See "People who ask to stop".
+- **Tested on** n8n 2.45.5, on n8n Cloud and self-hosted.
+
 ## What it does
 
 | Flow | Starts with | What happens |
@@ -157,7 +167,8 @@ Tested on 2026-11-17, **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, digest `sha256:9
 
 | | |
 |---|---|
-| `workflow.json` | SHA-256 `eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd` (the exact file the run below imported) |
+| `workflow.json` | SHA-256 `222861f7e4707b72a7b4b38a1ac213b83922a69a772920da710657ecc9ebddce` (the exact file the mock run below imported) |
+| Notes reformatted | Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 635 assertions, 0 failed (n8n 2.45.5, package build 1.5.16). The file before the reformat had the SHA-256 `eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`, and the real API runs below were made on it. `workflow.png` was not regenerated and still shows the previous notes. |
 | Method | a stateful simulation of the Turbo Notify public API (`templates/harness`, built from `openapi.json`), driven over HTTP, plus live round trips of the Polling Trigger |
 | Result | passed on the final file: 24 steps, 635 assertions, 0 failed, 188 s (run again on 2026-11-17 after the last change of the canvas layout; `workflow.png` is a screenshot of this file in the n8n 2.45.5 editor) |
 
@@ -234,7 +245,7 @@ The workflow was imported exactly as exported. Nothing else was edited. The only
 
 Two groups of runs, both against `https://api.turbonotify.com` with a production key of an account whose plan is **CUSTOM**, not Free, n8n 2.45.5 (image digest `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`), package `@turbo-notify/n8n-nodes-turbo-notify` 1.5.15. Every message went to one test number of the account owner, from a different number of the same owner, and every message was deleted for everyone at the end. The guard of the harness was on (recipient check, budget, request log).
 
-**Final run, 2026-11-18, on the exact file whose SHA-256 is above** (`eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`).
+**Final run, 2026-11-18, on the file before the notes were reformatted (it differs from the current file only in sticky notes)** (`eb7a9c6f44929948b095c7aeea20dbf9b99d4ef666cbf4c7a9ccc4cffb3442fd`).
 
 | Part | Result on the real API |
 |---|---|
