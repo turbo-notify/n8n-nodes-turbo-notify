@@ -40,7 +40,7 @@ It does not read messages that were written before the workflow was active, it d
 
 Live flow (22 working nodes, plus 9 notes):
 
-1. `Poll WhatsApp group messages` (Turbo Notify WhatsApp Polling Trigger: message.received, message.replied, message.sent, every 10 minutes)
+1. `Poll WhatsApp group messages` (WhatsApp by Turbo Notify Polling Trigger: message.received, message.replied, message.sent, every 10 minutes)
 2. `Every hour: look for digests that are due` (Schedule Trigger)
 3. `Run now for one group` (Manual Trigger)
 4. `Your settings` (Edit Fields: every value you change, each explained on the canvas)

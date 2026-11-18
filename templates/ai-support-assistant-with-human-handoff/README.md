@@ -14,7 +14,7 @@ A small business answers WhatsApp support chats with an AI agent that is told to
 
 ## What it does
 
-- Checks your WhatsApp numbers every minute (Turbo Notify WhatsApp Polling Trigger on `message.received`, `message.replied` and `message.sent`). It works on every plan and needs no public address. On the Lone Wolf plan the instant Turbo Notify WhatsApp Trigger can replace it.
+- Checks your WhatsApp numbers every minute (WhatsApp by Turbo Notify Polling Trigger on `message.received`, `message.replied` and `message.sent`). It works on every plan and needs no public address. On the Lone Wolf plan the instant WhatsApp by Turbo Notify Trigger can replace it.
 - Handles private chats. Group messages, messages the number sent through the API (its own replies), messages from the owner phone, numbers in `ignore_phones` and repeated events are skipped.
 - Opt-out: a message that is exactly one of the STOP words (default `stop`, `parar`, `sair`, capitals, accents and punctuation do not matter) is answered once with a confirmation and saved in `contacts_state`. That phone is never messaged again by this workflow until it sends a START word (default `start`, `voltar`).
 - Never talks over a person. When `human_until` of the chat is in the future the workflow does nothing. `human_until` is set when the assistant hands over, and also when you (or anyone) type in that chat from the WhatsApp app: the poll sees the outgoing `message.sent` with `origin = native` and pauses the assistant for `human_hours` again. Typing yourself only makes the assistant go quiet. The customer is not told and you are not alerted: the customer text, the owner alert and the contact card belong to a handover the assistant starts.
@@ -36,7 +36,7 @@ It does not stop at the first failure on purpose: the poll already moved past th
 
 Live flow (28 working nodes, plus 9 sticky notes):
 
-1. `Poll new WhatsApp messages` (Turbo Notify WhatsApp Polling Trigger)
+1. `Poll new WhatsApp messages` (WhatsApp by Turbo Notify Polling Trigger)
 2. `Your settings` (Edit Fields: everything you change, each value explained on the canvas)
 3. `Read the FAQ rows` (Data Table, once per run, only for the sample check)
 4. `Check the settings` (Code: stops the run while a setting or the FAQ is still a sample)
@@ -152,7 +152,7 @@ Every value is also explained on the canvas, under the node.
   - `optin_reply`: "Bem-vindo de volta. Escreva sua dúvida e responderemos."
   - `nontext_reply`: "Só consigo ler mensagens de texto. Por favor, escreva sua pergunta em texto."
   - `handoff_reply`: "Obrigado. Passei sua mensagem para a nossa equipe. Uma pessoa vai responder por aqui."
-- On Lone Wolf, replace the Polling Trigger with the Turbo Notify WhatsApp Trigger (instant) and keep the same three events.
+- On Lone Wolf, replace the Polling Trigger with the WhatsApp by Turbo Notify Trigger (instant) and keep the same three events.
 - To be told when a reply or an alert fails, set an Error workflow (Setup, step 8).
 - The agent answers in one JSON object that a Code node reads, and anything that is not readable becomes a handover. The more idiomatic n8n pattern is the **Structured Output Parser** on the AI Agent node. It was not used on purpose: the parser needs a model that follows the schema exactly, while the Code node also accepts a code fence or a sentence around the object and turns every other failure into a handover instead of a failed run. The cost: the format lives in the system prompt, so a model that does not follow it hands every chat over. In the real run (see the test record) the model followed it every time. If your model handles structured output well, swapping the parser in is a small change.
 

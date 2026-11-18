@@ -3,7 +3,7 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
-	"alias": ["whatsapp", "whatsapp notifications", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "send message"],
+	"alias": ["whatsapp", "whatsapp notifications", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "send message", "whatsapp send", "whatsapp message", "send whatsapp message", "whatsapp calendar", "whatsapp automation", "whatsapp by turbo notify", "turbo notify whatsapp"],
 	"resources": {
 		"credentialDocumentation": [
 			{

@@ -13,7 +13,7 @@ import { requireText, type Scope } from './validation';
 
 export class TurboNotify implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Turbo Notify WhatsApp',
+		displayName: 'WhatsApp by Turbo Notify',
 		name: 'turboNotify',
 		icon: { light: 'file:turboNotify.svg', dark: 'file:turboNotify.svg' },
 		group: ['output'],
@@ -22,7 +22,7 @@ export class TurboNotify implements INodeType {
 			'={{ $parameter["operation"].replace(/([A-Z])/g, " $1").toLowerCase() + ": " + $parameter["resource"] }}',
 		description:
 			'Send WhatsApp messages and read contacts, groups, numbers and events with Turbo Notify',
-		defaults: { name: 'Turbo Notify WhatsApp' },
+		defaults: { name: 'WhatsApp by Turbo Notify' },
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],

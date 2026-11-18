@@ -18,9 +18,9 @@ const folders = existsSync(root)
 
 const TYPE = '@turbo-notify/n8n-nodes-turbo-notify';
 const DEFAULT_NAMES = new Set([
-	'Turbo Notify WhatsApp',
-	'Turbo Notify WhatsApp Trigger',
-	'Turbo Notify WhatsApp Polling Trigger',
+	'WhatsApp by Turbo Notify',
+	'WhatsApp by Turbo Notify Trigger',
+	'WhatsApp by Turbo Notify Polling Trigger',
 	'Edit Fields',
 	'If',
 	'Switch',

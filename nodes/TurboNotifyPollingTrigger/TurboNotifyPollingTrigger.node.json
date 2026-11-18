@@ -3,7 +3,7 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
-	"alias": ["whatsapp", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "incoming message", "polling"],
+	"alias": ["whatsapp", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "incoming message", "polling", "whatsapp incoming message", "whatsapp message received", "whatsapp events", "whatsapp polling", "whatsapp by turbo notify", "turbo notify whatsapp"],
 	"resources": {
 		"credentialDocumentation": [
 			{
@@ -12,7 +12,7 @@
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#turbo-notify-whatsapp-polling-trigger"
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#whatsapp-by-turbo-notify-polling-trigger"
 			}
 		]
 	}

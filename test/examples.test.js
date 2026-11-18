@@ -60,13 +60,13 @@ describe('example workflows use real parameters of the nodes', () => {
 		const nodeNames = new Set(workflow.nodes.map((n) => n.name));
 		for (const [, ref] of raw.matchAll(/\$\('([^']+)'\)/g)) expect(nodeNames).toContain(ref);
 		const defaults = {
-			[`${TYPE}.turboNotify`]: 'Turbo Notify WhatsApp',
-			[`${TYPE}.turboNotifyTrigger`]: 'Turbo Notify WhatsApp Trigger',
-			[`${TYPE}.turboNotifyPollingTrigger`]: 'Turbo Notify WhatsApp Polling Trigger',
+			[`${TYPE}.turboNotify`]: 'WhatsApp by Turbo Notify',
+			[`${TYPE}.turboNotifyTrigger`]: 'WhatsApp by Turbo Notify Trigger',
+			[`${TYPE}.turboNotifyPollingTrigger`]: 'WhatsApp by Turbo Notify Polling Trigger',
 		};
 		for (const node of workflow.nodes) {
-			if (defaults[node.type] && /^Turbo Notify/.test(node.name)) expect(node.name).toBe(defaults[node.type]);
+			if (defaults[node.type] && /^(Turbo Notify|WhatsApp by Turbo Notify)/.test(node.name)) expect(node.name).toBe(defaults[node.type]);
 		}
-		expect(raw).not.toMatch(/Turbo Notify (Polling )?Trigger/);
+		expect(raw).not.toMatch(/(?<!WhatsApp by )Turbo Notify (Polling )?Trigger|Turbo Notify WhatsApp/);
 	});
 });

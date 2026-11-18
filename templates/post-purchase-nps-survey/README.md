@@ -47,7 +47,7 @@ It is not a chatbot and it does not follow up more than described: the question,
 Live flow (24 working nodes, plus 9 notes):
 
 1. `Receive an order` (Webhook, Header Auth)
-2. `Poll WhatsApp replies` (Turbo Notify WhatsApp Polling Trigger, every 5 minutes)
+2. `Poll WhatsApp replies` (WhatsApp by Turbo Notify Polling Trigger, every 5 minutes)
 3. `Every 30 minutes: ask the surveys that are due` (Schedule Trigger)
 4. `Every week: send the NPS report` (Schedule Trigger)
 5. `Your settings` (Edit Fields: every value you change, each explained on the canvas)

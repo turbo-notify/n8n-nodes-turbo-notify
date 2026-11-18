@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.16
+
+The labels now start with WhatsApp and the search finds more of what people type.
+
+- **WhatsApp by Turbo Notify**, **WhatsApp by Turbo Notify Trigger** and **WhatsApp by Turbo Notify Polling Trigger** are the names shown in the node panel and on the canvas. They start with WhatsApp, so the panel ranks them higher when you search for WhatsApp.
+- **The search knows more words.** Each node answers to phrases such as "whatsapp send", "whatsapp message", "whatsapp calendar", "whatsapp incoming message" and "whatsapp webhook", and to the previous label ("turbo notify whatsapp").
+- Nothing else changes: the node types, the parameters and the credential are the same, so a workflow that already uses the nodes keeps working, and a node you already placed keeps the name it had.
+- The README, the six example workflows and the Docs links follow the new names.
+
 ## 1.5.15
 
 - **The README says the package is verified by n8n.** The Install section no longer says the node appears on n8n Cloud "once n8n has verified the package".

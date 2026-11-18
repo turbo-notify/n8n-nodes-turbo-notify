@@ -127,9 +127,9 @@ describe('the nodes are found by searching for WhatsApp', () => {
 	} = require('../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node');
 
 	const nodes = [
-		[new TurboNotify().description, 'Turbo Notify WhatsApp'],
-		[new TurboNotifyTrigger().description, 'Turbo Notify WhatsApp Trigger'],
-		[new TurboNotifyPollingTrigger().description, 'Turbo Notify WhatsApp Polling Trigger'],
+		[new TurboNotify().description, 'WhatsApp by Turbo Notify'],
+		[new TurboNotifyTrigger().description, 'WhatsApp by Turbo Notify Trigger'],
+		[new TurboNotifyPollingTrigger().description, 'WhatsApp by Turbo Notify Polling Trigger'],
 	];
 
 	it.each(nodes)('%# says WhatsApp in its name, the catalog label n8n.io searches', (d, name) => {
@@ -147,5 +147,69 @@ describe('the nodes are found by searching for WhatsApp', () => {
 
 	it('keeps the instant trigger grouped with the action node (same label without "Trigger")', () => {
 		expect(nodes[1][0].displayName.replace(/ Trigger$/, '')).toBe(nodes[0][0].displayName);
+	});
+
+	it.each(nodes)('%# starts its name with WhatsApp, the first word the editor ranks', (d) => {
+		expect(d.displayName.startsWith('WhatsApp')).toBe(true);
+	});
+
+	it('names the polling trigger like the action plus "Polling Trigger"', () => {
+		expect(nodes[2][0].displayName).toBe(`${nodes[0][0].displayName} Polling Trigger`);
+	});
+
+	// The editor searches only displayName and each string of the codex alias list, and a query has to be
+	// an in-order subsequence of ONE field, so a two-word query needs an alias that holds both words.
+	const ALIASES = {
+		TurboNotify: [
+			'whatsapp',
+			'whatsapp send',
+			'whatsapp message',
+			'send whatsapp message',
+			'whatsapp calendar',
+			'whatsapp automation',
+			'whatsapp notifications',
+			'whatsapp by turbo notify',
+			'turbo notify whatsapp',
+		],
+		TurboNotifyTrigger: [
+			'whatsapp',
+			'whatsapp incoming message',
+			'whatsapp message received',
+			'whatsapp webhook',
+			'whatsapp events',
+			'whatsapp by turbo notify',
+			'turbo notify whatsapp',
+		],
+		TurboNotifyPollingTrigger: [
+			'whatsapp',
+			'whatsapp incoming message',
+			'whatsapp message received',
+			'whatsapp events',
+			'whatsapp polling',
+			'whatsapp by turbo notify',
+			'turbo notify whatsapp',
+		],
+	};
+	const OTHER_BRANDS = ['meta', 'twilio', 'facebook', 'zapier', 'make', 'vonage', 'messagebird'];
+
+	describe.each(Object.entries(ALIASES))('%s codex aliases', (dir, required) => {
+		const codex = JSON.parse(
+			readFileSync(join(__dirname, '..', 'nodes', dir, `${dir}.node.json`), 'utf8'),
+		);
+
+		it('keep whatsapp and the multi-word phrases people type', () => {
+			for (const alias of required) expect(codex.alias).toContain(alias);
+		});
+
+		it('are single lowercase strings, never another brand, never the Business Platform API', () => {
+			for (const alias of codex.alias) {
+				expect(typeof alias).toBe('string');
+				expect(alias).toBe(alias.toLowerCase());
+				const words = alias.split(/\s+/);
+				for (const brand of OTHER_BRANDS) expect(words).not.toContain(brand);
+				expect(alias).not.toMatch(/business (platform|api)|cloud api/);
+			}
+			expect(new Set(codex.alias).size).toBe(codex.alias.length);
+		});
 	});
 });

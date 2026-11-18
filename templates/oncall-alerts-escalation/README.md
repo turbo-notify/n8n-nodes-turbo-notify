@@ -44,7 +44,7 @@ No quiet hours, no on-call rotation calendar (the levels are fixed numbers) and 
 Live flow (21 working nodes, plus 9 notes):
 
 1. `Receive an alert` (Webhook, Header Auth)
-2. `Poll WhatsApp replies` (Turbo Notify WhatsApp Polling Trigger)
+2. `Poll WhatsApp replies` (WhatsApp by Turbo Notify Polling Trigger)
 3. `Every minute: look for unanswered alerts` (Schedule Trigger)
 4. `Your settings` (Edit Fields: every value you change, each explained in the node's Notes)
 5. `Check the settings` (Code: stops the run on a placeholder, then names the entry point)

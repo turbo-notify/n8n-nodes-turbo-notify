@@ -3,7 +3,7 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
-	"alias": ["whatsapp", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "incoming message", "webhook", "instant"],
+	"alias": ["whatsapp", "whatsapp business", "whatsapp api", "turbo notify", "wa", "notify", "incoming message", "webhook", "instant", "whatsapp incoming message", "whatsapp message received", "whatsapp webhook", "whatsapp events", "whatsapp by turbo notify", "turbo notify whatsapp"],
 	"resources": {
 		"credentialDocumentation": [
 			{
@@ -12,7 +12,7 @@
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#turbo-notify-whatsapp-trigger-instant"
+				"url": "https://github.com/turbo-notify/n8n-nodes-turbo-notify#whatsapp-by-turbo-notify-trigger-instant"
 			}
 		]
 	}
