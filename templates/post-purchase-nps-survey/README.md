@@ -212,7 +212,7 @@ Every value is also explained on the canvas, under the node.
 
 ## Test record
 
-Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh throwaway n8n, against a simulated Turbo Notify API. Nothing reached WhatsApp. See "What is not proven".
+Tested end to end from the exact `workflow.json` (SHA-256 below), in a fresh throwaway n8n, against a simulated Turbo Notify API. Nothing reached WhatsApp in that run. A second, shorter run against the real API follows ("Real API run"). See "What is not proven".
 
 | | |
 |---|---|
@@ -282,14 +282,51 @@ Branches run (each step asserts the requests the mock received and the rows in t
 | Inactive, then active again | A reply written while the workflow was switched off was read by the first poll after switching on, complete. It is not lost |
 | Live 30 minute timer | A due survey was asked by the real timer, once |
 
+### Real API run
+
+A second test ran the same `workflow.json` against the real Turbo Notify API, with real WhatsApp delivery between two numbers of the same owner (the number under test sends the questions, the number of another organization plays the customer and answers). The harness guard allowed one recipient and a budget of messages. Nothing in the file was edited.
+
+| | |
+|---|---|
+| Date | 2026-11-18 |
+| `workflow.json` | SHA-256 `d21c34a7b7e0f176bda01211dcc8335618689f6838620eb94c02b1d5576ab2d0` |
+| n8n | 2.45.5 (image `n8nio/n8n:2.45.5`, id `sha256:9f6d0a5987ab5a297c4b0b38fbf1a22285dd1364551478e93f03d506908fa74c`), time zone `America/Sao_Paulo` |
+| Package | `@turbo-notify/n8n-nodes-turbo-notify` 1.5.16, the local build of this module that the harness copies into n8n (the latest version on npm is also 1.5.16, but the template does not depend on a package version: it needs a Turbo Notify node and the two triggers) |
+| API | `https://api.turbonotify.com`, key of an organization on a plan with a large quota (not the Free plan) |
+| Patches applied by the scenario | the values a person types in `Your settings` (`owner_phone` a fictitious number, `business_name`, `review_url` `https://example.org/reviews`, the sending hours: the current hour and the next one), the poll from 5 to 1 minute and the timer from 30 to 1 minute (the smallest intervals n8n allows). The clock of a survey was moved by writing an older `due_at` or `created_at` into the table |
+| Scenario | `test/real.mjs`, 9 steps, 63 assertions, 0 failed, 556 s |
+| Messages | 10 real messages: 6 sent by the workflow through the number under test and 4 written by the customer number. All were deleted for everyone when the run ended |
+
+Rerun (from the `n8n-nodes-turbo-notify` module, Node 22, Docker, two API keys of two organizations that each have a connected number you own; the guard allows one recipient and stops at the budget):
+
+```bash
+export TN_REAL_OWNER_PHONE='+<the customer number>'
+export TN_REAL_PERSONAL_PHONE='+<the number under test>'
+node templates/harness/run-template.mjs templates/post-purchase-nps-survey/workflow.json \
+  --real-api --api-key-file <key of the number under test> --customer-key-file <key of the customer number> --max-sends 10 \
+  --scenario templates/post-purchase-nps-survey/test/real.mjs --image n8nio/n8n:2.45.5 --tz America/Sao_Paulo \
+  --run-id t6real --ports 5697,9251
+```
+
+What ran for real, in order: the table created twice by the workflow; the webhook refusing a call without the header and with a wrong one (`403` both); an order with the status `paid` leaving a note row and no message; survey 1 with the phone typed the local way (turned into E.164) and the same order posted twice (stored once); the real timer asking the question once, with the key `nps-question-<order id>` (state `delivered`); a second order of the same phone skipped by the cooldown with nothing sent; the customer answering `10` from the other number, read by the real Polling Trigger, and the thanks arriving as a link button that the API accepted (`202`, state `delivered`); survey 2 for a passive customer: the question, the answer `8`, the follow-up question, the comment, then the last thanks as a link button; the customer writing `STOP`, confirmed once; an order after STOP skipped with nothing sent. The guard blocked nothing, and the request log shows no `429` and no `content_expired`.
+
+Differences from the simulated API:
+
+- **Reply latency.** A reply written from the other number was in the table 46 to 65 seconds later, with the poll patched to one minute. The events feed already had the reply by the next tick, so with the exported 5 minute poll expect a reply to be read within about 5 minutes.
+- **The link button.** The API accepted it every time (`202`) and the state reached `delivered`. How the phone draws it was not seen.
+- **Idempotency lasts longer than a run.** A question sent with the key of an order that had been asked by an earlier attempt of the same day came back as the message of that earlier attempt (same message id, its old state) and nothing new was delivered. A new order id always makes a new question, so a shop is not affected, but it is the reason the scenario puts a per-run suffix on its order ids.
+- **The number is a real inbox.** Other people wrote to the number under test while the workflow was on. None of those chats produced a message.
+- **The owner is not a customer.** The template ignores messages written by `owner_phone`, so a customer that is also the owner never gets read (a first attempt of this test stopped at the first answer because of that, with nothing wrong in the file). The scenario now uses a fictitious `owner_phone`.
+- **`429` and `content_expired`** never appeared in this run, as in the simulated API only when injected.
+
 ### What is not proven
 
-- **Real WhatsApp delivery to a human.** Nothing here reached a phone. How the link button and the contact card look on a phone, on a personal account and on a Business account, was not seen. `test/real.mjs` is written for a later run against the real API (two owned numbers, a budget of 16 messages, a guard that allows one recipient) and has NOT been run (it was updated for this version: the timer name, `delivered`, the 5 minute poll).
+- **Real WhatsApp delivery to a human.** Delivery between two owned numbers was proven (see "Real API run"): the question, the follow-up, the confirmation and both link buttons reached `delivered`. A person did not read them: how the link button looks on a phone, on a personal account and on a Business account, was not seen. The owner side was not run for real: the alert, the comment, the contact card and the weekly report go to `owner_phone`, which cannot be the customer's number, and the guard allows one recipient. The contact card, the detractor path and the re-ask were therefore tested only against the simulated API. A separate owner number could not be covered.
 - **Any real shop or booking tool.** Shopify, WooCommerce, forms and booking tools were not connected; their payloads were simulated with flat JSON. That their native webhooks cannot send a header of your choice is our reading, not something we tested. Nested payloads are not read.
 - **n8n Cloud execution counts.** The figures in "Read this first" are arithmetic from the timer and the poll rhythm and from the prices page as read on 2026-11-18, not measured on a Cloud plan.
-- **Real reply latency.** A reply was read within the real poll tick on the simulated API. How long WhatsApp and the real events feed take to deliver a reply was not measured.
-- **The real Free plan and the real limits.** The `402`, `409`, `503` and `429` answers came from faults injected into the mock, from the documented contract. No Free plan, no warm-up limit, no `reply_ratio_too_low` and no spacing of 6 seconds was exercised end to end. How n8n itself reacts to a real `429` with a long `Retry-After` was not studied: the warm-up fault was tested without that header.
-- **Real expired content.** The expired reply was a fault served by the mock, built from the retention page. The mock does not expire content by itself, and the exact marker of a redacted preview was taken from the code of the webhook worker, not seen in a real event.
+- **Reply latency on the exported poll.** Measured once with the poll patched to one minute (46 to 65 seconds). The exported 5 minute poll was not waited for against the real API.
+- **The real Free plan and the real limits.** The real run used an organization on a large plan: no Free plan, no warm-up limit, no spacing and no `429` appeared. The `402`, `409`, `503` and `429` answers came from faults injected into the mock, from the documented contract. No Free plan, no warm-up limit, no `reply_ratio_too_low` and no spacing of 6 seconds was exercised end to end. How n8n itself reacts to a real `429` with a long `Retry-After` was not studied: the warm-up fault was tested without that header.
+- **Real expired content.** `content_expired` never appeared in the real run. The expired reply was a fault served by the mock, built from the retention page. The mock does not expire content by itself, and the exact marker of a redacted preview was taken from the code of the webhook worker, not seen in a real event.
 - **A sender whose number is hidden.** Handled in the code and tested with an event with the number removed; a real event of that kind was not seen.
 - **The weekly clock.** The weekly report was run by hand; Monday at 8:00 was not waited for. The 30 minute timer was waited for once. The weekly clean-up ran with the weekly trigger by hand, against the data table of this n8n version.
 - **An Error workflow.** It is described in Setup step 6, not built, and was not run.

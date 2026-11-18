@@ -3,14 +3,16 @@
  * with real WhatsApp delivery between two numbers of the same owner.
  *
  *   The workflow runs on number A (the "number under test", the key passed with --api-key-file).
- *   The "customer" is number B, an owned number of ANOTHER organization. It is the customer of every order and
- *   also the owner phone of the settings (the only recipient the guard allows is B, so the owner alerts reach B too),
- *   and it answers with its own key (--customer-key-file). Both numbers count in the same budget (--max-sends 12).
+ *   The "customer" is number B, an owned number of ANOTHER organization. It is the customer of every order and it
+ *   answers with its own key (--customer-key-file). Both numbers count in the same budget (--max-sends).
+ *   The template ignores messages written by `owner_phone` (the owner is never a customer), and the guard allows ONE
+ *   recipient, so the customer can not also be the owner. `owner_phone` is therefore a fictitious number that the
+ *   guard would refuse (403, never forwarded): the scenario never takes a path that writes to the owner.
  *
  *   export TN_REAL_OWNER_PHONE='+<number B: the customer, the only number the workflow may message>'
  *   export TN_REAL_PERSONAL_PHONE='+<number A: the number under test>'
  *   node templates/harness/run-template.mjs templates/post-purchase-nps-survey/workflow.json \
- *     --real-api --api-key-file <key of A> --customer-key-file <key of B> --max-sends 12 \
+ *     --real-api --api-key-file <key of A> --customer-key-file <key of B> --max-sends 10 \
  *     --scenario templates/post-purchase-nps-survey/test/real.mjs --image n8nio/n8n:2.45.5 --tz America/Sao_Paulo \
  *     --run-id t6real --ports 5697,9251
  *
@@ -18,27 +20,33 @@
  *   the values a person types in "Your settings" (owner phone, business name, review page https://example.org/reviews,
  *   the sending hours = the current hour and the next one), the poll of the Polling Trigger from 5 to 1 minute and the
  *   timer from 30 to 1 minute (the smallest intervals n8n allows). The clock of a survey is moved by writing an older
- *   `due_at` or `created_at` into the table, which a person could do too.
+ *   `due_at` or `created_at` into the table, which a person could do too. Order ids carry a per-run suffix: Turbo Notify
+ *   keeps an Idempotency-Key for a long time, so a repeated order id would return the message of an EARLIER run.
  *
- * Messages (12 allowed, 12 used), one phone number in different shapes:
+ * Messages (10 at most), one phone number in different shapes:
  *   survey 1, a promoter: the question (timer); B answers "10"; the thank you with the review link button. 1 + 1 + 1.
- *   survey 2, a detractor with a sentence in the score message: the question (timer); B answers "4 <sentence>";
- *     the alert, the comment, the contact card and the last thanks (a link button). 1 + 1 + 4.
- *   B writes STOP: the confirmation. 1 + 1. The weekly report, by hand: 1.
+ *   survey 2, a passive: the question (timer); B answers "8"; the follow-up question; B writes a comment; the last
+ *     thanks (a link button). 1 + 1 + 1 + 1 + 1.
+ *   B writes STOP: the confirmation. 1 + 1.
  * Free of messages: the table, the webhook with and without the header, a status that starts nothing, E.164, the same
  * order twice, the cooldown, an order after STOP.
  *
- * What real mode cannot show: how WhatsApp draws the button and the card on a phone, a customer who is not the
- * owner (the guard allows one recipient), the weekly clock.
+ * What real mode cannot show: how WhatsApp draws the button on a phone, the owner alert, the owner comment, the
+ * contact card and the weekly report (they go to the owner, who cannot be the customer here), a customer who is not
+ * the owner, the weekly clock.
  */
 const digits = (v) => String(v ?? '').replace(/\D/g, '');
 const HOOK = 'Receive an order';
 const POLL = 'Poll WhatsApp replies';
 const TIMER = 'Every 30 minutes: ask the surveys that are due';
-const WEEK = 'Every week: send the NPS report';
 const TOKEN = 'real-run-order-token-0001';
 const REVIEW = 'https://example.org/reviews';
 const ZONE = 'America/Sao_Paulo';
+/** The owner of the settings: fictitious, so that nothing is ever written to a real person as "the owner". */
+const OWNER = '+5511977770001';
+/** Idempotency keys outlive a run: every order id of this run is new. */
+const RUN = Date.now().toString(36).slice(-5);
+const O = { paid: `real-paid-${RUN}`, one: `real-1-${RUN}`, cool: `real-cool-${RUN}`, two: `real-2-${RUN}`, after: `real-after-stop-${RUN}` };
 
 export const timeoutMs = 45 * 60_000;
 export const credentials = [{ type: 'httpHeaderAuth', name: 'Order access (Header Auth)', data: { name: 'X-Order-Token', value: TOKEN } }];
@@ -65,10 +73,10 @@ function localShape(e164) {
 }
 
 export async function prepare(workflow) {
-	const { customer } = phones();
+	phones();
 	const hours = currentHours();
 	const settings = workflow.nodes.find((n) => n.name === 'Your settings');
-	const set = { owner_phone: customer, business_name: 'Sample Shop', window_start: hours.start, window_end: hours.end, review_url: REVIEW, review_button_text: 'Leave a review' };
+	const set = { owner_phone: OWNER, business_name: 'Sample Shop', window_start: hours.start, window_end: hours.end, review_url: REVIEW, review_button_text: 'Leave a review' };
 	for (const a of settings.parameters.assignments.assignments) if (a.name in set) a.value = set[a.name];
 	workflow.nodes.find((n) => n.name === POLL).parameters.pollTimes.item[0].value = 1;
 	workflow.nodes.find((n) => n.name === TIMER).parameters.rule.interval[0].minutesInterval = 1;
@@ -137,36 +145,36 @@ export default async function scenario(t) {
 
 	await t.step('2 a status that starts nothing leaves a note row and no message', async () => {
 		const mark = await real.guard.mark();
-		assert.equal((await call(body('real-paid', { status: 'paid' }))).status, 200, 'the webhook answers');
+		assert.equal((await call(body(O.paid, { status: 'paid' }))).status, 200, 'the webhook answers');
 		const note = await until(async () => (await allRows()).find((r) => /^status-\d\d$/.test(r.order_id)), 60_000, 'the status note row');
-		assert.match(note.note, /order real-paid: status "paid" does not start a survey \(start_statuses: delivered\)/, 'the note says which status arrived');
+		assert.match(note.note, new RegExp(`order ${O.paid}: status "paid" does not start a survey \\(start_statuses: delivered\\)`), 'the note says which status arrived');
 		assert.equal(note.phone, '', 'the note carries no phone');
-		assert.equal(await rowOf('real-paid'), undefined, 'no survey for it');
+		assert.equal(await rowOf(O.paid), undefined, 'no survey for it');
 		assert.count(await sendsSince(mark), 0, 'nothing was sent');
 	});
 
 	await t.step('3 survey 1: the phone typed as a shop would is turned into E.164, the real timer asks the question once with the real idempotency key', async () => {
 		const mark = await real.guard.mark();
-		assert.equal((await call(body('real-1', { phone: localShape(CUSTOMER) }))).status, 200, 'the webhook answers');
-		const queued = await until(async () => rowOf('real-1'), 60_000, 'the order to be stored');
+		assert.equal((await call(body(O.one, { phone: localShape(CUSTOMER) }))).status, 200, 'the webhook answers');
+		const queued = await until(async () => rowOf(O.one), 60_000, 'the order to be stored');
 		assert.equal(queued.status, 'queued', 'queued: nothing is sent at the moment of the order');
 		assert.equal(digits(queued.phone), digits(CUSTOMER), 'the local shape became the E.164 number');
 		assert.ok(queued.phone.startsWith('+'), 'with the plus sign');
-		assert.equal((await call(body('real-1', { phone: localShape(CUSTOMER) }))).status, 200, 'the same order again is accepted by the webhook');
+		assert.equal((await call(body(O.one, { phone: localShape(CUSTOMER) }))).status, 200, 'the same order again is accepted by the webhook');
 		await t.sleep(8000);
-		assert.count((await allRows()).filter((r) => r.order_id === 'real-1'), 1, 'and stores nothing more');
+		assert.count((await allRows()).filter((r) => r.order_id === O.one), 1, 'and stores nothing more');
 		assert.count(await sendsSince(mark), 0, 'nothing was sent yet');
-		await patchRow('real-1', { due_at: new Date(Date.now() - 3_600_000).toISOString() });
+		await patchRow(O.one, { due_at: new Date(Date.now() - 3_600_000).toISOString() });
 		// The row is saved as asked BEFORE the send and again with the message id after it: wait for the second save.
 		const row = await until(async () => {
-			const r = await rowOf('real-1');
+			const r = await rowOf(O.one);
 			return r?.status === 'asked' && r.message_id ? r : null;
 		}, 240_000, 'the real timer to ask the question');
 		const sends = await sendsSince(mark);
 		assert.count(sends, 1, 'one message');
 		assert.equal(digits(sends[0].to?.number), digits(CUSTOMER), 'to the customer only');
 		assert.match(text(sends[0]), /From 0 to 10/, 'the question');
-		assert.equal(sends[0].idempotencyKey, 'nps-question-real-1', 'the idempotency key built from the order id');
+		assert.equal(sends[0].idempotencyKey, `nps-question-${O.one}`, 'the idempotency key built from the order id');
 		assert.ok(row.message_id, 'the message id is stored');
 		const seen = await real.observe(row.message_id, ['delivered', 'read'], { timeoutMs: 90_000 });
 		t.note('questionDelivery', { reached: seen.reached, state: seen.state, seen: seen.seen });
@@ -175,17 +183,17 @@ export default async function scenario(t) {
 
 	await t.step('4 the cooldown: a second order of the same phone, a minute later, starts no second survey and sends nothing', async () => {
 		const mark = await real.guard.mark();
-		assert.equal((await call(body('real-cool'))).status, 200, 'the webhook answers');
-		const row = await until(async () => rowOf('real-cool'), 60_000, 'the order to be stored');
+		assert.equal((await call(body(O.cool))).status, 200, 'the webhook answers');
+		const row = await until(async () => rowOf(O.cool), 60_000, 'the order to be stored');
 		assert.equal(row.status, 'skipped', 'skipped');
-		assert.match(row.note, /real-1/, 'the note names the order that was asked');
+		assert.match(row.note, new RegExp(O.one), 'the note names the order that was asked');
 		assert.count(await sendsSince(mark), 0, 'nothing was sent');
 	});
 
 	await t.step('5 the customer answers 10 from a real number: the real poller reads it and the thank you arrives with the review link button', async () => {
 		const mark = await real.guard.mark();
 		const row = await answerAndWait('promoter', '10', async () => {
-			const r = await rowOf('real-1');
+			const r = await rowOf(O.one);
 			return r?.score === 10 ? r : null;
 		});
 		assert.equal([row.category, row.status], ['promoter', 'closed'], 'a promoter, the survey is finished');
@@ -202,48 +210,50 @@ export default async function scenario(t) {
 		t.note('linkButtonDelivery', { reached: seen.reached, state: seen.state });
 	});
 
-	await t.step('6 survey 2: a detractor writes the score and a sentence in ONE message: the alert, the comment, the contact card and the last thanks', async () => {
-		await patchRow('real-1', { created_at: new Date(Date.now() - 40 * 86_400_000).toISOString() });
+	await t.step('6 survey 2: a passive customer (8): the follow-up question, then the comment and the last thanks as a link button, nothing to the owner', async () => {
+		await patchRow(O.one, { created_at: new Date(Date.now() - 40 * 86_400_000).toISOString() });
 		const mark = await real.guard.mark();
-		assert.equal((await call(body('real-2'))).status, 200, 'the webhook answers');
-		const queued = await until(async () => rowOf('real-2'), 60_000, 'the order to be stored');
+		assert.equal((await call(body(O.two))).status, 200, 'the webhook answers');
+		const queued = await until(async () => rowOf(O.two), 60_000, 'the order to be stored');
 		assert.equal(queued.status, 'queued', 'queued: the 30 day cooldown of survey 1 was moved away');
-		await patchRow('real-2', { due_at: new Date(Date.now() - 3_600_000).toISOString() });
+		await patchRow(O.two, { due_at: new Date(Date.now() - 3_600_000).toISOString() });
 		await until(async () => {
-			const r = await rowOf('real-2');
+			const r = await rowOf(O.two);
 			return r?.status === 'asked' && r.message_id;
 		}, 240_000, 'the real timer to ask the question');
 		const asked = await sendsSince(mark);
 		assert.count(asked, 1, 'one question');
-		assert.equal(asked[0].idempotencyKey, 'nps-question-real-2', 'its idempotency key');
+		assert.equal(asked[0].idempotencyKey, `nps-question-${O.two}`, 'its idempotency key');
 		const mark2 = await real.guard.mark();
-		const reply = '4 The box arrived crushed and nobody answered me when I wrote twice.';
-		const row = await answerAndWait('detractor', reply, async () => {
-			const r = await rowOf('real-2');
-			return r?.score === 4 ? r : null;
+		const score = await answerAndWait('passiveScore', '8', async () => {
+			const r = await rowOf(O.two);
+			return r?.score === 8 ? r : null;
 		});
-		assert.equal([row.category, row.status], ['detractor', 'commented'], 'a detractor whose comment came with the score');
+		assert.equal([score.category, score.status], ['passive', 'answered'], 'a passive customer, the survey waits for the comment');
+		const followUps = await until(async () => {
+			const s = await sendsSince(mark2);
+			return s.length >= 1 ? s : null;
+		}, 180_000, 'the follow-up question');
+		assert.count(followUps, 1, 'one follow-up question');
+		assert.match(text(followUps[0]), /What would make it a 10/, 'what would make it a 10');
+		const mark3 = await real.guard.mark();
+		const reply = 'Delivery was a day late, otherwise all good.';
+		const row = await answerAndWait('passiveComment', reply, async () => {
+			const r = await rowOf(O.two);
+			return r?.status === 'commented' ? r : null;
+		});
 		assert.equal(row.comment, reply, 'the whole message is the comment');
 		const sends = await until(async () => {
-			const s = await sendsSince(mark2);
-			return s.length >= 4 ? s : null;
-		}, 180_000, 'the alert, the comment, the card and the thanks');
-		assert.count(sends, 4, 'four messages');
-		for (const s of sends) assert.equal(digits(s.to?.number), digits(CUSTOMER), 'every one to the owner number (also the customer)');
-		const alert = sends.find((s) => /^Unhappy customer: Sample Customer gave 4\/10 for order real-2/.test(text(s)));
-		const comment = sends.find((s) => text(s).includes(reply));
-		const card = sends.find((s) => s.content?.display_name === 'Sample Customer');
-		const thanks = sends.find((s) => s.content?.interactive_type === 'cta_url');
-		assert.ok(alert, 'the owner alert with the order, the score and the order link');
-		assert.ok(comment, 'the comment forwarded to the owner');
-		assert.ok(card, 'the contact card');
-		assert.ok(thanks, 'the last thanks as a link button (review_for everyone)');
-		assert.equal(thanks.content?.url_button?.url, REVIEW, 'to the review page');
-		assert.equal([alert.status, comment.status, card.status, thanks.status], [202, 202, 202, 202], 'the API accepted all four');
-		const cardSeen = await real.observe(card.messageId, ['delivered', 'read'], { timeoutMs: 90_000 });
-		const thanksSeen = await real.observe(thanks.messageId, ['delivered', 'read'], { timeoutMs: 90_000 });
-		t.note('contactCardDelivery', { reached: cardSeen.reached, state: cardSeen.state });
-		t.note('detractorButtonDelivery', { reached: thanksSeen.reached, state: thanksSeen.state });
+			const s = await sendsSince(mark3);
+			return s.length >= 1 ? s : null;
+		}, 180_000, 'the last thanks');
+		assert.count(sends, 1, 'one message: nothing to the owner for a passive customer');
+		assert.equal(digits(sends[0].to?.number), digits(CUSTOMER), 'to the customer');
+		assert.equal(sends[0].content?.interactive_type, 'cta_url', 'the last thanks is a link button (review_for everyone)');
+		assert.equal(sends[0].content?.url_button?.url, REVIEW, 'to the review page');
+		assert.equal(sends[0].status, 202, 'the API accepted the link button');
+		const seen = await real.observe(sends[0].messageId, ['delivered', 'read'], { timeoutMs: 90_000 });
+		t.note('passiveButtonDelivery', { reached: seen.reached, state: seen.state });
 	});
 
 	await t.step('7 STOP is confirmed once, and an order after it is skipped with nothing sent', async () => {
@@ -258,33 +268,19 @@ export default async function scenario(t) {
 		await t.sleep(90_000);
 		assert.count(await sendsSince(mark), 1, 'and only one: nothing again on the next ticks');
 		const after = await real.guard.mark();
-		assert.equal((await call(body('real-after-stop'))).status, 200, 'the webhook answers');
-		const row = await until(async () => rowOf('real-after-stop'), 60_000, 'the order to be stored');
+		assert.equal((await call(body(O.after))).status, 200, 'the webhook answers');
+		const row = await until(async () => rowOf(O.after), 60_000, 'the order to be stored');
 		assert.equal(row.status, 'skipped', 'skipped');
 		t.note('orderAfterStopReason', row.note);
 		await t.sleep(70_000);
 		assert.count(await sendsSince(after), 0, 'nothing was sent');
 	});
 
-	await t.step('8 the weekly report reaches the owner, run by hand', async () => {
-		if (real.guard.messagesAccepted + person.count >= real.maxSends) {
-			t.note('weeklyReport', 'not run: the budget of this run was used by the surveys');
-			return;
-		}
-		const mark = await real.guard.mark();
-		const report = await t.run(WEEK);
-		assert.equal(report.status, 'success', report.describe());
-		const reports = await sendsSince(mark);
-		assert.count(reports, 1, 'one report');
-		assert.match(text(reports[0]), /^NPS report, last 7 days/, 'the report');
-		assert.ok(!text(reports[0]).includes(digits(CUSTOMER)), 'and no phone number in it');
-	});
-
-	await t.step('9 accounting and what the real API showed', async () => {
+	await t.step('8 accounting and what the real API showed', async () => {
 		const total = real.guard.messagesAccepted + person.count;
 		t.note('messages', { byWorkflow: real.guard.messagesAccepted, byPerson: person.count, total });
 		assert.ok(total <= real.maxSends, `inside the budget (${total} of ${real.maxSends})`);
-		assert.equal(real.guard.blocked, 0, 'the guard blocked nothing: the workflow never tried another number');
+		assert.equal(real.guard.blocked, 0, 'the guard blocked nothing: the workflow never tried another number (the fictitious owner was never written to)');
 		const all = await real.guard.requests();
 		const byStatus = {};
 		for (const r of all) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
