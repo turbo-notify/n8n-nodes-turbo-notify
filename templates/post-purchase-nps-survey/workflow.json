@@ -1,0 +1,1770 @@
+{
+  "name": "Ask customers for an NPS score on WhatsApp after a purchase with Turbo Notify",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7b3e9a52-4c18-4d6f-a0e5-91c2f8d37b64",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "f08eb3f3-4462-457b-a6bc-82ae4ecce736",
+      "name": "Receive an order",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "7b3e9a52-4c18-4d6f-a0e5-91c2f8d37b64",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Order access (Header Auth)"
+        }
+      },
+      "notes": "Needs Header Auth: a request without the right header is refused and never reaches the workflow. After an import check the Production URL shown in this node: that is the address to call. An import through the API or the CLI keeps the path of the file: change it to a new random value. Never shorten it. Share the Production URL and the header value only with your shop or booking system, over HTTPS."
+    },
+    {
+      "parameters": {
+        "events": [
+          "message.received",
+          "message.replied"
+        ],
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55f9e13c-849a-4faa-a662-8bc7fe73f17a",
+      "name": "Poll WhatsApp replies",
+      "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ],
+      "credentials": {
+        "turboNotifyApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Turbo Notify API"
+        }
+      },
+      "notes": "Reads the replies of your customers every 5 minutes. Works on every plan. On n8n Cloud each poll that finds a message counts as an execution: make it slower on a small plan. A reply written while n8n was off is read at the next poll, while its text still exists."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "0dcc6614-195a-4b23-ac0c-ae6b6ba9bdd6",
+      "name": "Every 30 minutes: ask the surveys that are due",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        400
+      ],
+      "notes": "Every 30 minutes (about 1,440 executions a month on n8n Cloud) it asks the surveys that are due, inside your sending hours, and closes the ones nobody answered. To spend fewer, use a Cron expression limited to your sending hours."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "7ac12110-f2bb-4110-afc7-e181d3b59e96",
+      "name": "Every week: send the NPS report",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        600
+      ],
+      "notes": "Monday at 8:00 (in the workflow time zone) it sends you the NPS report of the last 7 days."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d7b165d-1c62-4193-a188-15ab6df940c4",
+              "name": "owner_phone",
+              "value": "+55XXXXXXXXXXX",
+              "type": "string"
+            },
+            {
+              "id": "d683dfb0-1d55-4498-a6c6-5ecce23d8348",
+              "name": "business_name",
+              "value": "Your Business Name",
+              "type": "string"
+            },
+            {
+              "id": "bf7a2f62-ac0f-4f44-aba4-59a9806631e4",
+              "name": "number_alias",
+              "value": "main",
+              "type": "string"
+            },
+            {
+              "id": "f6450a65-778a-4c03-a6dd-222eae25df14",
+              "name": "review_url",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "e5a7b1f5-6745-45bf-aaf2-ef9c3da4ca7a",
+              "name": "review_button_text",
+              "value": "Leave a review",
+              "type": "string"
+            },
+            {
+              "id": "5f4de2bd-54d8-4387-afde-e0cd66074e22",
+              "name": "review_for",
+              "value": "everyone",
+              "type": "string"
+            },
+            {
+              "id": "ab261c64-71e5-41c0-a7fc-7b28f7f17e3d",
+              "name": "expected_timezone",
+              "value": "America/Sao_Paulo",
+              "type": "string"
+            },
+            {
+              "id": "212f4aa2-1328-49d1-ae18-b1de2c8532ad",
+              "name": "default_country_code",
+              "value": "55",
+              "type": "string"
+            },
+            {
+              "id": "e6f41bb3-171b-40f2-a201-7d836003b836",
+              "name": "start_statuses",
+              "value": "delivered",
+              "type": "string"
+            },
+            {
+              "id": "5c4065fe-6587-4406-aded-fd527822e5b4",
+              "name": "delay_hours",
+              "value": 24,
+              "type": "number"
+            },
+            {
+              "id": "e661e9f2-140d-44e4-a3f8-8d6e6356d0bf",
+              "name": "window_start",
+              "value": "09:00",
+              "type": "string"
+            },
+            {
+              "id": "046993f7-d38d-44fe-a920-c656d4f3d750",
+              "name": "window_end",
+              "value": "20:00",
+              "type": "string"
+            },
+            {
+              "id": "fc1cc5b3-2cab-41ee-a39c-d6fa7b2a2021",
+              "name": "cooldown_days",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "de1a9832-1268-4ab6-a146-310b8af568e5",
+              "name": "max_surveys_per_day",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "d7c138dd-11ac-4b88-ab82-53a78e6c36ff",
+              "name": "max_surveys_per_run",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "70677c98-5169-4855-aaec-0c94f1600816",
+              "name": "close_after_days",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "d2286d40-df46-4e03-a6b3-0732f390ded9",
+              "name": "purge_days",
+              "value": 180,
+              "type": "number"
+            },
+            {
+              "id": "ec5cac24-ac05-42fa-ac2e-84ff1a86c418",
+              "name": "max_text_length",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "f5f6656d-0899-45cb-a78d-6f849c589769",
+              "name": "max_comment_length",
+              "value": 500,
+              "type": "number"
+            },
+            {
+              "id": "616c7d06-88e9-4f33-ab7b-f7915e7d2617",
+              "name": "optout_words",
+              "value": "stop, parar, sair, pare, cancelar, descadastrar, unsubscribe, para",
+              "type": "string"
+            },
+            {
+              "id": "8106c164-eb92-4e2a-a815-0b8c90df228d",
+              "name": "name_fallback",
+              "value": "there",
+              "type": "string"
+            },
+            {
+              "id": "0241e130-2f0d-4ac1-aad0-3487c75c6d75",
+              "name": "field_order_id",
+              "value": "order_id",
+              "type": "string"
+            },
+            {
+              "id": "7d3d008d-57fe-49fc-a209-630f05433b5a",
+              "name": "field_customer_name",
+              "value": "customer_name",
+              "type": "string"
+            },
+            {
+              "id": "8e72873b-4f5d-489d-a35f-1f78672e285b",
+              "name": "field_phone",
+              "value": "phone",
+              "type": "string"
+            },
+            {
+              "id": "e97228b9-e867-4af8-a25f-96d36a18ab88",
+              "name": "field_status",
+              "value": "status",
+              "type": "string"
+            },
+            {
+              "id": "2a96a8b3-bdfb-4788-a4b1-d501bcc0d119",
+              "name": "field_order_url",
+              "value": "order_url",
+              "type": "string"
+            },
+            {
+              "id": "e9223e14-904b-4e74-ae49-7999a3707d0d",
+              "name": "field_items",
+              "value": "items",
+              "type": "string"
+            },
+            {
+              "id": "db1786f6-5c0a-4453-a501-d54485a11e55",
+              "name": "msg_question",
+              "value": "Hi {name}, thanks for your order {order_id} at {business}. From 0 to 10, how likely are you to recommend us to a friend? Reply with a number (you may add one sentence). To stop these questions, reply STOP.",
+              "type": "string"
+            },
+            {
+              "id": "390e5146-7d28-4dd5-a51b-8d969cb62233",
+              "name": "msg_reask",
+              "value": "Sorry, I did not catch that. Please reply with a number from 0 to 10, or STOP to stop these questions.",
+              "type": "string"
+            },
+            {
+              "id": "62214f3c-30a3-43ae-a98c-40ef725a51f4",
+              "name": "msg_promoter",
+              "value": "Thank you, {name}! We are glad you had a good experience.",
+              "type": "string"
+            },
+            {
+              "id": "e87fc237-bc11-4c2f-a5c3-b9c8e2553824",
+              "name": "msg_review_invite",
+              "value": "If you have a minute, a public review helps other people find us.",
+              "type": "string"
+            },
+            {
+              "id": "fe63da4a-668b-4595-af2c-b7f7f3c6753e",
+              "name": "msg_passive",
+              "value": "Thank you, {name}. What would make it a 10 for you?",
+              "type": "string"
+            },
+            {
+              "id": "dc6e7f36-ada1-4084-abbf-33a635fd014a",
+              "name": "msg_detractor",
+              "value": "I am sorry, {name}. What went wrong? A person will read your answer.",
+              "type": "string"
+            },
+            {
+              "id": "6add5187-b980-4269-a738-5c36d416c421",
+              "name": "msg_comment_thanks",
+              "value": "Thank you, {name}. Your answer reached us.",
+              "type": "string"
+            },
+            {
+              "id": "7fa7a3be-4236-4094-a2ae-88756eeedd04",
+              "name": "msg_optout_confirm",
+              "value": "Done. We will not ask you again.",
+              "type": "string"
+            },
+            {
+              "id": "ecd32f5a-e347-466d-a4e6-86b3a29c4ebd",
+              "name": "msg_owner_alert",
+              "value": "Unhappy customer: {customer_name} gave {score}/10 for order {order_id}.\\n{order_url}",
+              "type": "string"
+            },
+            {
+              "id": "5c818a1f-2c68-482f-add9-2f14f3b729b8",
+              "name": "msg_owner_comment",
+              "value": "{customer_name} wrote about order {order_id} ({score}/10): {comment}",
+              "type": "string"
+            },
+            {
+              "id": "242897fd-47a9-4264-a1c9-4f964bbabeca",
+              "name": "msg_report",
+              "value": "NPS report, last {days} days\\nQuestions sent: {asked}\\nAnswers: {answered} ({rate}% of the questions sent)\\nNPS: {nps}\\nPromoters {promoters}, passives {passives}, detractors {detractors}\\nLatest unhappy comments:\\n{comments}\\nNot sent: {failed}\\nSkipped, bad phone: {skipped}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "c85f595f-7f82-4e03-a49a-a43a1b66edc4",
+      "name": "Your settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        300
+      ],
+      "executeOnce": true,
+      "notesInFlow": true,
+      "notes": "owner_phone: your own WhatsApp number, with + and the country code. It gets the alert about an unhappy customer and the weekly report, at any hour (these alerts are not held back by the sending hours). It must be a different phone from the number linked to Turbo Notify: messages to yourself have no push. It counts as one of the 2 contacts per cycle on Free. Replace it: the workflow stops while it is a placeholder\nbusiness_name: how the texts name your business ({business}). Replace it: the workflow stops while it is the sample\nnumber_alias: the number that sends the questions and reads the replies: main, or the alias or the num_ id of an extra number. Replies written to another number of the account are ignored. Also set Options > Number on the Polling Trigger to save reads\nreview_url: the page where a customer is sent to leave a public review (your Google Maps or Trustpilot link). Empty: nobody gets a review button\nreview_button_text: text on the review button, at most 20 characters\nreview_for: who gets the review link when review_url is set. everyone: every customer who answered with a score (the link comes with the last thanks, so a customer who writes no comment is not sent one). promoters: only a 9 or 10. WARNING: asking only the happy customers for a review is selective solicitation. Review platforms such as Google prohibit it and consumer regulators can treat it as deceptive. This is not legal advice\nexpected_timezone: the time zone of your sending hours. The workflow time zone (Workflow settings, Timezone) must be the same, or the two timers stop. Orders and replies are never stopped by it\ndefault_country_code: added to local phone numbers that come without +. Works for 55 (Brazil). With another code only numbers that start with it, or with +, are accepted: outside Brazil your shop must send numbers with + and the country code\nstart_statuses: the order statuses that start a survey, comma separated, or * for any status. Choose the status that means the customer HAS the product: a question 24 hours after payment can arrive before the parcel. The first matching event of an order starts the clock, a later one is ignored. A status that matches nothing leaves a row status-01 to status-20 in the table that says which status arrived\ndelay_hours: hours between the order event and the question. 0 asks at the next timer run\nwindow_start: sending hours, start (24 hour clock, in expected_timezone). Nobody is asked before it\nwindow_end: sending hours, end. Nobody is asked from this time on. A survey that falls outside waits for the next window\ncooldown_days: one survey per customer per period: a customer asked in the last this many days is not asked about a new order. 0 switches it off\nmax_surveys_per_day: most questions sent per day (your local day). The rest wait for the next day. These are first messages to people who never wrote to the number, the kind WhatsApp users report: a new number may send only 50 messages on its first day, so start low\nmax_surveys_per_run: most questions sent in ONE run of the timer, so a backlog at the opening of the sending hours does not go out as one burst\nclose_after_days: days after which a question nobody answered (or a comment nobody wrote) is closed. A survey that could not be sent in time is skipped\npurge_days: closed, skipped and failed rows older than this many days are deleted once a week, with the notes about statuses. 0 never deletes, otherwise 60 or more. A customer who opted out is never deleted: deleting that row would let the workflow ask them again\nmax_text_length: longest customer name and list of items kept. Longer text is cut. A name or list that carries a web address is dropped\nmax_comment_length: longest comment kept and forwarded. Longer text is cut\noptout_words: a WHOLE message that stops the questions for that customer, comma separated. Capitals, accents and punctuation do not matter. A sentence that holds one (\"please stop\") does not match: it is an unclear answer and gets ONE re-ask that tells how to stop\nname_fallback: what {name} becomes when the order has no customer name (pt-BR: cliente)\nfield_order_id: name of the field in your order that holds a unique order id (1 to 64 letters, digits or . _ # : -, not starting with report-, optout- or status-)\nfield_customer_name: name of the field with the customer name\nfield_phone: name of the field with the customer WhatsApp number\nfield_status: name of the field with the status of the order\nfield_order_url: name of the field with a link to the order, optional. It goes to you in the unhappy customer alert\nfield_items: name of the field with what was bought, optional. A list of names, a list of objects with name or title, or a text\nmsg_question: the question. {name} {order_id} {business} {items}. \\n is a line break. Keep the STOP line (or the word you set in optout_words)\nmsg_reask: sent ONCE when the answer holds no clear number. After a second unclear answer the survey closes\nmsg_promoter: sent for a 9 or 10\nmsg_review_invite: added under the thanks, with the review button, only when review_url is set. Keep it neutral: it goes to everyone when review_for is everyone\nmsg_passive: sent for a 7 or 8. The next message of the customer is stored as the comment\nmsg_detractor: sent for a 0 to 6. The next message of the customer is stored as the comment and sent to you\nmsg_comment_thanks: the one short thanks after the comment is stored (with the review button when review_for is everyone)\nmsg_optout_confirm: confirms a STOP, once\nmsg_owner_alert: sent to you at once for a 0 to 6, followed by the customer contact card. {customer_name} {score} {order_id} {order_url} {items}. A line whose placeholder is empty is dropped\nmsg_owner_comment: sent to you with the comment of an unhappy customer\nmsg_report: the weekly report, sent to you. {days} {asked} {answered} {rate} {nps} {promoters} {passives} {detractors} {comments} {failed} {skipped}"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Stops the run while a setting is still a sample or makes no sense, before anything is read, saved or sent.\n// Then it hands on what the entry point delivered (the order, the replies, or nothing for a timer), marked with\n// where it came from.\nconst cfg = $('Your settings').first().json;\nconst problems = [];\n// Where this run came from decides what is checked: the time zone only matters to the two timers (sending hours and\n// the week of the report). An order and a reply never depend on it, so a zone mismatch can never lose an order or a STOP.\nconst source = $('Receive an order').isExecuted ? 'order' : $('Poll WhatsApp replies').isExecuted ? 'reply' : $('Every week: send the NPS report').isExecuted ? 'report' : 'timer';\nconst text = (name) => String(cfg[name] ?? '').trim();\nconst E164 = /^\\+[1-9]\\d{7,14}$/;\nconst HHMM = /^([01]\\d|2[0-3]):[0-5]\\d$/;\n\nif (!E164.test(text('owner_phone'))) problems.push('owner_phone is not a real number yet (your own WhatsApp number, with + and the country code)');\nif (!text('business_name') || text('business_name') === 'Your Business Name') problems.push('business_name is still the sample');\nif (!text('number_alias')) problems.push('number_alias is empty (main, the alias or the num_ id of the number that sends)');\nif ((source === 'timer' || source === 'report') && $now.zoneName !== text('expected_timezone')) {\n  problems.push('Time zone mismatch: this workflow runs in ' + $now.zoneName + ' but expected_timezone in Your settings is ' + text('expected_timezone') + '. Set the workflow time zone (Workflow settings, Timezone) and expected_timezone to the same zone');\n}\nconst number = (name, whole, min) => {\n  const value = Number(cfg[name]);\n  if (text(name) === '' || !Number.isFinite(value) || value < min || (whole && !Number.isInteger(value))) {\n    problems.push(name + ' must be a ' + (whole ? 'whole ' : '') + 'number of ' + min + ' or more');\n  }\n};\nnumber('delay_hours', false, 0);\nnumber('cooldown_days', false, 0);\nnumber('max_surveys_per_day', true, 1);\nnumber('max_surveys_per_run', true, 1);\nnumber('close_after_days', false, 1);\nnumber('max_text_length', true, 10);\nnumber('max_comment_length', true, 20);\nif (!(Number(cfg.purge_days) === 0 || (Number.isInteger(Number(cfg.purge_days)) && Number(cfg.purge_days) >= 60)) || text('purge_days') === '') {\n  problems.push('purge_days must be 0 (never delete) or a whole number of 60 or more');\n}\nif (!HHMM.test(text('window_start')) || !HHMM.test(text('window_end')) || text('window_start') >= text('window_end')) {\n  problems.push('window_start and window_end must be times like 09:00 and 20:00, the start before the end');\n}\nif (!/^\\d{1,4}$/.test(text('default_country_code'))) problems.push('default_country_code must be digits, for example 55');\nconst list = (name) => text(name).split(',').map((word) => word.trim()).filter(Boolean);\nif (list('start_statuses').length === 0) problems.push('start_statuses is empty: no order would start a survey');\nif (list('optout_words').length === 0) problems.push('optout_words is empty: a customer could not stop the questions');\nfor (const name of ['field_order_id', 'field_customer_name', 'field_phone', 'field_status', 'field_order_url', 'field_items']) {\n  if (!text(name)) problems.push(name + ' is empty: name the field of your order that holds it');\n}\nif (!['everyone', 'promoters'].includes(text('review_for').toLowerCase())) problems.push('review_for must be everyone or promoters');\nconst review = text('review_url');\nif (review && (review.length > 500 || !/^https?:\\/\\/\\S+$/i.test(review))) problems.push('review_url must be empty or a web address starting with http:// or https:// (500 characters at most)');\nconst button = text('review_button_text');\nif (!button || button.length > 20) problems.push('review_button_text must be 1 to 20 characters');\nfor (const name of ['name_fallback', 'msg_question', 'msg_reask', 'msg_promoter', 'msg_passive', 'msg_detractor', 'msg_comment_thanks', 'msg_optout_confirm', 'msg_owner_alert', 'msg_owner_comment', 'msg_report']) {\n  if (!text(name)) problems.push(name + ' is empty');\n}\nif (review && !text('msg_review_invite')) problems.push('msg_review_invite is empty (it goes with the review button)');\n\nif (problems.length > 0) {\n  throw new Error('Not ready to survey anybody: ' + problems.join('; ') + '. Fix Your settings, then the workflow runs.');\n}\n\nconst items = source === 'order' ? $('Receive an order').all() : source === 'reply' ? $('Poll WhatsApp replies').all() : [{ json: {} }];\nreturn items.map((item) => ({ json: { ...item.json, source } }));"
+      },
+      "id": "1ce6b544-1825-4f85-ad5e-a59c7e7a3a44",
+      "name": "Check the settings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Stops the run while a setting is a sample or makes no sense. For the two timers the time zone too (an order or a reply is never lost to it). Then it hands on what the trigger delivered."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "surveys"
+        },
+        "matchType": "anyCondition",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "queued"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "asked"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "answered"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "opted_out"
+            },
+            {
+              "keyName": "created_at",
+              "condition": "gte",
+              "keyValue": "={{ new Date(Date.now() - Math.max(Number($('Your settings').first().json.cooldown_days) || 0, 31) * (24 * 3600000)).toISOString() }}"
+            }
+          ]
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "fb0b2f28-742c-41f6-a6ef-396a5ff4fd64",
+      "name": "Read the surveys",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "notes": "Reads, once per run, the surveys that are waiting (queued, asked, answered), everyone who opted out, and everything created in the last 31 days (or cooldown_days, if longer)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decides what this run has to do. Nothing is sent or saved here. It returns PLANS: one per row to save, each with\n// the messages to send for that row. For replies it returns the events worth reading in full instead (the next\n// nodes read the whole text, then decide). The input is the rows of the table.\nconst cfg = $('Your settings').first().json;\nconst source = $('Check the settings').first().json.source;\nconst incoming = $('Check the settings').all().map((item) => item.json);\nconst COLUMNS = ['order_id', 'customer_name', 'phone', 'status', 'score', 'comment', 'asked_at', 'answered_at', 'due_at', 'message_id', 'category', 'created_at', 'reasks', 'note', 'order_url', 'items'];\nconst blankRow = () => ({ order_id: '', customer_name: '', phone: '', status: '', score: null, comment: '', asked_at: '', answered_at: '', due_at: '', message_id: '', category: '', created_at: '', reasks: 0, note: '', order_url: '', items: '' });\nconst pick = (row) => {\n  const out = blankRow();\n  for (const name of COLUMNS) if (row[name] !== undefined && row[name] !== null) out[name] = row[name];\n  out.score = row.score === undefined || row.score === null || row.score === '' ? null : Number(row.score);\n  out.reasks = Number(row.reasks) || 0;\n  return out;\n};\nconst DAY = (24 * 3600000);\nconst list = (value) => String(value ?? '').split(',').map((word) => word.trim().toLowerCase()).filter(Boolean);\nconst digits = (value) => String(value ?? '').replace(/\\D/g, '');\nconst fold = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n// Control characters, zero-width and bidirectional marks become spaces (written as escapes on purpose).\nconst clean = (value, max) => String(value ?? '').replace(/[\\u0000-\\u001f\\u007f\\u200b-\\u200f\\u202a-\\u202e\\u2060-\\u206f\\ufeff]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, max);\n// The words that opt a customer out: a WHOLE message, capitals, accents and punctuation do not matter.\nconst stopWords = list(cfg.optout_words).map((word) => fold(word).replace(/[^a-z0-9]+/g, ' ').trim()).filter(Boolean);\nconst isStop = (text) => stopWords.includes(fold(text).replace(/[^a-z0-9]+/g, ' ').trim());\nconst rows = $input.all().map((item) => item.json).filter((row) => row && row.order_id).map(pick);\nconst nowMs = Date.now();\nconst nowIso = new Date(nowMs).toISOString();\nconst ageMs = (iso) => (Date.parse(iso) ? nowMs - Date.parse(iso) : Infinity);\nconst plan = (row, messages) => ({ json: { row, messages: messages || [] } });\nconst safe = (value) => String(value).replace(/[^A-Za-z0-9._-]/g, '_');\nconst say = (purpose, row, vars) => ({\n  purpose,\n  to: row.phone,\n  key: 'nps-' + purpose + '-' + safe(row.order_id),\n  vars: { customer_name: row.customer_name, order_id: row.order_id, items: row.items, order_url: row.order_url, ...vars },\n});\n\n// ---------------------------------------------------------------- a new order\nif (source === 'order') {\n  const hook = incoming[0] || {};\n  const body = hook.body && typeof hook.body === 'object' && !Array.isArray(hook.body) ? hook.body : null;\n  if (!body) throw new Error('Order rejected: the request has no JSON object in its body.');\n  const field = (setting) => body[String(cfg[setting]).trim()];\n  const max = Math.floor(Number(cfg.max_text_length));\n  const hasLink = (value) => /https?:|www\\.|@\\d/i.test(value);\n\n  const orderId = clean(field('field_order_id'), 65);\n  if (!/^[A-Za-z0-9._#:-]{1,64}$/.test(orderId)) {\n    throw new Error('Order rejected: the field \"' + cfg.field_order_id + '\" must hold an order id of 1 to 64 letters, digits or . _ # : - (got ' + (orderId ? orderId.length + ' characters' : 'nothing') + ').');\n  }\n  // The table uses these prefixes for its own rows (the weekly report, a STOP marker, a note about a status).\n  if (/^(report|optout|status)-/i.test(orderId)) {\n    throw new Error('Order rejected: an order id may not start with report-, optout- or status- (the table uses those for its own rows).');\n  }\n  const status = clean(field('field_status'), 40).toLowerCase();\n  const starts = list(cfg.start_statuses);\n  if (!starts.includes('*') && !starts.includes(status)) {\n    // Another event of the order (created, paid, cancelled, refunded) starts nothing. It is never silent: a row says which\n    // status arrived, so a status that matches nothing is seen at once. The row has no phone and no name. There are 20\n    // slots (status-01 to status-20, picked from the order id): a newer order overwrites an older one in its slot, so\n    // the table cannot fill up with them and the latest ones are always there.\n    const slot = [...orderId].reduce((hash, char) => Math.imul(hash ^ char.charCodeAt(0), ((1 << 24) + 0x193)) >>> 0, 0x811c9dc5) % 20 + 1;\n    const noteId = 'status-' + String(slot).padStart(2, '0');\n    const why = 'order ' + orderId + ': ' + (status ? 'status \"' + status + '\" does not start a survey' : 'the field \"' + cfg.field_status + '\" is empty or missing') + ' (start_statuses: ' + starts.join(', ') + ')';\n    return [plan({ ...blankRow(), order_id: noteId, status: 'skipped', note: why.slice(0, 300), created_at: nowIso })];\n  }\n\n  let name = clean(field('field_customer_name'), max);\n  if (hasLink(name)) name = '';\n  const rawItems = field('field_items');\n  const itemNames = (Array.isArray(rawItems) ? rawItems : [rawItems]).map((item) => (item && typeof item === 'object' ? item.name ?? item.title ?? '' : item));\n  let items = clean(itemNames.map((item) => clean(item, max)).filter(Boolean).join(', '), max);\n  if (hasLink(items)) items = '';\n  const link = clean(field('field_order_url'), 501);\n  const orderUrl = link.length <= 500 && /^https?:\\/\\/\\S+$/i.test(link) ? link : '';\n\n  // Phone: E.164 only where it is unambiguous. Local formats get default_country_code only for 55 (Brazil: the area\n  // code and the 9 digit mobile number are needed). With another code, only numbers that start with that code or\n  // with + are accepted: a leading 0 or a trunk prefix cannot be told apart from the number itself.\n  const country = String(cfg.default_country_code || '55').replace(/\\D/g, '');\n  const international = (all) => {\n    if (!/^[1-9]\\d{7,14}$/.test(all)) return { error: 'not a valid international number' };\n    if (all.startsWith('55') && !(all.length === 13 && all[4] === '9')) return { error: 'a Brazilian mobile number is the country code 55, the area code, then 9 and 8 more digits' };\n    return { phone: '+' + all };\n  };\n  const toE164 = (raw) => {\n    const typed = String(raw ?? '').trim().replace(/[\\s().-]/g, '');\n    if (!/^\\+?\\d+$/.test(typed)) return { error: 'not digits' };\n    if (typed.startsWith('+')) return international(typed.slice(1));\n    if (typed.startsWith('00')) return international(typed.slice(2));\n    let all = typed;\n    if (country === '55') {\n      all = all.replace(/^0(?=\\d{10,11}$)/, '');\n      if (/^55\\d{11}$/.test(all)) return international(all);\n      if (/^[1-9][1-9]9\\d{8}$/.test(all)) return international('55' + all);\n      return { error: 'a local number needs the area code and the 9 digit mobile number, or must start with + and the country code' };\n    }\n    if (all.startsWith(country)) return international(all);\n    return { error: 'must start with + and the country code' };\n  };\n\n  // The same order again (the shop sent the event twice, or both paid and delivered) is ignored.\n  if (rows.some((row) => row.order_id === orderId)) return [];\n\n  const row = { ...blankRow(), order_id: orderId, customer_name: name, order_url: orderUrl, items, created_at: nowIso };\n  const parsed = toE164(field('field_phone'));\n  if (parsed.error) {\n    return [plan({ ...row, status: 'skipped', note: 'invalid phone (' + parsed.error + '): ' + clean(field('field_phone'), 30) })];\n  }\n  const phone = parsed.phone;\n  if (rows.some((other) => other.phone === phone && other.status === 'opted_out')) {\n    return [plan({ ...row, phone, status: 'skipped', note: 'the customer opted out' })];\n  }\n  const cooldownMs = Number(cfg.cooldown_days) * DAY;\n  const recent = rows.find((other) => other.phone === phone && ['queued', 'asked', 'answered', 'commented', 'closed'].includes(other.status) && ageMs(other.created_at) < cooldownMs);\n  if (recent) {\n    return [plan({ ...row, phone, status: 'skipped', note: 'already surveyed in the last ' + cfg.cooldown_days + ' days (order ' + recent.order_id + ')' })];\n  }\n  return [plan({ ...row, phone, status: 'queued', due_at: new Date(nowMs + Number(cfg.delay_hours) * 3600000).toISOString() })];\n}\n\n// ---------------------------------------------------------------- every 15 minutes: close what is old, ask what is due\nif (source === 'timer') {\n  const out = [];\n  const closeMs = Number(cfg.close_after_days) * DAY;\n  const minutes = $now.hour * 60 + $now.minute;\n  const [from, to] = [cfg.window_start, cfg.window_end].map((value) => { const [h, m] = String(value).split(':').map(Number); return h * 60 + m; });\n  const inWindow = minutes >= from && minutes < to;\n  const dayStart = $now.startOf('day').toMillis();\n  const changed = new Set();\n  const close = (row, patch) => { changed.add(row.order_id); out.push(plan({ ...row, ...patch })); };\n\n  for (const row of rows) {\n    if (row.status === 'asked' && ageMs(row.asked_at) >= closeMs) close(row, { status: 'closed', note: 'no answer in ' + cfg.close_after_days + ' days' });\n    else if (row.status === 'answered' && ageMs(row.answered_at) >= closeMs) close(row, { status: 'closed', note: 'no comment in ' + cfg.close_after_days + ' days' });\n    else if (row.status === 'queued' && ageMs(row.due_at) >= closeMs) close(row, { status: 'skipped', note: 'not sent in time' });\n  }\n\n  if (inWindow) {\n    // One open question per customer: whoever still owes an answer is not asked about another order.\n    const busy = new Set(rows.filter((row) => (row.status === 'asked' || row.status === 'answered') && !changed.has(row.order_id)).map((row) => row.phone));\n    // A question that was marked as asked but never confirmed (n8n stopped in between) is sent again with the SAME\n    // idempotency key: Turbo Notify returns the first message when it did go out.\n    for (const row of rows) {\n      if (row.status === 'asked' && !changed.has(row.order_id) && !row.message_id && row.reasks === 0 && ageMs(row.asked_at) >= 120000) {\n        out.push(plan(row, [say('question', row)]));\n      }\n    }\n    // At most max_surveys_per_day a day AND max_surveys_per_run at a time: the window opening with a backlog must not\n    // send a burst of first messages to people who never wrote to the number.\n    let room = Math.floor(Number(cfg.max_surveys_per_day)) - rows.filter((row) => row.asked_at && Date.parse(row.asked_at) >= dayStart).length;\n    room = Math.min(room, Math.floor(Number(cfg.max_surveys_per_run)));\n    const due = rows\n      .filter((row) => row.status === 'queued' && !changed.has(row.order_id) && Date.parse(row.due_at) <= nowMs)\n      .sort((a, b) => Date.parse(a.due_at) - Date.parse(b.due_at));\n    for (const row of due) {\n      if (room <= 0) break;\n      if (busy.has(row.phone)) continue;\n      busy.add(row.phone);\n      room -= 1;\n      out.push(plan({ ...row, status: 'asked', asked_at: nowIso, note: '' }, [say('question', row)]));\n    }\n  }\n  return out;\n}\n\n// ---------------------------------------------------------------- once a week: the NPS report for the owner\nif (source === 'report') {\n  const weekId = $now.weekYear + '-W' + String($now.weekNumber).padStart(2, '0');\n  const reportId = 'report-' + weekId;\n  // Once a week old rows go, when purge_days is set: the closed, skipped and failed ones. Never a STOP (opted_out), and\n  // never a survey that is still open: the delete node excludes them.\n  const purge = Number(cfg.purge_days) > 0 ? [{ json: { purge: true, cutoff: new Date(nowMs - Number(cfg.purge_days) * DAY).toISOString() } }] : [];\n  if (rows.some((row) => row.order_id === reportId)) return purge; // this week's report went out already\n  const days = 7;\n  const since = nowMs - days * DAY;\n  const surveys = rows.filter((row) => !/^(report|optout|status)-/.test(row.order_id));\n  const within = (iso) => Date.parse(iso) >= since;\n  const asked = surveys.filter((row) => row.asked_at && within(row.asked_at)).length;\n  const answered = surveys.filter((row) => row.answered_at && within(row.answered_at) && row.score !== null);\n  const count = (category) => answered.filter((row) => row.category === category).length;\n  const [promoters, passives, detractors] = [count('promoter'), count('passive'), count('detractor')];\n  const first = (value) => String(value || '').split(' ')[0] || 'a customer';\n  const comments = answered\n    .filter((row) => row.category === 'detractor' && row.comment)\n    .sort((a, b) => Date.parse(b.answered_at) - Date.parse(a.answered_at))\n    .slice(0, 3)\n    .map((row) => '- ' + first(row.customer_name) + ' (' + row.score + '/10): ' + row.comment.slice(0, 160));\n  const ids = (rowsOf) => rowsOf.slice(0, 5).map((row) => row.order_id).join(', ') + (rowsOf.length > 5 ? ' and ' + (rowsOf.length - 5) + ' more' : '');\n  const failed = surveys.filter((row) => row.status === 'send_failed' && within(row.created_at));\n  const skipped = surveys.filter((row) => row.status === 'skipped' && String(row.note).startsWith('invalid phone') && within(row.created_at));\n  const vars = {\n    days,\n    asked,\n    answered: answered.length,\n    rate: asked > 0 ? Math.round((100 * answered.length) / asked) : 0,\n    nps: answered.length > 0 ? Math.round((100 * (promoters - detractors)) / answered.length) : 'n/a',\n    promoters,\n    passives,\n    detractors,\n    comments: comments.length > 0 ? comments.join('\\n') : 'none',\n    failed: failed.length > 0 ? failed.length + ' (orders ' + ids(failed) + ')' : 'none',\n    skipped: skipped.length > 0 ? skipped.length + ' (orders ' + ids(skipped) + ')' : 'none',\n  };\n  const row = { ...blankRow(), order_id: reportId, customer_name: 'Weekly report', status: 'closed', note: 'weekly report', created_at: nowIso };\n  return [...purge, plan(row, [{ purpose: 'report', to: String(cfg.owner_phone).trim(), key: 'nps-report-' + weekId, vars }])];\n}\n\n// ---------------------------------------------------------------- replies: only from customers who owe an answer (or who say STOP)\nconst ownerDigits = digits(cfg.owner_phone);\n// Only the number that sends the questions: with several numbers on the account a customer who writes to another one\n// is not answering a survey. The setting is main, an alias or a num_ id; the event carries the alias and the id.\nconst wanted = fold(String(cfg.number_alias).trim());\nconst onNumber = (event) => (!event.number_id && !event.number_alias) || fold(event.number_id) === wanted || fold(event.number_alias) === wanted;\n// A message whose content expired reaches the poll with a marker in place of its text: it is never read as an answer.\nconst REDACTED = /^\\[content redacted/i;\nconst byPhone = new Map();\nfor (const row of rows) if (row.phone) byPhone.set(row.phone, [...(byPhone.get(row.phone) || []), row]);\nconst picks = [];\nfor (const [index, event] of incoming.entries()) {\n  const d = event.data || {};\n  if (event.type !== 'message.received' && event.type !== 'message.replied') continue;\n  if (!onNumber(event)) continue;\n  if (d.direction !== 'inbound' || (d.to && d.to.group_id) || d.content_type !== 'text') continue; // private text written by a person\n  if (REDACTED.test(String(d.preview ?? ''))) continue;\n  const from = digits(d.from && d.from.number); // a sender whose number WhatsApp hides has none: it cannot be matched to a survey and is ignored\n  if (!from || from === digits(d.to && d.to.number) || from === ownerDigits) continue;\n  const phone = '+' + from;\n  const mine = byPhone.get(phone) || [];\n  const waiting = mine.some((row) => row.status === 'asked' || row.status === 'answered');\n  const stops = isStop(d.preview) && mine.length > 0 && !mine.some((row) => row.status === 'opted_out');\n  if (!waiting && !stops) continue; // chat that has nothing to do with a survey is never answered\n  picks.push({ json: { pick: true, event_id: event.id, message_id: d.id || '', number_id: event.number_id || '', phone, preview: String(d.preview ?? ''), at: d.at || event.created_at || '', order: index } });\n}\n// Oldest first, so that two messages of the same customer are judged in the order they were written.\nreturn picks.sort((a, b) => (Date.parse(a.json.at) || 0) - (Date.parse(b.json.at) || 0) || a.json.order - b.json.order);"
+      },
+      "id": "3330e3d8-ca7d-4f49-a1a4-a308c8a6ebb3",
+      "name": "Decide what to do",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ],
+      "notes": "A new order is checked and queued (or skipped, with the reason). A timer run closes old surveys and asks the due ones. The week run writes the report and clears old rows. A poll run picks the replies from customers who owe an answer."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ecc35132-97ef-4130-a0d3-a951d766b4ef",
+                    "leftValue": "={{ $json.pick === true }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Read the reply in full"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d282676e-6bc0-4c00-a458-921edaf40f64",
+                    "leftValue": "={{ $json.purge === true }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delete old rows"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Save a plan"
+        }
+      },
+      "id": "4fd0ee55-0743-46dc-a452-1f42eff7c642",
+      "name": "Where does this go?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1680,
+        300
+      ],
+      "notes": "Read the reply in full: a reply from a customer who owes an answer. Delete old rows: the weekly clean-up. Save a plan: everything else, ready to be saved."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "surveys"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "created_at",
+              "condition": "lt",
+              "keyValue": "={{ $json.cutoff }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "neq",
+              "keyValue": "opted_out"
+            },
+            {
+              "keyName": "status",
+              "condition": "neq",
+              "keyValue": "queued"
+            },
+            {
+              "keyName": "status",
+              "condition": "neq",
+              "keyValue": "asked"
+            },
+            {
+              "keyName": "status",
+              "condition": "neq",
+              "keyValue": "answered"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1c626399-10c1-4417-a4ec-309489e5530f",
+      "name": "Delete old rows (purge_days)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        40
+      ],
+      "executeOnce": true,
+      "notes": "Once a week, when purge_days is not 0: deletes closed, skipped and failed rows older than purge_days. Never a customer who opted out, never a survey that is still open."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "number": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.number_id }}"
+        },
+        "operation": "get",
+        "messageId": "={{ $json.message_id }}",
+        "simplify": true
+      },
+      "id": "d59c6f6b-aee3-47b1-a431-a47752ee2162",
+      "name": "Read the whole message",
+      "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        540
+      ],
+      "credentials": {
+        "turboNotifyApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Turbo Notify API"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "The poll carries only the first 50 characters of a message. This reads the whole text, so a comment is stored and forwarded complete. Only replies of customers who owe an answer are read."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Judges the replies of this poll, one after the other, oldest first, so two messages of the same customer are\n// handled in the order they were written. Each reply is matched with the survey that is waiting for it. Nothing is\n// sent or saved here: it returns PLANS (a row to save and the messages to send for it).\nconst cfg = $('Your settings').first().json;\nconst picks = $('Decide what to do').all().map((item) => item.json);\nconst read = $input.all().map((item) => item.json); // the whole messages, in the same order as the picks\nconst COLUMNS = ['order_id', 'customer_name', 'phone', 'status', 'score', 'comment', 'asked_at', 'answered_at', 'due_at', 'message_id', 'category', 'created_at', 'reasks', 'note', 'order_url', 'items'];\nconst blankRow = () => ({ order_id: '', customer_name: '', phone: '', status: '', score: null, comment: '', asked_at: '', answered_at: '', due_at: '', message_id: '', category: '', created_at: '', reasks: 0, note: '', order_url: '', items: '' });\nconst pick = (row) => {\n  const out = blankRow();\n  for (const name of COLUMNS) if (row[name] !== undefined && row[name] !== null) out[name] = row[name];\n  out.score = row.score === undefined || row.score === null || row.score === '' ? null : Number(row.score);\n  out.reasks = Number(row.reasks) || 0;\n  return out;\n};\nconst DAY = (24 * 3600000);\nconst list = (value) => String(value ?? '').split(',').map((word) => word.trim().toLowerCase()).filter(Boolean);\nconst digits = (value) => String(value ?? '').replace(/\\D/g, '');\nconst fold = (value) => String(value ?? '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n// Control characters, zero-width and bidirectional marks become spaces (written as escapes on purpose).\nconst clean = (value, max) => String(value ?? '').replace(/[\\u0000-\\u001f\\u007f\\u200b-\\u200f\\u202a-\\u202e\\u2060-\\u206f\\ufeff]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, max);\n// The words that opt a customer out: a WHOLE message, capitals, accents and punctuation do not matter.\nconst stopWords = list(cfg.optout_words).map((word) => fold(word).replace(/[^a-z0-9]+/g, ' ').trim()).filter(Boolean);\nconst isStop = (text) => stopWords.includes(fold(text).replace(/[^a-z0-9]+/g, ' ').trim());\nconst nowIso = new Date().toISOString();\nconst safe = (value) => String(value).replace(/[^A-Za-z0-9._-]/g, '_');\nconst surveys = new Map($('Read the surveys').all().map((item) => item.json).filter((row) => row && row.order_id).map((row) => [row.order_id, pick(row)]));\nconst plans = new Map(); // order_id -> { row, messages }\nconst save = (row) => {\n  surveys.set(row.order_id, row);\n  if (!plans.has(row.order_id)) plans.set(row.order_id, { row, messages: [] });\n  plans.get(row.order_id).row = row;\n  return plans.get(row.order_id);\n};\nconst say = (entry, purpose, to, extra) => entry.messages.push({\n  purpose,\n  to,\n  key: purpose === 'optout' ? 'nps-stop-' + digits(to) : 'nps-' + purpose + '-' + safe(entry.row.order_id),\n  vars: { customer_name: entry.row.customer_name, phone: entry.row.phone, order_id: entry.row.order_id, items: entry.row.items, order_url: entry.row.order_url, score: entry.row.score, category: entry.row.category, comment: entry.row.comment, ...extra },\n});\n\n// A score is ONE whole number from 0 to 10, as digits (\"9\", \"9 !\", \"10/10\", \"7 out of 10\", \"nota 8\") or as a word in\n// English or Portuguese (\"nine\", \"dez\", \"ten out of ten\"). Two different numbers, a decimal, a number above 10\n// (\"100%\") or no number at all is not a score: it gets one gentle re-ask.\nconst WORDS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, um: 1, uma: 1, dois: 2, duas: 2, tres: 3, quatro: 4, cinco: 5, seis: 6, sete: 7, oito: 8, nove: 9, dez: 10 };\nconst WEAK = new Set(['one', 'um', 'uma']); // also ordinary words: counted only in a very short message (two words or fewer)\nconst parseScore = (raw) => {\n  const text = fold(raw).replace(/(\\d{1,2})\\s*(?:\\/|out of|de)\\s*10(?!\\d)/g, '$1');\n  if (/\\d[.,]\\d/.test(text)) return null;\n  const found = new Set([...text.matchAll(/(?<!\\d)\\d{1,3}(?!\\d)/g)].map((match) => Number(match[0])));\n  if (found.size === 0 && !/\\d/.test(text)) {\n    const tokens = text.match(/[a-z]+/g) || [];\n    for (const token of tokens) {\n      if (Object.hasOwn(WORDS, token) && (!WEAK.has(token) || tokens.length <= 2)) found.add(WORDS[token]);\n    }\n  }\n  if (found.size !== 1) return null;\n  const [score] = [...found];\n  return score >= 0 && score <= 10 ? score : null;\n};\n// A sentence next to the score (\"nota 10, entrega rapida e atendimento otimo\") is already the comment.\nconst hasSentence = (raw) => {\n  const words = (clean(raw, 1000).replace(/\\d+\\s*(?:\\/|out of|de)\\s*10/gi, ' ').replace(/\\d+/g, ' ').match(/\\p{L}{2,}/gu) || []).filter((word) => !Object.hasOwn(WORDS, fold(word)));\n  return words.length >= 4;\n};\nconst categoryOf = (score) => (score >= 9 ? 'promoter' : score >= 7 ? 'passive' : 'detractor');\n\nfor (const [index, event] of picks.entries()) {\n  const message = read[index] || {};\n  // A message whose content expired (the plan keeps the text for a limited time) has no text and a marker for a preview:\n  // it is never read as an answer. The survey stays as it was and closes by itself after close_after_days.\n  if (message.content_expired === true || /^\\[content redacted/i.test(String(event.preview ?? ''))) continue;\n  const whole = typeof message.text === 'string' && message.text.trim() ? message.text : event.preview; // the poll only carries the first 50 characters\n  const text = clean(whole, Math.floor(Number(cfg.max_comment_length)));\n  const mine = [...surveys.values()].filter((row) => row.phone === event.phone);\n\n  if (isStop(text)) {\n    if (mine.length === 0 || mine.some((row) => row.status === 'opted_out')) continue; // not our customer, or confirmed before\n    const waiting = mine.filter((row) => row.status === 'queued' || row.status === 'asked' || row.status === 'answered');\n    const stopped = waiting.length > 0\n      ? waiting.map((row) => save({ ...row, status: 'opted_out', note: 'asked to stop' }))\n      : [save({ ...blankRow(), order_id: 'optout-' + digits(event.phone), customer_name: mine[0].customer_name, phone: event.phone, status: 'opted_out', note: 'asked to stop', created_at: nowIso })];\n    say(stopped[0], 'optout', event.phone);\n    continue;\n  }\n\n  const newest = (status, at) => mine.filter((row) => row.status === status).sort((a, b) => Date.parse(b[at]) - Date.parse(a[at]))[0];\n  const target = newest('asked', 'asked_at') || newest('answered', 'answered_at');\n  if (!target) continue;\n\n  if (target.status === 'asked') {\n    const score = parseScore(text);\n    if (score === null) {\n      if (target.reasks < 1) say(save({ ...target, reasks: 1 }), 'reask', target.phone);\n      else save({ ...target, status: 'closed', note: 'no valid score after one re-ask' });\n      continue;\n    }\n    const category = categoryOf(score);\n    const comment = hasSentence(text) ? text : '';\n    const entry = save({ ...target, score, category, comment, answered_at: nowIso, status: category === 'promoter' ? (comment ? 'commented' : 'closed') : comment ? 'commented' : 'answered' });\n    if (category === 'promoter') {\n      say(entry, 'promoter', target.phone);\n    } else {\n      if (category === 'detractor') say(entry, 'owner_alert', String(cfg.owner_phone).trim());\n      if (category === 'detractor' && comment) say(entry, 'owner_comment', String(cfg.owner_phone).trim());\n      if (category === 'detractor') say(entry, 'owner_card', String(cfg.owner_phone).trim());\n      say(entry, comment ? 'comment_thanks' : category === 'passive' ? 'passive' : 'detractor', target.phone);\n    }\n  } else {\n    // The score was given and the customer was asked why: whatever they write next is the comment.\n    const entry = save({ ...target, comment: text, status: 'commented' });\n    if (target.category === 'detractor') say(entry, 'owner_comment', String(cfg.owner_phone).trim());\n    say(entry, 'comment_thanks', target.phone);\n  }\n}\nreturn [...plans.values()].map((entry) => ({ json: { row: entry.row, messages: entry.messages } }));"
+      },
+      "id": "aaa19de0-24f3-4cc0-a889-1a717bcd5a6e",
+      "name": "Decide about the replies",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        540
+      ],
+      "notes": "Judges the replies one after the other: a score, a re-ask, a comment, or STOP. Nothing else gets an answer."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "surveys"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.row.order_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.row.order_id }}",
+            "customer_name": "={{ $json.row.customer_name }}",
+            "phone": "={{ $json.row.phone }}",
+            "status": "={{ $json.row.status }}",
+            "score": "={{ $json.row.score }}",
+            "comment": "={{ $json.row.comment }}",
+            "asked_at": "={{ $json.row.asked_at }}",
+            "answered_at": "={{ $json.row.answered_at }}",
+            "due_at": "={{ $json.row.due_at }}",
+            "message_id": "={{ $json.row.message_id }}",
+            "category": "={{ $json.row.category }}",
+            "created_at": "={{ $json.row.created_at }}",
+            "reasks": "={{ $json.row.reasks }}",
+            "note": "={{ $json.row.note }}",
+            "order_url": "={{ $json.row.order_url }}",
+            "items": "={{ $json.row.items }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comment",
+              "displayName": "comment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_at",
+              "displayName": "asked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "answered_at",
+              "displayName": "answered_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_at",
+              "displayName": "due_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reasks",
+              "displayName": "reasks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_url",
+              "displayName": "order_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "items",
+              "displayName": "items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ebe0520-7e18-44fd-afc9-32656dde3942",
+      "name": "Save the survey before sending",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2460,
+        300
+      ],
+      "notes": "The row is stored BEFORE anybody is messaged, so a restart cannot lose an order, an answer or an opt-out."
+    },
+    {
+      "parameters": {
+        "jsCode": "// The one place that makes every text, from the wording in Your settings. Nothing is sent or saved here: it\n// returns one item per message, and the nodes after it send them. A row that has no message to send stops here.\nconst cfg = $('Your settings').first().json;\nconst source = $('Check the settings').first().json.source;\nconst plans = (source === 'reply' ? $('Decide about the replies').all() : $('Decide what to do').all()).map((item) => item.json).filter((plan) => plan.row); // the week run may also hand on a clean-up item: it has no row\n// {placeholders} are filled in; a typed backslash and n become a line break; a line whose only content was an empty\n// placeholder (no order link) disappears.\nconst fill = (template, values) =>\n  String(template)\n    .replace(/\\\\n/g, '\\n')\n    .split('\\n')\n    .map((line) => ({ line, filled: line.replace(/\\{(\\w+)\\}/g, (whole, name) => (name in values ? String(values[name]) : whole)) }))\n    .filter(({ line, filled }) => line.trim() === '' || filled.trim() !== '')\n    .map(({ filled }) => filled)\n    .join('\\n')\n    .trim();\nconst reviewUrl = String(cfg.review_url ?? '').trim();\n// Who is invited to leave a review: everyone who answered with a score (the link comes with the last thanks), or, only\n// when the owner chooses it, the promoters alone.\nconst reviewForEveryone = String(cfg.review_for ?? 'everyone').trim().toLowerCase() !== 'promoters';\n\nconst out = [];\nfor (const { row, messages } of plans) {\n  for (const message of messages) {\n    const first = String(message.vars.customer_name || '').split(' ')[0] || String(cfg.name_fallback);\n    const values = { ...message.vars, customer_name: message.vars.customer_name || message.vars.phone || 'a customer', name: first, business: cfg.business_name };\n    const item = { order_id: row.order_id, purpose: message.purpose, kind: 'text', to: message.to, key: message.key, text: '', button_text: '', button_url: '', display_name: '', card_phone: '', row_after: row };\n    switch (message.purpose) {\n      case 'question': item.text = fill(cfg.msg_question, values); break;\n      case 'reask': item.text = fill(cfg.msg_reask, values); break;\n      case 'promoter':\n        if (reviewUrl) {\n          item.kind = 'button';\n          item.text = fill(cfg.msg_promoter, values) + '\\n' + fill(cfg.msg_review_invite, values);\n          item.button_text = String(cfg.review_button_text).trim();\n          item.button_url = reviewUrl;\n        } else {\n          item.text = fill(cfg.msg_promoter, values);\n        }\n        break;\n      case 'passive': item.text = fill(cfg.msg_passive, values); break;\n      case 'detractor': item.text = fill(cfg.msg_detractor, values); break;\n      case 'comment_thanks':\n        if (reviewUrl && reviewForEveryone) {\n          item.kind = 'button';\n          item.text = fill(cfg.msg_comment_thanks, values) + '\\n' + fill(cfg.msg_review_invite, values);\n          item.button_text = String(cfg.review_button_text).trim();\n          item.button_url = reviewUrl;\n        } else {\n          item.text = fill(cfg.msg_comment_thanks, values);\n        }\n        break;\n      case 'optout': item.text = fill(cfg.msg_optout_confirm, values); break;\n      case 'owner_alert': item.text = fill(cfg.msg_owner_alert, values); break;\n      case 'owner_comment': item.text = fill(cfg.msg_owner_comment, values); break;\n      case 'owner_card':\n        item.kind = 'card';\n        item.display_name = String(message.vars.customer_name || message.vars.phone).slice(0, 200);\n        item.card_phone = message.vars.phone;\n        break;\n      case 'report':\n        item.text = fill(cfg.msg_report, values);\n        // The same report sent again (a retry) has the same key and Turbo Notify returns the first message. A report\n        // with other numbers (sent again on purpose, after its row was deleted) must not be refused as a conflict.\n        item.key += '-' + [...item.text].reduce((hash, char) => Math.imul(hash ^ char.charCodeAt(0), ((1 << 24) + 0x193)) >>> 0, 0x811c9dc5).toString(16);\n        break;\n      default: throw new Error('Unknown message purpose: ' + message.purpose);\n    }\n    item.text = item.text.slice(0, item.kind === 'button' ? 1000 : 3500);\n    out.push({ json: item });\n  }\n}\nreturn out;"
+      },
+      "id": "26af60bd-3e73-40c8-a4a4-5635fa175a07",
+      "name": "Write the messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2700,
+        300
+      ],
+      "notes": "The one place that makes every text, from the wording in Your settings. A row with nothing to send ends here."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a00b331c-6dd5-45fc-af76-58316e8f2af1",
+                    "leftValue": "={{ $json.kind }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f0ec8068-c451-423a-abb0-35c4b157e218",
+                    "leftValue": "={{ $json.kind }}",
+                    "rightValue": "button",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Review button"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "45de007d-30f6-45b4-a905-8200be478719",
+                    "leftValue": "={{ $json.kind }}",
+                    "rightValue": "card",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Contact card"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9779132-ccc4-44e0-a023-9374ea407836",
+      "name": "Which kind of message?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2940,
+        300
+      ],
+      "notes": "Text for the question, the thanks and the alerts. A link button for a happy customer. A contact card for the unhappy customer."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "number": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Your settings').first().json.number_alias }}"
+        },
+        "operation": "sendText",
+        "recipientType": "phone",
+        "phoneNumber": "={{ $json.to }}",
+        "text": "={{ $json.text }}",
+        "options": {
+          "idempotencyKey": "={{ $json.key }}"
+        }
+      },
+      "id": "917bc7a6-d0f2-40b7-a962-7b597ae22ef7",
+      "name": "Send the text",
+      "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        100
+      ],
+      "credentials": {
+        "turboNotifyApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Turbo Notify API"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "The question, the re-ask, the follow-ups, the thanks, the alerts to you and the report. A refused send never stops the others and the row records why."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "number": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Your settings').first().json.number_alias }}"
+        },
+        "operation": "sendLinkButton",
+        "recipientType": "phone",
+        "phoneNumber": "={{ $json.to }}",
+        "body": "={{ $json.text }}",
+        "buttonText": "={{ $json.button_text }}",
+        "buttonUrl": "={{ $json.button_url }}",
+        "additionalFields": {},
+        "options": {
+          "idempotencyKey": "={{ $json.key }}"
+        }
+      },
+      "id": "677476d3-e225-4d4d-a05b-630811cf5187",
+      "name": "Send the thank you with the review button",
+      "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        300
+      ],
+      "credentials": {
+        "turboNotifyApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Turbo Notify API"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "One message: the thanks with a button that opens your review page."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "number": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Your settings').first().json.number_alias }}"
+        },
+        "operation": "sendContactCard",
+        "recipientType": "phone",
+        "phoneNumber": "={{ $json.to }}",
+        "displayName": "={{ $json.display_name }}",
+        "phonesInput": "fields",
+        "phones": {
+          "phoneValues": [
+            {
+              "number": "={{ $json.card_phone }}",
+              "label": "WhatsApp"
+            }
+          ]
+        },
+        "options": {
+          "idempotencyKey": "={{ $json.key }}"
+        }
+      },
+      "id": "9e20c06e-e8d9-4c91-ae63-60133efd45f3",
+      "name": "Send the contact card to the owner",
+      "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        500
+      ],
+      "credentials": {
+        "turboNotifyApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Turbo Notify API"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "The card of the unhappy customer, sent to you, so you can write back with one tap."
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "26aa582a-edfc-41ed-a444-c63b4df65f3f",
+      "name": "Gather the answers of Turbo Notify",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3420,
+        300
+      ],
+      "notes": "Puts the answers of the three send nodes back together."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs once, after every message of this run was sent or refused. Each answer of Turbo Notify is matched with the\n// message that was planned for it, then written into the row of its survey: the id of the question, or the reason\n// a message was refused. A refused send arrives here as an error: it never stopped the other messages.\nconst COLUMNS = ['order_id', 'customer_name', 'phone', 'status', 'score', 'comment', 'asked_at', 'answered_at', 'due_at', 'message_id', 'category', 'created_at', 'reasks', 'note', 'order_url', 'items'];\nconst blankRow = () => ({ order_id: '', customer_name: '', phone: '', status: '', score: null, comment: '', asked_at: '', answered_at: '', due_at: '', message_id: '', category: '', created_at: '', reasks: 0, note: '', order_url: '', items: '' });\nconst pick = (row) => {\n  const out = blankRow();\n  for (const name of COLUMNS) if (row[name] !== undefined && row[name] !== null) out[name] = row[name];\n  out.score = row.score === undefined || row.score === null || row.score === '' ? null : Number(row.score);\n  out.reasks = Number(row.reasks) || 0;\n  return out;\n};\nconst reasonOf = (error) => String(typeof error === 'string' ? error : (error && error.message) || JSON.stringify(error)).slice(0, 200);\n// A refusal that waiting can cure: the number is not connected right now, Turbo Notify answered 5xx or not at all, the\n// daily volume of a new number or the pace is used up. Such a question goes back to queued and is tried again at the\n// next run (it is bounded by close_after_days: a survey that could not be sent in time is skipped). Anything else (a\n// quota, a key without the scope, a reply ratio too low, a value Turbo Notify rejects) becomes send_failed: only a person can mend it.\nconst TEMPORARY = /\\((?:number_not_connected|warmup_limit_exceeded|duplicate_burst_blocked|recipients_per_day_limit_exceeded|send_rate_spacing|rate_limit_exceeded|service_unavailable)\\)|could not complete the request \\(5\\d\\d\\)|did not answer in time|could not reach turbo notify|too many requests/i;\nconst results = $input.all().map((answer, index) => {\n  const planned = $('Write the messages').itemMatching(index).json;\n  const failed = Boolean(answer.json.error) || !answer.json.id;\n  return { planned, ok: !failed, message_id: failed ? '' : answer.json.id, error: failed ? reasonOf(answer.json.error || 'Turbo Notify did not return a message id') : '' };\n});\n\nconst byOrder = new Map();\nfor (const result of results) {\n  if (!byOrder.has(result.planned.order_id)) byOrder.set(result.planned.order_id, []);\n  byOrder.get(result.planned.order_id).push(result);\n}\nconst out = [];\nfor (const [, own] of byOrder) {\n  const row = { ...own[0].planned.row_after };\n  const failures = [];\n  for (const result of own) {\n    const purpose = result.planned.purpose;\n    if (result.ok) {\n      if (purpose === 'question') row.message_id = result.message_id;\n      continue;\n    }\n    const to = purpose.startsWith('owner_') || purpose === 'report' ? 'the owner' : 'the customer';\n    const again = purpose === 'question' && TEMPORARY.test(result.error);\n    failures.push({ order_id: row.order_id, purpose, to, error: result.error + (again ? ' (the question stays queued and is tried again at the next run)' : '') });\n    if (purpose === 'question') {\n      // The question never reached the customer: it does not count for today's limit. A temporary refusal is tried again\n      // by itself, any other one waits for a person.\n      Object.assign(row, again ? { status: 'queued', asked_at: '', message_id: '', note: 'will try again, question not sent: ' + result.error } : { status: 'send_failed', asked_at: '', note: 'question not sent: ' + result.error });\n    } else {\n      row.note = [row.note, purpose + ' to ' + to + ' not sent: ' + result.error].filter(Boolean).join(' | ').slice(0, 500);\n    }\n  }\n  out.push({ json: { ...pick(row), failures } });\n}\nreturn out;"
+      },
+      "id": "3bc93af8-f37c-4218-a8d8-a6f73ffc1b77",
+      "name": "Record the answers",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3660,
+        300
+      ],
+      "notes": "Matches each answer with its message and writes the message id, or the reason it was refused, into the row. A question that was refused makes the row send_failed."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "surveys"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.order_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "phone": "={{ $json.phone }}",
+            "status": "={{ $json.status }}",
+            "score": "={{ $json.score }}",
+            "comment": "={{ $json.comment }}",
+            "asked_at": "={{ $json.asked_at }}",
+            "answered_at": "={{ $json.answered_at }}",
+            "due_at": "={{ $json.due_at }}",
+            "message_id": "={{ $json.message_id }}",
+            "category": "={{ $json.category }}",
+            "created_at": "={{ $json.created_at }}",
+            "reasks": "={{ $json.reasks }}",
+            "note": "={{ $json.note }}",
+            "order_url": "={{ $json.order_url }}",
+            "items": "={{ $json.items }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comment",
+              "displayName": "comment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_at",
+              "displayName": "asked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "answered_at",
+              "displayName": "answered_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_at",
+              "displayName": "due_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reasks",
+              "displayName": "reasks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_url",
+              "displayName": "order_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "items",
+              "displayName": "items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cd157905-e7ed-4983-ae2a-35d6186c132d",
+      "name": "Save the survey after sending",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3900,
+        300
+      ],
+      "notes": "Writes the message id of the question, or the failure, into the row."
+    },
+    {
+      "parameters": {
+        "jsCode": "// The last node of the run. A refused message is never silent: the row already says why, and this node makes the\n// run fail so that your Error workflow (or the Executions list) shows it. It names the order and who was not\n// reached, never a phone number.\nconst rows = $('Record the answers').all().map((item) => item.json);\nconst lines = [];\nfor (const row of rows) {\n  for (const failure of row.failures) {\n    lines.push(failure.purpose + ' for ' + (failure.order_id.startsWith('report-') ? 'the weekly report' : 'order ' + failure.order_id) + ' was not sent to ' + failure.to + ': ' + failure.error);\n  }\n}\nif (lines.length > 0) throw new Error('Some messages were not sent. ' + lines.join(' || '));\nreturn $input.all();"
+      },
+      "id": "3f0d7b11-facc-47aa-adfb-ea1374b98472",
+      "name": "Report what failed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4140,
+        300
+      ],
+      "notes": "Fails the run when a message was refused, naming the order. This is what your Error workflow reacts to."
+    },
+    {
+      "parameters": {},
+      "id": "2c7b6c76-a6a4-4bee-aaa2-5cdcb7d1b4b8",
+      "name": "Run once: create the table",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "surveys",
+        "columns": {
+          "column": [
+            {
+              "name": "order_id",
+              "type": "string"
+            },
+            {
+              "name": "customer_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "string"
+            },
+            {
+              "name": "score",
+              "type": "number"
+            },
+            {
+              "name": "comment",
+              "type": "string"
+            },
+            {
+              "name": "asked_at",
+              "type": "string"
+            },
+            {
+              "name": "answered_at",
+              "type": "string"
+            },
+            {
+              "name": "due_at",
+              "type": "string"
+            },
+            {
+              "name": "message_id",
+              "type": "string"
+            },
+            {
+              "name": "category",
+              "type": "string"
+            },
+            {
+              "name": "created_at",
+              "type": "string"
+            },
+            {
+              "name": "reasks",
+              "type": "number"
+            },
+            {
+              "name": "note",
+              "type": "string"
+            },
+            {
+              "name": "order_url",
+              "type": "string"
+            },
+            {
+              "name": "items",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "b9b85ccd-ec79-4775-a832-9454607fc294",
+      "name": "Create the surveys table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### How it works\nNeeds Lone Wolf or higher in practice: every customer is a contact. Your shop posts a JSON order event (order_id, phone, status, customer_name; field_* settings rename them) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one WhatsApp question, 0 to 10, inside your sending hours. A 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, a 0 to 6 is asked what went wrong and you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. Not a chatbot. Other NPS templates exist (20880, 22663, 4686, Google Sheets based): this one adds STOP, reply matching, cooldown, daily cap and re-ask.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15), see [installing community nodes](https://docs.n8n.io/integrations/community-nodes/installation/). Works on n8n Cloud and self-hosted. Tested on n8n 2.45.5.\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once. In Your settings type owner_phone (a different phone from the number linked to Turbo Notify; Free allows 2 contacts per cycle) and business_name. Check start_statuses, time zone, hours and texts.\n4. Activate, test with your own phone, then point your shop at the Production URL. It must send a fixed custom header: Shopify and WooCommerce native webhooks usually cannot, so use a relay. Outside Brazil send numbers with + and the country code.\n5. Set an Error workflow.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. n8n Cloud counts executions: the 30 minute timer is about 1,440 a month and the 5 minute poll up to 8,640. Slow them down on a small plan.",
+        "height": 780,
+        "width": 640,
+        "color": 1
+      },
+      "id": "46b13ac2-0a8a-48e9-a50b-30dd709b04ce",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -110
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Four ways in\nAn order from your shop, a reply, a timer every 15 minutes, a weekly timer.",
+        "height": 960,
+        "width": 380,
+        "color": 7
+      },
+      "id": "e5f83cc9-5754-44ff-a1c2-537ad924ca47",
+      "name": "Section: four ways in",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -110
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Check, then read the table\nStops on a sample setting. Reads the survey rows once.",
+        "height": 360,
+        "width": 420,
+        "color": 7
+      },
+      "id": "76794e65-476b-4872-a304-4fa1a6f55854",
+      "name": "Section: check and read",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Decide what to do\nQueue an order, ask what is due, report the week, clear old rows, or judge a reply read in full.",
+        "height": 860,
+        "width": 900,
+        "color": 7
+      },
+      "id": "3b19772c-fb6e-4514-ad9d-14334dcc5d1b",
+      "name": "Section: decide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Save, then write\nThe row is saved before anything is sent. Then every text is made from your settings.",
+        "height": 360,
+        "width": 420,
+        "color": 7
+      },
+      "id": "06f54c23-cadb-45ae-a0db-b96bfb6812e8",
+      "name": "Section: save and write",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Send\nText, review button or contact card. A refused send never stops the others.",
+        "height": 760,
+        "width": 660,
+        "color": 7
+      },
+      "id": "12a6034f-b545-403e-aac1-d82d7ac773d1",
+      "name": "Section: send",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2900,
+        -10
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Record and report\nThe message id or the failure goes into the row. A refusal then fails the run.",
+        "height": 360,
+        "width": 660,
+        "color": 7
+      },
+      "id": "9ea6eea7-b599-4397-a110-c706af730228",
+      "name": "Section: record and report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3620,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Run once: create the table\nCreates surveys when missing. Safe to run again.",
+        "height": 360,
+        "width": 420,
+        "color": 7
+      },
+      "id": "6bce7597-f51f-464b-a779-029a3721fb97",
+      "name": "Section: create the table",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        890
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Replace the samples before you activate**\nWhile owner_phone or business_name is a sample the workflow stops and asks nobody. owner_phone must not be the number linked to Turbo Notify. Every value in Your settings is explained under the node.",
+        "height": 800,
+        "width": 460,
+        "color": 3
+      },
+      "id": "4733c497-55f0-4793-a01d-26f12fc2d289",
+      "name": "Warning: replace the samples",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        130
+      ]
+    }
+  ],
+  "connections": {
+    "Receive an order": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll WhatsApp replies": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 30 minutes: ask the surveys that are due": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every week: send the NPS report": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your settings": {
+      "main": [
+        [
+          {
+            "node": "Check the settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check the settings": {
+      "main": [
+        [
+          {
+            "node": "Read the surveys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the surveys": {
+      "main": [
+        [
+          {
+            "node": "Decide what to do",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide what to do": {
+      "main": [
+        [
+          {
+            "node": "Where does this go?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Where does this go?": {
+      "main": [
+        [
+          {
+            "node": "Read the whole message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete old rows (purge_days)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save the survey before sending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the whole message": {
+      "main": [
+        [
+          {
+            "node": "Decide about the replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide about the replies": {
+      "main": [
+        [
+          {
+            "node": "Save the survey before sending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save the survey before sending": {
+      "main": [
+        [
+          {
+            "node": "Write the messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the messages": {
+      "main": [
+        [
+          {
+            "node": "Which kind of message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which kind of message?": {
+      "main": [
+        [
+          {
+            "node": "Send the text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send the thank you with the review button",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send the contact card to the owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the text": {
+      "main": [
+        [
+          {
+            "node": "Gather the answers of Turbo Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the thank you with the review button": {
+      "main": [
+        [
+          {
+            "node": "Gather the answers of Turbo Notify",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send the contact card to the owner": {
+      "main": [
+        [
+          {
+            "node": "Gather the answers of Turbo Notify",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Gather the answers of Turbo Notify": {
+      "main": [
+        [
+          {
+            "node": "Record the answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record the answers": {
+      "main": [
+        [
+          {
+            "node": "Save the survey after sending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save the survey after sending": {
+      "main": [
+        [
+          {
+            "node": "Report what failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run once: create the table": {
+      "main": [
+        [
+          {
+            "node": "Create the surveys table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "pinData": {}
+}
