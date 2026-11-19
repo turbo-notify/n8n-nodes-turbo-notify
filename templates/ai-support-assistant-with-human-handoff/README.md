@@ -1,4 +1,4 @@
-# AI support assistant with human handoff (WhatsApp, Turbo Notify)
+# Answer WhatsApp support chats with an AI agent and hand over to a person (Turbo Notify)
 
 A small business answers WhatsApp support chats with an AI agent that is told to answer only from what the business wrote down, and to ask for a person when it is unsure. The model is the small part. The workflow is the handling around it: who may be answered, when the assistant must stay silent, what happens when the model is unsure, what happens when a reply cannot be sent, and how the owner finds out.
 

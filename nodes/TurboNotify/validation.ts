@@ -126,7 +126,7 @@ export const messageId = (s: Scope, v: unknown, field = 'Message ID') =>
 		field,
 		MESSAGE_ID,
 		'msg',
-		'Map the ID of the message: {{ $json.id }} after another Turbo Notify step, {{ $json.data.id }} after the Trigger.',
+		'Map the ID of the message: {{ $json.id }} after another WhatsApp by Turbo Notify step, {{ $json.data.id }} after the Trigger.',
 	);
 export const contactId = (s: Scope, v: unknown, field = 'Contact') =>
 	requireId(

@@ -232,7 +232,7 @@ export const messageDescription: INodeProperties[] = [
 		default: '',
 		placeholder: 'e.g. msg_0198d3c5a1b24d3e9f01a2b3c4d5e6f7',
 		description: 'ID of the message, starting with msg_. It belongs to the number selected above.',
-		hint: 'After another Turbo Notify step, map the id of its output. After the Trigger, map data.id.',
+		hint: 'After another WhatsApp by Turbo Notify step, map the id of its output. After the Trigger, map data.id.',
 		displayOptions: message(WITH_MESSAGE_ID),
 	},
 
