@@ -27,7 +27,7 @@ The node needs three things, and none of them is in n8n:
 2. Your WhatsApp number, connected under **Numbers** in the dashboard. You link it from the phone, in WhatsApp under **Linked devices**, so keep the phone at hand.
 3. An API key, created under **API keys**. See [Credentials](#credentials).
 
-The page [Use Turbo Notify in n8n](https://docs.turbonotify.com/en/guides/n8n/) goes through all of it. Test with a few messages first: a new number and a small plan have limits that a real list reaches quickly. Two limits apply to every send, and the smaller one stops you:
+The page [Send WhatsApp messages from n8n with Turbo Notify](https://docs.turbonotify.com/en/automation/n8n/) goes through all of it. Test with a few messages first: a new number and a small plan have limits that a real list reaches quickly. Two limits apply to every send, and the smaller one stops you:
 
 | Limit | Value |
 |---|---|
@@ -206,7 +206,7 @@ On a self-hosted n8n, community nodes work as tools only when `N8N_COMMUNITY_PAC
 - **Endpoint**: `https://mcp.turbonotify.com` (it speaks Streamable HTTP, so use an n8n version whose MCP Client Tool offers that transport)
 - **Authentication**: Bearer Auth, with a credential whose token is a Turbo Notify API key (the **AI agent (MCP)** template fits)
 
-The connection is described in the [MCP server guide](https://docs.turbonotify.com/en/general/mcp-server/). Use the node for steps you want fixed in the workflow, and the MCP server when the agent decides what to do.
+The connection is described in the [MCP server guide](https://docs.turbonotify.com/en/agents/mcp-server/). Use the node for steps you want fixed in the workflow, and the MCP server when the agent decides what to do.
 
 ## Errors
 
