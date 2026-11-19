@@ -1022,7 +1022,7 @@
         "numberInputs": 3
       },
       "id": "26aa582a-edfc-41ed-a444-c63b4df65f3f",
-      "name": "Gather the answers of Turbo Notify",
+      "name": "Gather the answers of the WhatsApp sends",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
@@ -1687,7 +1687,7 @@
       "main": [
         [
           {
-            "node": "Gather the answers of Turbo Notify",
+            "node": "Gather the answers of the WhatsApp sends",
             "type": "main",
             "index": 0
           }
@@ -1698,7 +1698,7 @@
       "main": [
         [
           {
-            "node": "Gather the answers of Turbo Notify",
+            "node": "Gather the answers of the WhatsApp sends",
             "type": "main",
             "index": 1
           }
@@ -1709,14 +1709,14 @@
       "main": [
         [
           {
-            "node": "Gather the answers of Turbo Notify",
+            "node": "Gather the answers of the WhatsApp sends",
             "type": "main",
             "index": 2
           }
         ]
       ]
     },
-    "Gather the answers of Turbo Notify": {
+    "Gather the answers of the WhatsApp sends": {
       "main": [
         [
           {

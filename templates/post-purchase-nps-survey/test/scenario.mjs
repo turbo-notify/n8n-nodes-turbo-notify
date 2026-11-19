@@ -133,7 +133,7 @@ export default async function scenario(t) {
 		assert.equal(hook.credentials.httpHeaderAuth.name, 'Order access (Header Auth)', 'the placeholder credential name');
 		assert.equal(hook.parameters.responseMode, 'onReceived', 'the shop gets its answer at once');
 		assert.equal(t.workflow.node(POLL).parameters.events, ['message.received', 'message.replied'], 'a quoted reply arrives as message.replied');
-		assert.equal(t.workflow.node('Gather the answers of Turbo Notify').parameters.numberInputs, 3, 'three send nodes are gathered');
+		assert.equal(t.workflow.node('Gather the answers of the WhatsApp sends').parameters.numberInputs, 3, 'three send nodes are gathered');
 		const settings = t.workflow.node('Your settings');
 		assert.equal(settings.notesInFlow, true, 'the explanations show on the canvas');
 		for (const name of Object.keys(exported)) assert.ok(String(settings.notes).split('\n').some((line) => line.startsWith(`${name}:`)), `the note explains ${name}`);

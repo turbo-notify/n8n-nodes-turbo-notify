@@ -746,7 +746,7 @@
 		{
 			"parameters": {},
 			"id": "3f61664c-428e-4137-a766-e58bed9748e9",
-			"name": "Gather the answers of Turbo Notify",
+			"name": "Gather the answers of the WhatsApp sends",
 			"type": "n8n-nodes-base.merge",
 			"typeVersion": 3.2,
 			"notes": "Puts the answers of both send nodes back together.",
@@ -1394,7 +1394,7 @@
 			"main": [
 				[
 					{
-						"node": "Gather the answers of Turbo Notify",
+						"node": "Gather the answers of the WhatsApp sends",
 						"type": "main",
 						"index": 0
 					}
@@ -1405,14 +1405,14 @@
 			"main": [
 				[
 					{
-						"node": "Gather the answers of Turbo Notify",
+						"node": "Gather the answers of the WhatsApp sends",
 						"type": "main",
 						"index": 1
 					}
 				]
 			]
 		},
-		"Gather the answers of Turbo Notify": {
+		"Gather the answers of the WhatsApp sends": {
 			"main": [
 				[
 					{
