@@ -14,8 +14,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        860,
+        125
       ],
       "webhookId": "7b3e9a52-4c18-4d6f-a0e5-91c2f8d37b64",
       "credentials": {
@@ -48,8 +48,8 @@
       "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        200
+        860,
+        295
       ],
       "credentials": {
         "turboNotifyApi": {
@@ -75,8 +75,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        400
+        860,
+        465
       ],
       "notes": "Every 30 minutes (about 1,440 executions a month on n8n Cloud) it asks the surveys that are due, inside your sending hours, and closes the ones nobody answered. To spend fewer, use a Cron expression limited to your sending hours."
     },
@@ -101,8 +101,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        600
+        860,
+        635
       ],
       "notes": "Monday at 8:00 (in the workflow time zone) it sends you the NPS report of the last 7 days."
     },
@@ -348,8 +348,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        480,
-        300
+        1210,
+        360
       ],
       "executeOnce": true,
       "notesInFlow": true,
@@ -364,8 +364,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        300
+        1450,
+        360
       ],
       "notes": "Stops the run while a setting is a sample or makes no sense. For the two timers the time zone too (an order or a reply is never lost to it). Then it hands on what the trigger delivered."
     },
@@ -416,8 +416,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1200,
-        300
+        1690,
+        360
       ],
       "alwaysOutputData": true,
       "executeOnce": true,
@@ -432,8 +432,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        300
+        1960,
+        285
       ],
       "notes": "A new order is checked and queued (or skipped, with the reason). A timer run closes old surveys and asks the due ones. The week run writes the report and clears old rows. A poll run picks the replies from customers who owe an answer."
     },
@@ -503,8 +503,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1680,
-        300
+        2180,
+        285
       ],
       "notes": "Read the reply in full: a reply from a customer who owes an answer. Delete old rows: the weekly clean-up. Save a plan: everything else, ready to be saved."
     },
@@ -554,8 +554,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1920,
-        40
+        2400,
+        285
       ],
       "executeOnce": true,
       "notes": "Once a week, when purge_days is not 0: deletes closed, skipped and failed rows older than purge_days. Never a customer who opted out, never a survey that is still open."
@@ -577,8 +577,8 @@
       "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
       "typeVersion": 1,
       "position": [
-        1920,
-        540
+        2400,
+        455
       ],
       "credentials": {
         "turboNotifyApi": {
@@ -598,8 +598,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2160,
-        540
+        2620,
+        455
       ],
       "notes": "Judges the replies one after the other: a score, a re-ask, a comment, or STOP. Nothing else gets an answer."
     },
@@ -797,8 +797,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2460,
-        300
+        1150,
+        820
       ],
       "notes": "The row is stored BEFORE anybody is messaged, so a restart cannot lose an order, an answer or an opt-out."
     },
@@ -811,8 +811,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2700,
-        300
+        1390,
+        820
       ],
       "notes": "The one place that makes every text, from the wording in Your settings. A row with nothing to send ends here."
     },
@@ -901,8 +901,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2940,
-        300
+        1680,
+        990
       ],
       "notes": "Text for the question, the thanks and the alerts. A link button for a happy customer. A contact card for the unhappy customer."
     },
@@ -927,8 +927,8 @@
       "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
       "typeVersion": 1,
       "position": [
-        3180,
-        100
+        1900,
+        820
       ],
       "credentials": {
         "turboNotifyApi": {
@@ -963,8 +963,8 @@
       "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
       "typeVersion": 1,
       "position": [
-        3180,
-        300
+        1900,
+        990
       ],
       "credentials": {
         "turboNotifyApi": {
@@ -1005,8 +1005,8 @@
       "type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
       "typeVersion": 1,
       "position": [
-        3180,
-        500
+        1900,
+        1160
       ],
       "credentials": {
         "turboNotifyApi": {
@@ -1026,8 +1026,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3420,
-        300
+        2210,
+        820
       ],
       "notes": "Puts the answers of the three send nodes back together."
     },
@@ -1040,8 +1040,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3660,
-        300
+        2430,
+        820
       ],
       "notes": "Matches each answer with its message and writes the message id, or the reason it was refused, into the row. A question that was refused makes the row send_failed."
     },
@@ -1239,8 +1239,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        3900,
-        300
+        2650,
+        820
       ],
       "notes": "Writes the message id of the question, or the failure, into the row."
     },
@@ -1253,8 +1253,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4140,
-        300
+        2870,
+        820
       ],
       "notes": "Fails the run when a message was refused, naming the order. This is what your Error workflow reacts to."
     },
@@ -1265,8 +1265,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        1000
+        60,
+        705
       ]
     },
     {
@@ -1351,14 +1351,14 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        240,
-        1000
+        320,
+        705
       ]
     },
     {
       "parameters": {
-        "content": "### How it works\nYour shop posts a JSON order event (order_id, phone, status, customer_name) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one WhatsApp question, 0 to 10, inside your sending hours.\n\nA 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, and a 0 to 6 is asked what went wrong while you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. It is not a chatbot.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15).\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once.\n4. In Your settings type owner_phone (not the number linked to Turbo Notify) and business_name, then check start_statuses, time zone, hours and texts.\n5. Activate, test with your own phone, then point your shop at the Production URL.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. On a small n8n Cloud plan slow the timer and the poll down.",
-        "height": 470,
+        "content": "### How it works\nAsk customers for a 0 to 10 score on WhatsApp a day after their order. Your shop posts a JSON order event (order_id, phone, status, customer_name) to a protected webhook. A day after the status you choose (delivered by default) the customer gets one question inside your sending hours.\n\nA 9 or 10 is thanked, a 7 or 8 is asked what would make it a 10, and a 0 to 6 is asked what went wrong while you get an alert with the contact card. STOP opts out. A weekly report gives the NPS. It is not a chatbot.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15). Verified community node: installs from the nodes panel on n8n Cloud and from Settings > Community Nodes on self-hosted n8n.\n2. Create a Turbo Notify API credential (messages:send, messages:read, events:read) and a Header Auth credential \"Order access (Header Auth)\".\n3. Run the manual branch once.\n4. In Your settings type owner_phone (not the number linked to Turbo Notify) and business_name, then check start_statuses, time zone, hours and texts.\n5. Activate, test with your own phone, then point your shop at the Production URL.\n\n### Customization\nTexts, delay, cooldown and caps are in Your settings. On a small n8n Cloud plan slow the timer and the poll down.",
+        "height": 530,
         "width": 560,
         "color": 1
       },
@@ -1367,15 +1367,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -110
+        0,
+        0
       ]
     },
     {
       "parameters": {
         "content": "## Four ways in\n\nAn order from your shop, a reply, a timer every 30 minutes and a weekly timer.",
-        "height": 904,
-        "width": 300,
+        "height": 825,
+        "width": 380,
         "color": 7
       },
       "id": "e5f83cc9-5754-44ff-a1c2-537ad924ca47",
@@ -1383,15 +1383,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -100,
-        -132
+        660,
+        0
       ]
     },
     {
       "parameters": {
         "content": "## Check, then read the table\n\nStops on a sample setting, then reads the survey rows once.",
-        "height": 285,
-        "width": 440,
+        "height": 390,
+        "width": 760,
         "color": 7
       },
       "id": "76794e65-476b-4872-a304-4fa1a6f55854",
@@ -1399,15 +1399,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        910,
-        187
+        1090,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## Decide what to do\n\nQueue an order, ask what is due, report the week, clear old rows or judge a reply.",
-        "height": 785,
-        "width": 920,
+        "height": 485,
+        "width": 880,
         "color": 7
       },
       "id": "3b19772c-fb6e-4514-ad9d-14334dcc5d1b",
@@ -1415,15 +1415,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1390,
-        -73
+        1900,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## Save, then write\n\nThe row is saved before anything is sent. Every text comes from your settings.",
-        "height": 304,
-        "width": 440,
+        "height": 315,
+        "width": 480,
         "color": 7
       },
       "id": "06f54c23-cadb-45ae-a0db-b96bfb6812e8",
@@ -1431,15 +1431,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2410,
-        168
+        1090,
+        695
       ]
     },
     {
       "parameters": {
         "content": "## Send\n\nText, review button or contact card. A refused send never stops the others.",
-        "height": 685,
-        "width": 680,
+        "height": 655,
+        "width": 480,
         "color": 7
       },
       "id": "12a6034f-b545-403e-aac1-d82d7ac773d1",
@@ -1447,15 +1447,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2890,
-        -13
+        1620,
+        695
       ]
     },
     {
       "parameters": {
         "content": "## Record and report\n\nThe message id or the failure goes into the row. A refusal then fails the run.",
-        "height": 285,
-        "width": 680,
+        "height": 315,
+        "width": 880,
         "color": 7
       },
       "id": "9ea6eea7-b599-4397-a110-c706af730228",
@@ -1463,15 +1463,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3610,
-        187
+        2150,
+        695
       ]
     },
     {
       "parameters": {
         "content": "## Run once: create the table\n\nCreates surveys when missing. Safe to run again.",
-        "height": 285,
-        "width": 440,
+        "height": 315,
+        "width": 480,
         "color": 7
       },
       "id": "6bce7597-f51f-464b-a779-029a3721fb97",
@@ -1479,15 +1479,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -50,
-        887
+        0,
+        580
       ]
     },
     {
       "parameters": {
         "content": "**Replace the samples before you activate.** While owner_phone or business_name is a sample, the workflow asks nobody.",
-        "height": 281,
-        "width": 300,
+        "height": 255,
+        "width": 250,
         "color": 3
       },
       "id": "4733c497-55f0-4793-a01d-26f12fc2d289",
@@ -1495,8 +1495,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        380,
-        191
+        1135,
+        265
       ]
     }
   ],
