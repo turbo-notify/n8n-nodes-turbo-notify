@@ -28,7 +28,7 @@ async function requireSecret(context: IHookFunctions | IWebhookFunctions): Promi
 	if (secret === '') {
 		throw new NodeOperationError(
 			context.getNode(),
-			"'Webhook Signing Secret' in the Turbo Notify API credential is empty",
+			"'Webhook Signing Secret' in the WhatsApp by Turbo Notify API credential is empty",
 			{
 				description:
 					'Type the secret you entered next to the webhook address in the Turbo Notify dashboard, or turn off Verify Signature under Options to try things out.',

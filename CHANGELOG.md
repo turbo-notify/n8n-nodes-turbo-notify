@@ -7,7 +7,7 @@ The texts people read before they install the node now say what it does on Whats
 - **The description of every operation says WhatsApp and what it does.** For example "Send a WhatsApp text message from your own number, to a phone number, a contact or a group" instead of "Send a text message", and "Check whether a WhatsApp message you sent is pending, sent, delivered, read or failed". This is the text the n8n.io page and the operation list show. The operation names and values are the same, so no workflow changes.
 - **The node descriptions and the package description say what you can do with WhatsApp:** reminders, notices, replies, delivery checks, groups, and the trigger for incoming messages.
 - **The credential is listed as "WhatsApp by Turbo Notify API"**, so a search for WhatsApp in the credential list finds it. Existing credentials keep working.
-- **The Docs links point to the current pages** (the n8n guide and the MCP server page), and the package homepage is the n8n guide.
+- **The Docs links point to the current pages** (the n8n guide), and the package homepage is the n8n guide.
 - Nothing else changes: the node types, the parameters and the behaviour are the same.
 
 ## 1.5.16

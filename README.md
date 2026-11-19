@@ -1,6 +1,6 @@
 # @turbo-notify/n8n-nodes-turbo-notify
 
-Send WhatsApp messages from n8n with your own number, and start a workflow when one arrives: appointment reminders, order notices, customer replies, delivery checks and group digests. This package adds the Turbo Notify service to n8n:
+Send WhatsApp messages from n8n with your own number, and start a workflow when one arrives: appointment reminders, order notices, customer replies, delivery checks and group digests. This package adds three WhatsApp nodes to n8n, made by Turbo Notify:
 
 - **WhatsApp by Turbo Notify** node: send text, images, video, audio, documents, stickers, locations, contact cards, calendar events and link buttons; reply, react, edit and delete messages; show typing; check delivery status; read messages, contacts, groups, numbers and events. It also works as a tool for an AI Agent.
 - **WhatsApp by Turbo Notify Trigger** node: starts a workflow the moment something happens (a message arrives, a message is delivered or read, a number disconnects, a quota runs low). It is a webhook, so it is instant.

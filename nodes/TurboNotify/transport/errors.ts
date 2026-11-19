@@ -79,7 +79,7 @@ const KNOWN: Record<string, Described> = {
 	not_authenticated: {
 		message: 'The API key was not accepted',
 		description:
-			`Check the 'API Key' in the Turbo Notify API credential. A revoked or expired key never works again: create a new one under API keys in the dashboard (${DASHBOARD}/api-keys).`,
+			`Check the 'API Key' in the WhatsApp by Turbo Notify API credential. A revoked or expired key never works again: create a new one under API keys in the dashboard (${DASHBOARD}/api-keys).`,
 	},
 	number_not_connected: {
 		message: 'The number is not connected to WhatsApp',
@@ -217,7 +217,7 @@ function describe(status: number | undefined, body: IDataObject, error: unknown)
 		} else if (kind === 'unreachable') {
 			message = 'Could not reach Turbo Notify';
 			description =
-				"Check 'Base URL' in the Turbo Notify API credential and the network of this n8n.";
+				"Check 'Base URL' in the WhatsApp by Turbo Notify API credential and the network of this n8n.";
 		}
 	}
 

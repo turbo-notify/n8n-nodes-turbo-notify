@@ -46,7 +46,7 @@ async function baseUrl(context: TurboNotifyContext): Promise<string> {
 	if (!usable) {
 		throw new NodeOperationError(
 			context.getNode(),
-			"'Base URL' in the Turbo Notify API credential is not a valid web address",
+			"'Base URL' in the WhatsApp by Turbo Notify API credential is not a valid web address",
 			{
 				description:
 					'Use https://api.turbonotify.com unless support gave you another address. It takes no login, query or fragment.',
