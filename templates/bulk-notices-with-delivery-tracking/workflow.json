@@ -2,45 +2,14 @@
 	"name": "Send WhatsApp notices to a list and track delivery with Turbo Notify",
 	"nodes": [
 		{
-			"id": "7af2e7b3-0d6e-4cb6-872f-2b3975aebd5b",
-			"parameters": {
-				"content": "### How it works\nSend one notice to a list of people and see what happened to each message.\n\nA password protected form takes name and phone (two columns copied from a sheet work) and the text, with {name} where the name goes. The workflow cleans the numbers, drops duplicates and your stop list, checks your quota and sends in paced batches from your own number.\n\nA Polling Trigger writes delivered, read and failed into the notices data table. You get ONE WhatsApp summary per batch, when everyone has a receipt or after report_after_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential with the scopes messages:send, messages:read and events:read, and select it in all four Turbo Notify nodes.\n3. Create a Basic Auth credential for the form.\n4. Run \"Create the notices table\" once.\n5. In Settings set owner_phone: your own number, not the one linked to Turbo Notify.\n6. Activate, then test with two rows to yourself.\n\n### Customization\nTo send from another number, set number in Settings and pick the same number in the Polling Trigger options. Batch size, pause and caps are also in Settings.",
-				"height": 520,
-				"width": 560
-			},
-			"name": "Overview note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				-780,
-				-1000
-			]
-		},
-		{
-			"id": "d2124b65-05fb-459b-8752-5fd42ce6f4a9",
-			"parameters": {
-				"content": "## Create the table\n\nRun this once. It makes the `notices` data table and does nothing if it already exists.",
-				"height": 304,
-				"width": 460,
-				"color": 7
-			},
-			"name": "Create the table note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				-50,
-				-1012
-			]
-		},
-		{
 			"id": "d977dba9-cef3-44a0-8628-ecc117b25a4b",
 			"parameters": {},
 			"name": "Create the notices table (run once)",
 			"type": "n8n-nodes-base.manualTrigger",
 			"typeVersion": 1,
 			"position": [
-				0,
-				-880
+				60,
+				685
 			]
 		},
 		{
@@ -109,40 +78,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				260,
-				-880
-			]
-		},
-		{
-			"id": "f28f062e-04fd-45f3-8161-034699a2f26c",
-			"parameters": {
-				"content": "## Triggers\n\nThe form sends a batch, the Polling Trigger brings delivery news and the hourly check closes silent messages.",
-				"height": 683,
-				"width": 300,
-				"color": 7
-			},
-			"name": "Triggers note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				-60,
-				-531
-			]
-		},
-		{
-			"id": "ae4051c6-160a-4a55-8fa9-161b4ac860d8",
-			"parameters": {
-				"content": "**Protect the form below.** Set a Basic Auth credential on it before you activate: anyone with the address and the password can message your list.",
-				"height": 114,
-				"width": 300,
-				"color": 3
-			},
-			"name": "Protect the form note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				-60,
-				-665
+				320,
+				685
 			]
 		},
 		{
@@ -180,8 +117,8 @@
 			"type": "n8n-nodes-base.formTrigger",
 			"typeVersion": 2.1,
 			"position": [
-				40,
-				-380
+				860,
+				472
 			],
 			"webhookId": "3ede736c-571f-4c46-8a5e-41a08fcfb274",
 			"credentials": {
@@ -212,8 +149,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
 			"typeVersion": 1,
 			"position": [
-				40,
-				-200
+				860,
+				642
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -238,24 +175,8 @@
 			"type": "n8n-nodes-base.scheduleTrigger",
 			"typeVersion": 1.2,
 			"position": [
-				40,
-				-20
-			]
-		},
-		{
-			"id": "f36f25e6-ee8d-486e-8838-70a031984b8c",
-			"parameters": {
-				"content": "## Settings and routing\n\nEvery value you may change is in Settings. New batches go up, tracking goes down.",
-				"height": 285,
-				"width": 720,
-				"color": 7
-			},
-			"name": "Settings and routing note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				340,
-				-313
+				860,
+				812
 			]
 		},
 		{
@@ -356,8 +277,8 @@
 			"type": "n8n-nodes-base.set",
 			"typeVersion": 3.4,
 			"position": [
-				390,
-				-200
+				1210,
+				592
 			],
 			"notes": "owner_phone: your own number with the country code and + (summaries go here). Must be changed, and must be a different phone from the number linked to Turbo Notify.\nnumber: alias of the Turbo Notify number that sends (main unless you added others). Read by Get message quota and both send nodes, never from the form. To send from another number, set it here and pick the same number in the Polling Trigger options (that option only filters the events).\nbatch_size: messages sent before each pause. Keep it small: a number sends about one message every 15 seconds.\npause_between_batches_seconds: pause after each batch so the number queue empties (a message that waits more than 5 minutes fails). Use at least batch_size x 15.\ndedupe_days: a number that got the same final text in this many days is skipped as duplicate. 0 switches it off.\nreport_after_hours (12): a phone that is off sends no receipt, so the summary of its batch would wait for it. After this many hours a silent message is closed as no_receipt and the summary goes out anyway; a late receipt still updates the table.\ntrack_days: delivery news is applied to notices younger than this many days.\nqueued_max_age_hours: a queued line older than this is marked skipped_stale (when the next batch is submitted) instead of being sent days late.\nmax_recipients_per_submission: a longer list is refused.\nmax_message_length: a longer text is refused (WhatsApp stops at 4096).\ndaily_cap: messages accepted in 24 hours across batches. A batch that would pass it is refused whole.\ndefault_message: leave it empty. The form requires a message, so this is only used if the message arrives empty from another source. Example of a good text: Hello {name}, the class on Friday moved to 7 pm. Reply here if you cannot come. Reply STOP if you do not want these notices.\ndefault_country_code: added to numbers typed without + (55 is Brazil). With another code only numbers that start with it or with + are accepted.\nstop_list: phones that must never get a notice, separated by commas, with + and country code, for example +5511977770001, +5511977770002. When someone replies STOP, type the number here at once.",
 			"notesInFlow": true
@@ -377,8 +298,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				650,
-				-200
+				1470,
+				592
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -421,24 +342,8 @@
 			"type": "n8n-nodes-base.if",
 			"typeVersion": 2.2,
 			"position": [
-				910,
-				-200
-			]
-		},
-		{
-			"id": "5c908c52-3482-457f-87d4-44bfb24755ba",
-			"parameters": {
-				"content": "## Check the lines and save them\n\nEach phone becomes +E.164 only when it is certain. Invalid, duplicate and stop list lines are kept with a reason.",
-				"height": 285,
-				"width": 1080,
-				"color": 7
-			},
-			"name": "Check and save the lines note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1110,
-				-993
+				1730,
+				592
 			]
 		},
 		{
@@ -470,8 +375,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1160,
-				-880
+				2000,
+				125
 			],
 			"alwaysOutputData": true,
 			"executeOnce": true
@@ -485,8 +390,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1380,
-				-880
+				2220,
+				125
 			]
 		},
 		{
@@ -502,8 +407,8 @@
 			"type": "n8n-nodes-base.respondToWebhook",
 			"typeVersion": 1.4,
 			"position": [
-				1600,
-				-880
+				2440,
+				125
 			]
 		},
 		{
@@ -536,8 +441,8 @@
 			"type": "n8n-nodes-base.if",
 			"typeVersion": 2.2,
 			"position": [
-				1820,
-				-880
+				2660,
+				125
 			]
 		},
 		{
@@ -671,24 +576,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				2040,
-				-880
-			]
-		},
-		{
-			"id": "950ee6b1-a70a-4706-8b6f-044170a1d8e1",
-			"parameters": {
-				"content": "## Send in paced batches\n\nEvery row is marked first, then only what fits the quota goes out. A repeat never sends twice.",
-				"height": 325,
-				"width": 1640,
-				"color": 7
-			},
-			"name": "Send in paced batches note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1990,
-				-573
+				2880,
+				125
 			]
 		},
 		{
@@ -700,8 +589,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				2040,
-				-460
+				2000,
+				490
 			]
 		},
 		{
@@ -734,8 +623,8 @@
 			"type": "n8n-nodes-base.if",
 			"typeVersion": 2.2,
 			"position": [
-				2520,
-				-460
+				2440,
+				490
 			],
 			"notes": "Both outputs can run in one submission. Every row was saved before this step, so the order between the two branches (set by their position on the canvas) does not change what is sent or reported.",
 			"notesInFlow": true
@@ -750,8 +639,8 @@
 			"type": "n8n-nodes-base.splitInBatches",
 			"typeVersion": 3,
 			"position": [
-				2760,
-				-420
+				2660,
+				490
 			]
 		},
 		{
@@ -775,8 +664,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				3000,
-				-420
+				2880,
+				490
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -860,8 +749,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				3240,
-				-420
+				3100,
+				490
 			]
 		},
 		{
@@ -874,8 +763,8 @@
 			"type": "n8n-nodes-base.wait",
 			"typeVersion": 1.1,
 			"position": [
-				3480,
-				-420
+				3320,
+				490
 			]
 		},
 		{
@@ -937,27 +826,11 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				2280,
-				-460
+				2220,
+				490
 			],
 			"notes": "Saves the plan on every row first: it stays queued (to be sent) or is marked skipped with its reason. A row that is no longer queued is left alone and not sent.",
 			"notesInFlow": true
-		},
-		{
-			"id": "b63cc9a4-0243-4c4c-8d32-3d28525f2eff",
-			"parameters": {
-				"content": "## Follow each message\n\nDelivered, read and failed events update the matching row, never backwards.",
-				"height": 285,
-				"width": 640,
-				"color": 7
-			},
-			"name": "Follow each message note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1110,
-				-203
-			]
 		},
 		{
 			"id": "a27798e6-014a-418e-8b80-b0521ea5b28e",
@@ -1001,8 +874,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1160,
-				-90
+				2000,
+				855
 			],
 			"alwaysOutputData": true,
 			"executeOnce": true
@@ -1016,8 +889,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1380,
-				-90
+				2220,
+				855
 			]
 		},
 		{
@@ -1099,26 +972,10 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1600,
-				-90
+				2440,
+				855
 			],
 			"alwaysOutputData": true
-		},
-		{
-			"id": "ce637916-1233-4fe1-8e8f-f38d04203b95",
-			"parameters": {
-				"content": "## One summary per batch\n\nOnce every row is final, or after report_after_hours, you get one message with the counts.",
-				"height": 285,
-				"width": 860,
-				"color": 7
-			},
-			"name": "One summary per batch note",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1110,
-				157
-			]
 		},
 		{
 			"id": "4f883256-2ec9-4ab2-8635-e28f29f4e8f1",
@@ -1148,8 +1005,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1160,
-				270
+				2000,
+				1220
 			],
 			"executeOnce": true
 		},
@@ -1162,8 +1019,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1380,
-				270
+				2220,
+				1220
 			]
 		},
 		{
@@ -1187,8 +1044,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				1600,
-				270
+				2440,
+				1220
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1245,8 +1102,151 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1820,
-				270
+				2660,
+				1220
+			]
+		},
+		{
+			"id": "7af2e7b3-0d6e-4cb6-872f-2b3975aebd5b",
+			"parameters": {
+				"content": "### How it works\nSend one notice to a list of people and see what happened to each message.\n\nA password protected form takes name and phone (two columns copied from a sheet work) and the text, with {name} where the name goes. The workflow cleans the numbers, drops duplicates and your stop list, checks your quota and sends in paced batches from your own number.\n\nA Polling Trigger writes delivered, read and failed into the notices data table. You get ONE WhatsApp summary per batch, when everyone has a receipt or after report_after_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential with the scopes messages:send, messages:read and events:read, and select it in all four Turbo Notify nodes.\n3. Create a Basic Auth credential for the form.\n4. Run \"Create the notices table\" once.\n5. In Settings set owner_phone: your own number, not the one linked to Turbo Notify.\n6. Activate, then test with two rows to yourself.\n\n### Customization\nTo send from another number, set number in Settings and pick the same number in the Polling Trigger options. Batch size, pause and caps are also in Settings.",
+				"height": 510,
+				"width": 560
+			},
+			"name": "Overview note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"id": "d2124b65-05fb-459b-8752-5fd42ce6f4a9",
+			"parameters": {
+				"content": "## Create the table\n\nRun this once. It makes the `notices` data table and does nothing if it already exists.",
+				"height": 315,
+				"width": 480,
+				"color": 7
+			},
+			"name": "Create the table note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				560
+			]
+		},
+		{
+			"id": "f28f062e-04fd-45f3-8161-034699a2f26c",
+			"parameters": {
+				"content": "## Triggers\n\nThe form sends a batch, the Polling Trigger brings delivery news and the hourly check closes silent messages.",
+				"height": 755,
+				"width": 440,
+				"color": 7
+			},
+			"name": "Triggers note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				660,
+				247
+			]
+		},
+		{
+			"id": "f36f25e6-ee8d-486e-8838-70a031984b8c",
+			"parameters": {
+				"content": "## Settings and routing\n\nEvery value you may change is in Settings. New batches go up, tracking goes down.",
+				"height": 315,
+				"width": 740,
+				"color": 7
+			},
+			"name": "Settings and routing note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1150,
+				467
+			]
+		},
+		{
+			"id": "5c908c52-3482-457f-87d4-44bfb24755ba",
+			"parameters": {
+				"content": "## Check the lines and save them\n\nEach phone becomes +E.164 only when it is certain. Invalid, duplicate and stop list lines are kept with a reason.",
+				"height": 315,
+				"width": 1100,
+				"color": 7
+			},
+			"name": "Check and save the lines note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1940,
+				0
+			]
+		},
+		{
+			"id": "950ee6b1-a70a-4706-8b6f-044170a1d8e1",
+			"parameters": {
+				"content": "## Send in paced batches\n\nEvery row is marked first, then only what fits the quota goes out. A repeat never sends twice.",
+				"height": 315,
+				"width": 1540,
+				"color": 7
+			},
+			"name": "Send in paced batches note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1940,
+				365
+			]
+		},
+		{
+			"id": "b63cc9a4-0243-4c4c-8d32-3d28525f2eff",
+			"parameters": {
+				"content": "## Follow each message\n\nDelivered, read and failed events update the matching row, never backwards.",
+				"height": 315,
+				"width": 660,
+				"color": 7
+			},
+			"name": "Follow each message note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1940,
+				730
+			]
+		},
+		{
+			"id": "ce637916-1233-4fe1-8e8f-f38d04203b95",
+			"parameters": {
+				"content": "## One summary per batch\n\nOnce every row is final, or after report_after_hours, you get one message with the counts.",
+				"height": 315,
+				"width": 880,
+				"color": 7
+			},
+			"name": "One summary per batch note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1940,
+				1095
+			]
+		},
+		{
+			"id": "ae4051c6-160a-4a55-8fa9-161b4ac860d8",
+			"parameters": {
+				"content": "**Protect the form below.** Set a Basic Auth credential on it before you activate: anyone with the address and the password can message your list.",
+				"height": 255,
+				"width": 300,
+				"color": 3
+			},
+			"name": "Protect the form note",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				760,
+				377
 			]
 		}
 	],

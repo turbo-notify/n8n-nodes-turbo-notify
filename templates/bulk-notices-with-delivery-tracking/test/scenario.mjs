@@ -154,7 +154,14 @@ export default async function scenario(t) {
 		const gap = (a, b) => Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w), b.y - (a.y + a.h), a.y - (b.y + b.h));
 		const inside = (a, b) => a.x >= b.x && a.y >= b.y && a.x + a.w <= b.x + b.w && a.y + a.h <= b.y + b.h;
 		const notes = t.workflow.nodes.filter((n) => n.type === 'n8n-nodes-base.stickyNote');
-		for (const a of notes) for (const b of notes) if (a.name < b.name) assert.ok(apart(box(a), box(b)) && gap(box(a), box(b)) >= 20, `${a.name} and ${b.name} do not overlap or nest and are at least 20 px apart`);
+		// The red warning sits over the one node it concerns, inside that node's section: it may nest in a white section (and then it is not allowed to touch its edge).
+		const isWarning = (n) => n.parameters.color === 3;
+		for (const a of notes) for (const b of notes) if (a.name < b.name) {
+			const warn = isWarning(a) ? a : isWarning(b) ? b : null;
+			const other = warn === a ? b : a;
+			if (warn && inside(box(warn), box(other))) assert.ok(box(warn).x - box(other).x >= 20 && box(warn).y - box(other).y >= 20 && box(other).x + box(other).w - (box(warn).x + box(warn).w) >= 20 && box(other).y + box(other).h - (box(warn).y + box(warn).h) >= 20, `${warn.name} sits inside ${other.name}, at least 20 px from its edge`);
+			else assert.ok(apart(box(a), box(b)) && gap(box(a), box(b)) >= 20, `${a.name} and ${b.name} do not overlap or nest and are at least 20 px apart`);
+		}
 		for (const note of notes) for (const n of t.workflow.nodes.filter((x) => x.type !== 'n8n-nodes-base.stickyNote')) assert.ok(apart(box(n), box(note)) || inside(box(n), box(note)), `${n.name} is not half inside ${note.name}`);
 		assert.excludes(notes.map((n) => n.name + n.parameters.content).join('|'), 'Section:', 'no "Section:" prefix in the names or the headings');
 		assert.excludes(t.workflow.nodes.map((n) => n.name).join('|'), 'Mark rows not sent', 'the plan is saved on every row before the branch');
