@@ -174,11 +174,14 @@ Polling means a delay of up to the interval (one minute at the shortest).
 
 Import a file from [`examples/`](examples) with **Import from File** in the workflow menu, then choose your credential in each WhatsApp by Turbo Notify node. The phone numbers in the examples are made up. Use your own.
 
+- [`send-first-message.json`](examples/send-first-message.json): sends one WhatsApp text to the number you put in it (use your own), the quickest way to check that the credential works.
 - [`answer-private-messages.json`](examples/answer-private-messages.json): the Polling Trigger starts on every received message, skips groups, shows typing and answers with Reply. The typing step needs the Lone Wolf plan: on the Free plan it fails and the workflow goes on.
 - [`answer-with-ai.json`](examples/answer-with-ai.json): the same, but it first reads the whole message with Get and passes it through a step where you plug in your AI model, then replies with its answer.
 - [`notices-from-a-list.json`](examples/notices-from-a-list.json): sends a different text to every row of a list. Replace the Code node with your sheet or database.
 - [`check-delivery.json`](examples/check-delivery.json): sends a message, waits, reads its status and branches when it failed (put your own steps on each branch).
 - [`form-to-whatsapp.json`](examples/form-to-whatsapp.json): when someone submits an n8n form, send them a WhatsApp text.
+
+For complete workflows built for the n8n template library (appointment reminders with RSVP, bulk notices with delivery tracking, an AI support assistant with human handoff, on-call alerts, an NPS survey and a group digest), see [`templates/`](templates). Each folder has the workflow, a short guide and the test record.
 
 ## Patterns
 
