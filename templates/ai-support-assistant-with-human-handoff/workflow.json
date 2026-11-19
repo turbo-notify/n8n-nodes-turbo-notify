@@ -23,7 +23,7 @@
 			"typeVersion": 1,
 			"position": [
 				60,
-				775
+				825
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -97,13 +97,13 @@
 							"type": "number"
 						},
 						{
-							"id": "32697686-a812-4745-82e3-cf50d1aca656",
+							"id": "c2697686-a812-4745-82e3-cf50d1aca656",
 							"name": "human_hours",
 							"value": 4,
 							"type": "number"
 						},
 						{
-							"id": "ee45cc2c-d5f2-426a-8a5f-c13602274642",
+							"id": "ee45cc2c-d5f2-426a-8a5f-c1360e274642",
 							"name": "hourly_cap",
 							"value": 6,
 							"type": "number"
@@ -149,7 +149,7 @@
 			"typeVersion": 3.4,
 			"position": [
 				280,
-				775
+				825
 			],
 			"executeOnce": true,
 			"notesInFlow": true,
@@ -166,7 +166,7 @@
 			"typeVersion": 3,
 			"position": [
 				940,
-				775
+				825
 			],
 			"notes": "One event at a time. The poll hands them over oldest first, so a STOP or a handover is saved before the next event of the same customer is read."
 		},
@@ -181,7 +181,7 @@
 			"typeVersion": 2,
 			"position": [
 				1160,
-				775
+				825
 			]
 		},
 		{
@@ -249,7 +249,7 @@
 			"typeVersion": 3.2,
 			"position": [
 				1380,
-				775
+				825
 			]
 		},
 		{
@@ -357,7 +357,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1650,
-				855
+				905
 			]
 		},
 		{
@@ -378,7 +378,7 @@
 			"typeVersion": 1,
 			"position": [
 				1650,
-				685
+				735
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -417,7 +417,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				1870,
-				685
+				735
 			],
 			"alwaysOutputData": true
 		},
@@ -432,7 +432,7 @@
 			"typeVersion": 2,
 			"position": [
 				2090,
-				685
+				735
 			]
 		},
 		{
@@ -524,7 +524,7 @@
 			"typeVersion": 3.2,
 			"position": [
 				2310,
-				685
+				735
 			]
 		},
 		{
@@ -546,7 +546,7 @@
 			"typeVersion": 1,
 			"position": [
 				2580,
-				685
+				735
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -572,7 +572,7 @@
 			"typeVersion": 3.1,
 			"position": [
 				2820,
-				685
+				735
 			],
 			"onError": "continueRegularOutput"
 		},
@@ -594,7 +594,7 @@
 			"typeVersion": 1.3,
 			"position": [
 				2733,
-				875
+				925
 			],
 			"credentials": {
 				"openAiApi": {
@@ -615,7 +615,7 @@
 			"typeVersion": 1.3,
 			"position": [
 				2906,
-				875
+				925
 			]
 		},
 		{
@@ -659,7 +659,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				3081,
-				875
+				925
 			],
 			"notes": "One keyword search over question, keywords and answer. For a long FAQ use a vector store or put a short FAQ in business_facts."
 		},
@@ -674,7 +674,7 @@
 			"typeVersion": 2,
 			"position": [
 				3180,
-				685
+				735
 			]
 		},
 		{
@@ -708,7 +708,7 @@
 			"typeVersion": 2.2,
 			"position": [
 				3420,
-				685
+				735
 			]
 		},
 		{
@@ -810,13 +810,13 @@
 				},
 				"options": {}
 			},
-			"id": "34540556-e3ba-4197-8d45-c3c649d062d6",
+			"id": "c4540556-e3ba-4197-8d45-c3c649d062d6",
 			"name": "Save the contact state",
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
 				2580,
-				1240
+				1290
 			]
 		},
 		{
@@ -840,7 +840,7 @@
 			"typeVersion": 1,
 			"position": [
 				2800,
-				1240
+				1290
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -858,7 +858,7 @@
 			"typeVersion": 1,
 			"position": [
 				2580,
-				1605
+				1655
 			],
 			"notes": "The two ways to a handover meet here: the rules deciding before the model, or the agent asking for a person. Kept as one named point so both paths share the same three messages."
 		},
@@ -967,7 +967,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				2800,
-				1605
+				1655
 			]
 		},
 		{
@@ -991,7 +991,7 @@
 			"typeVersion": 1,
 			"position": [
 				3020,
-				1605
+				1655
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1023,7 +1023,7 @@
 			"typeVersion": 1,
 			"position": [
 				3240,
-				1605
+				1655
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1064,7 +1064,7 @@
 			"typeVersion": 1,
 			"position": [
 				3460,
-				1605
+				1655
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1084,7 +1084,7 @@
 			"typeVersion": 2,
 			"position": [
 				1650,
-				1220
+				1270
 			],
 			"notes": "Every event runs to the end even when a send fails: the poll already moved past these events, so stopping early would drop the rest. The run fails here, once, with the list."
 		},
@@ -1298,7 +1298,7 @@
 			"typeVersion": 1.1,
 			"position": [
 				500,
-				775
+				825
 			],
 			"id": "aec0f37b-201e-4e58-875e-f20fddd61c74",
 			"name": "Read the FAQ rows",
@@ -1314,7 +1314,7 @@
 			"typeVersion": 2,
 			"position": [
 				720,
-				775
+				825
 			],
 			"id": "c65e12fc-c1c0-45d7-bd1c-91fca5a432d2",
 			"name": "Check the settings",
@@ -1329,7 +1329,7 @@
 			"typeVersion": 2,
 			"position": [
 				1910,
-				1220
+				1270
 			],
 			"id": "bed67b72-661f-4c71-87da-313cb7004cc0",
 			"name": "Record what failed for this event",
@@ -1337,8 +1337,8 @@
 		},
 		{
 			"parameters": {
-				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
-				"height": 510,
+				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15). Verified community node: installs from the nodes panel on n8n Cloud and from Settings > Community Nodes on self-hosted n8n.\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
+				"height": 560,
 				"width": 560
 			},
 			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",
@@ -1363,7 +1363,7 @@
 			"typeVersion": 1,
 			"position": [
 				0,
-				560
+				610
 			]
 		},
 		{
@@ -1379,7 +1379,7 @@
 			"typeVersion": 1,
 			"position": [
 				1590,
-				560
+				610
 			]
 		},
 		{
@@ -1395,7 +1395,7 @@
 			"typeVersion": 1,
 			"position": [
 				2520,
-				560
+				610
 			]
 		},
 		{
@@ -1411,7 +1411,7 @@
 			"typeVersion": 1,
 			"position": [
 				2520,
-				1115
+				1165
 			]
 		},
 		{
@@ -1427,7 +1427,7 @@
 			"typeVersion": 1,
 			"position": [
 				2520,
-				1480
+				1530
 			]
 		},
 		{
@@ -1443,7 +1443,7 @@
 			"typeVersion": 1,
 			"position": [
 				1590,
-				1095
+				1145
 			]
 		},
 		{
@@ -1475,7 +1475,7 @@
 			"typeVersion": 1,
 			"position": [
 				190,
-				665
+				715
 			]
 		}
 	],
