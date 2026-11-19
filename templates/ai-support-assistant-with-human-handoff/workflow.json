@@ -22,8 +22,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotifyPollingTrigger",
 			"typeVersion": 1,
 			"position": [
-				0,
-				0
+				60,
+				775
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -148,8 +148,8 @@
 			"type": "n8n-nodes-base.set",
 			"typeVersion": 3.4,
 			"position": [
-				360,
-				0
+				280,
+				775
 			],
 			"executeOnce": true,
 			"notesInFlow": true,
@@ -165,8 +165,8 @@
 			"type": "n8n-nodes-base.splitInBatches",
 			"typeVersion": 3,
 			"position": [
-				1190,
-				0
+				940,
+				775
 			],
 			"notes": "One event at a time. The poll hands them over oldest first, so a STOP or a handover is saved before the next event of the same customer is read."
 		},
@@ -180,8 +180,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1430,
-				0
+				1160,
+				775
 			]
 		},
 		{
@@ -248,8 +248,8 @@
 			"type": "n8n-nodes-base.switch",
 			"typeVersion": 3.2,
 			"position": [
-				1670,
-				0
+				1380,
+				775
 			]
 		},
 		{
@@ -356,8 +356,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				2010,
-				300
+				1650,
+				855
 			]
 		},
 		{
@@ -377,8 +377,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				2010,
-				0
+				1650,
+				685
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -416,8 +416,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				2250,
-				0
+				1870,
+				685
 			],
 			"alwaysOutputData": true
 		},
@@ -431,8 +431,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				2490,
-				0
+				2090,
+				685
 			]
 		},
 		{
@@ -523,8 +523,8 @@
 			"type": "n8n-nodes-base.switch",
 			"typeVersion": 3.2,
 			"position": [
-				2730,
-				-32
+				2310,
+				685
 			]
 		},
 		{
@@ -545,8 +545,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				3220,
-				0
+				2580,
+				685
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -571,8 +571,8 @@
 			"type": "@n8n/n8n-nodes-langchain.agent",
 			"typeVersion": 3.1,
 			"position": [
-				3460,
-				0
+				2820,
+				685
 			],
 			"onError": "continueRegularOutput"
 		},
@@ -593,8 +593,8 @@
 			"type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
 			"typeVersion": 1.3,
 			"position": [
-				3380,
-				290
+				2733,
+				875
 			],
 			"credentials": {
 				"openAiApi": {
@@ -614,8 +614,8 @@
 			"type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
 			"typeVersion": 1.3,
 			"position": [
-				3540,
-				290
+				2906,
+				875
 			]
 		},
 		{
@@ -658,8 +658,8 @@
 			"type": "n8n-nodes-base.dataTableTool",
 			"typeVersion": 1.1,
 			"position": [
-				3700,
-				290
+				3081,
+				875
 			],
 			"notes": "One keyword search over question, keywords and answer. For a long FAQ use a vector store or put a short FAQ in business_facts."
 		},
@@ -673,8 +673,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				3800,
-				25
+				3180,
+				685
 			]
 		},
 		{
@@ -707,8 +707,8 @@
 			"type": "n8n-nodes-base.if",
 			"typeVersion": 2.2,
 			"position": [
-				4040,
-				25
+				3420,
+				685
 			]
 		},
 		{
@@ -815,8 +815,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				3190,
-				800
+				2580,
+				1240
 			]
 		},
 		{
@@ -839,8 +839,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				3430,
-				800
+				2800,
+				1240
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -857,8 +857,8 @@
 			"type": "n8n-nodes-base.noOp",
 			"typeVersion": 1,
 			"position": [
-				3190,
-				1170
+				2580,
+				1605
 			],
 			"notes": "The two ways to a handover meet here: the rules deciding before the model, or the agent asking for a person. Kept as one named point so both paths share the same three messages."
 		},
@@ -966,8 +966,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				3430,
-				1170
+				2800,
+				1605
 			]
 		},
 		{
@@ -990,8 +990,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				3670,
-				1170
+				3020,
+				1605
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1022,8 +1022,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				3910,
-				1170
+				3240,
+				1605
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1063,8 +1063,8 @@
 			"type": "@turbo-notify/n8n-nodes-turbo-notify.turboNotify",
 			"typeVersion": 1,
 			"position": [
-				4150,
-				1170
+				3460,
+				1605
 			],
 			"credentials": {
 				"turboNotifyApi": {
@@ -1083,8 +1083,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1220,
-				690
+				1650,
+				1220
 			],
 			"notes": "Every event runs to the end even when a send fails: the poll already moved past these events, so stopping early would drop the rest. The run fails here, once, with the list."
 		},
@@ -1095,8 +1095,8 @@
 			"type": "n8n-nodes-base.manualTrigger",
 			"typeVersion": 1,
 			"position": [
-				800,
-				-620
+				720,
+				125
 			]
 		},
 		{
@@ -1133,8 +1133,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1060,
-				-620
+				940,
+				125
 			]
 		},
 		{
@@ -1183,8 +1183,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1320,
-				-620
+				1160,
+				125
 			]
 		},
 		{
@@ -1196,8 +1196,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1580,
-				-620
+				1380,
+				125
 			]
 		},
 		{
@@ -1274,151 +1274,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				1840,
-				-620
-			]
-		},
-		{
-			"parameters": {
-				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
-				"height": 500,
-				"width": 560
-			},
-			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",
-			"name": "Overview",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				-60,
-				-750
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Listen and check\n\nPolls your number every minute and stops while the settings or the FAQ are still samples.",
-				"height": 285,
-				"width": 1160,
-				"color": 7
-			},
-			"id": "f4f7b260-1505-41d3-8956-ce7777a7e0dd",
-			"name": "Section: listen",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				660,
-				-113
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Rules before the AI\n\nSTOP words, a person in the chat, non-text messages, handoff words and the hourly cap are decided in code, never by the model.",
-				"height": 617,
-				"width": 920,
-				"color": 7
-			},
-			"id": "10241d8d-49e7-4265-8a69-c212b51452e6",
-			"name": "Section: rules",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1960,
-				-145
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Ask the AI\n\nAnswers only from the FAQ table and your facts. Anything unclear becomes a handoff.",
-				"height": 575,
-				"width": 1020,
-				"color": 7
-			},
-			"id": "94c95ee4-8715-4e11-86b5-cb0942e0f7a9",
-			"name": "Section: AI",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				3170,
-				-113
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Reply\n\nThe contact state is saved first, then the answer goes out.",
-				"height": 285,
-				"width": 440,
-				"color": 7
-			},
-			"id": "70304a48-d67b-4061-8009-c045e90a6755",
-			"name": "Section: reply",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				3140,
-				687
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Hand over to a person\n\nPauses the assistant in this chat, tells the customer, then sends you the reason and the contact card.",
-				"height": 285,
-				"width": 1160,
-				"color": 7
-			},
-			"id": "34d88ea7-3ea8-4278-8785-c105954ba0b2",
-			"name": "Section: handover",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				3140,
-				1057
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Report what failed\n\nNotes a reply or an alert that failed. When all events are done, the run fails with that list.",
-				"height": 304,
-				"width": 440,
-				"color": 7
-			},
-			"id": "9466bdf9-200f-4a87-8073-ccb0f612f696",
-			"name": "Section: failures",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				1170,
-				558
-			]
-		},
-		{
-			"parameters": {
-				"content": "## Run once: tables and samples\n\nCreates the faq and contacts_state tables, then adds four sample FAQ rows. Delete them before you activate.",
-				"height": 285,
-				"width": 1240,
-				"color": 7
-			},
-			"id": "26c2322d-1d91-42f4-845f-c7186f53005d",
-			"name": "Section: setup",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				750,
-				-733
-			]
-		},
-		{
-			"parameters": {
-				"content": "**Replace these before you activate:** owner_phone, business_name, business_facts and the sample FAQ rows. Until then the workflow answers nobody.",
-				"height": 300,
-				"width": 300,
-				"color": 3
-			},
-			"id": "a3d1c463-d884-4bc7-8035-ca9c2bba0a01",
-			"name": "Warning: owner phone",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				260,
-				-128
+				1600,
+				125
 			]
 		},
 		{
@@ -1440,8 +1297,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				710,
-				0
+				500,
+				775
 			],
 			"id": "aec0f37b-201e-4e58-875e-f20fddd61c74",
 			"name": "Read the FAQ rows",
@@ -1456,8 +1313,8 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				950,
-				0
+				720,
+				775
 			],
 			"id": "c65e12fc-c1c0-45d7-bd1c-91fca5a432d2",
 			"name": "Check the settings",
@@ -1471,12 +1328,155 @@
 			"type": "n8n-nodes-base.code",
 			"typeVersion": 2,
 			"position": [
-				1460,
-				690
+				1910,
+				1220
 			],
 			"id": "bed67b72-661f-4c71-87da-313cb7004cc0",
 			"name": "Record what failed for this event",
 			"notes": "Both ways of answering a customer end here. A send that failed is written on the item, nothing stops yet."
+		},
+		{
+			"parameters": {
+				"content": "### How it works\nAn AI agent answers WhatsApp support chats from your FAQ and hands the chat to a person when it should. A model can be wrong.\n\nIt answers EVERY private chat of EVERY number of the organization: use a dedicated organization, set Options > Number on the trigger, or list friends and suppliers in ignore_phones. STOP silences it for that customer until START.\n\nWhen it hands over (the agent asks, a trigger phrase appears, too many replies) the customer gets a fixed text, the chat is held for human_hours and you get the reason, the last message and a contact card. When you type in a chat yourself, the assistant goes quiet for human_hours.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential and a chat model credential, and select them on every Turbo Notify node and the model node.\n3. Run the manual branch once: it creates the tables and four SAMPLE FAQ rows.\n4. In Your settings replace owner_phone, business_name and business_facts, and write your own FAQ rows.\n5. Test from another phone, then activate.\n\n### Customization\nTexts, limits and handoff words are in Your settings.",
+				"height": 510,
+				"width": 560
+			},
+			"id": "442de7dc-b5ca-4651-806b-c3f746a25012",
+			"name": "Overview",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Listen and check\n\nPolls your number every minute and stops while the settings or the FAQ are still samples.",
+				"height": 405,
+				"width": 1540,
+				"color": 7
+			},
+			"id": "f4f7b260-1505-41d3-8956-ce7777a7e0dd",
+			"name": "Section: listen",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				0,
+				560
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Rules before the AI\n\nSTOP words, a person in the chat, non-text messages, handoff words and the hourly cap are decided in code, never by the model.",
+				"height": 485,
+				"width": 880,
+				"color": 7
+			},
+			"id": "10241d8d-49e7-4265-8a69-c212b51452e6",
+			"name": "Section: rules",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1590,
+				560
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Ask the AI\n\nAnswers only from the FAQ table and your facts. Anything unclear becomes a handoff.",
+				"height": 505,
+				"width": 1060,
+				"color": 7
+			},
+			"id": "94c95ee4-8715-4e11-86b5-cb0942e0f7a9",
+			"name": "Section: AI",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				2520,
+				560
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Reply\n\nThe contact state is saved first, then the answer goes out.",
+				"height": 315,
+				"width": 480,
+				"color": 7
+			},
+			"id": "70304a48-d67b-4061-8009-c045e90a6755",
+			"name": "Section: reply",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				2520,
+				1115
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Hand over to a person\n\nPauses the assistant in this chat, tells the customer, then sends you the reason and the contact card.",
+				"height": 315,
+				"width": 1100,
+				"color": 7
+			},
+			"id": "34d88ea7-3ea8-4278-8785-c105954ba0b2",
+			"name": "Section: handover",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				2520,
+				1480
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Report what failed\n\nNotes a reply or an alert that failed. When all events are done, the run fails with that list.",
+				"height": 315,
+				"width": 480,
+				"color": 7
+			},
+			"id": "9466bdf9-200f-4a87-8073-ccb0f612f696",
+			"name": "Section: failures",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1590,
+				1095
+			]
+		},
+		{
+			"parameters": {
+				"content": "## Run once: tables and samples\n\nCreates the faq and contacts_state tables, then adds four sample FAQ rows. Delete them before you activate.",
+				"height": 315,
+				"width": 1100,
+				"color": 7
+			},
+			"id": "26c2322d-1d91-42f4-845f-c7186f53005d",
+			"name": "Section: setup",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				660,
+				0
+			]
+		},
+		{
+			"parameters": {
+				"content": "**Replace these before you activate:** owner_phone, business_name, business_facts and the sample FAQ rows. Until then the workflow answers nobody.",
+				"height": 270,
+				"width": 280,
+				"color": 3
+			},
+			"id": "a3d1c463-d884-4bc7-8035-ca9c2bba0a01",
+			"name": "Warning: owner phone",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				190,
+				665
+			]
 		}
 	],
 	"connections": {
