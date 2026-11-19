@@ -22,8 +22,8 @@
 			},
 			"notes": "Needs Header Auth: a request without the right header is refused and never reaches the workflow. n8n normally assigns a new address to an imported copy: use the Production URL shown in this node. Share it and the header value only with your monitoring tool, over HTTPS.",
 			"position": [
-				0,
-				0
+				860,
+				125
 			]
 		},
 		{
@@ -53,8 +53,8 @@
 			},
 			"notes": "Reads the replies of your on-call people once a minute. Works on every plan. A reply written while n8n was off is read at the next poll.",
 			"position": [
-				0,
-				200
+				860,
+				295
 			]
 		},
 		{
@@ -74,8 +74,8 @@
 			"typeVersion": 1.2,
 			"notes": "Every minute it pages the next level of any alert that was not taken in time. It does nothing when no alert is open. It counts as one n8n execution a minute: see the README before you keep it on n8n Cloud, and set 2 or 5 minutes if you prefer.",
 			"position": [
-				0,
-				400
+				860,
+				465
 			]
 		},
 		{
@@ -244,8 +244,8 @@
 			"notes": "oncall_phone_1: level 1, paged first. With + and country code. NEVER the phone linked to Turbo Notify: it cannot page itself. Replace it: the workflow stops while it is a placeholder\noncall_phone_2: level 2, paged when level 1 does not answer. Another person's real number, never the linked phone. Empty it to use fewer levels. On Free, at most two different phones in all: set owner_phone equal to this one, or empty this\noncall_phone_3: level 3, optional. Leave empty for two levels. Not the linked phone\nowner_phone: gets the final message when nobody answers. Not the linked phone either. May be the same number as a level, which on Free keeps you at two phones\nack_minutes: minutes a level has to answer. The timer adds one minute of grace and runs every minute, so the next level is paged ack_minutes + 1 to + 2 minutes after the page. With a slower Schedule Trigger use a multiple of its interval\nack_words: a reply that starts with one of these takes the alert, optionally followed by its code (OK 7K2F). Comma separated, capitals and accents do not matter\nmin_severity: alerts below this severity are ignored. An unknown or missing severity is never ignored\nseverity_order: your severities from the lowest to the highest, comma separated. The highest one is never held back by max_new_alerts_per_hour\nmax_new_alerts_per_hour: more new alerts than this in the last 60 minutes are not paged and the run fails, so a flood is seen. The block is rolling: it lifts as alerts age past the hour\nreopen_minutes: an alert that fires again less than this long after it was resolved is ignored (a monitor that flaps). At least 1 minute. If your tool only reports changes, a second outage inside this time is not paged: set 0 or 1\nrearm_hours: an alert that was taken or that nobody took pages again if it fires again after this many hours\nmax_text_length: longest alert message accepted. Longer text is cut. Service names are cut at 80\nfield_alert_id: name of the field in your alert that holds a unique id or fingerprint. Without one the same service and text count as the same alert\nfield_service: name of the field with the service or host\nfield_severity: name of the field with the severity\nfield_status: name of the field with firing or resolved (empty or any other word means firing)\nfield_message: name of the field with the text of the alert. Do not put secrets or customer data in it\nfield_runbook_url: name of the field with a link to the runbook, optional. It is added to the page text and gives the page a button\nrunbook_button_text: text on the runbook button, at most 20 characters\nmsg_page: the first page. {service} {severity} {message} {code} {alert_id} {minutes}. \\n is a line break. The runbook link is added at the end\nmsg_escalated: the page of the next level. Same placeholders, plus {previous_level} and {level}\nmsg_ack_confirm: sent to the person who took the alert. Same placeholders as msg_page\nmsg_ack_note: sent to the other levels already paged. Same placeholders, plus {name}: the name WhatsApp shows, or the number\nmsg_final: sent once to every level and to the owner after the last level did not answer. Same placeholders as msg_page\nmsg_resolved: sent to the people who were paged when the monitoring tool reports the alert resolved. Same placeholders as msg_page",
 			"notesInFlow": true,
 			"position": [
-				560,
-				200
+				1205,
+				350
 			]
 		},
 		{
@@ -258,8 +258,8 @@
 			"typeVersion": 2,
 			"notes": "Stops the run while a phone is a placeholder or a setting makes no sense. Then it hands on what the trigger delivered.",
 			"position": [
-				1020,
-				200
+				1680,
+				350
 			]
 		},
 		{
@@ -293,8 +293,8 @@
 			"typeVersion": 2.2,
 			"notes": "True: an alert from your monitoring tool. False: replies from the poll, or the minute timer.",
 			"position": [
-				1280,
-				200
+				1960,
+				350
 			]
 		},
 		{
@@ -332,8 +332,8 @@
 			"executeOnce": true,
 			"notes": "Reads the row of this alert and the alerts opened in the last hour (to count a flood).",
 			"position": [
-				1580,
-				0
+				2230,
+				125
 			]
 		},
 		{
@@ -346,8 +346,8 @@
 			"typeVersion": 2,
 			"notes": "Checks and caps the fields, ignores low severities and repeated firing, closes on resolved, opens a new incident otherwise. An alert with an odd id or no id is still paged.",
 			"position": [
-				1840,
-				0
+				2450,
+				125
 			]
 		},
 		{
@@ -565,8 +565,8 @@
 			"typeVersion": 1.1,
 			"notes": "The alert is stored BEFORE anybody is paged, so a restart cannot lose it.",
 			"position": [
-				2100,
-				0
+				2670,
+				125
 			]
 		},
 		{
@@ -599,8 +599,8 @@
 			"executeOnce": true,
 			"notes": "Reads the alerts that are still open, once per run.",
 			"position": [
-				1580,
-				300
+				2230,
+				295
 			]
 		},
 		{
@@ -613,8 +613,8 @@
 			"typeVersion": 2,
 			"notes": "After a poll: matches each reply to the alert it takes. On the timer: finds the alerts that need the next level, one minute after ack_minutes.",
 			"position": [
-				1840,
-				300
+				2450,
+				295
 			]
 		},
 		{
@@ -627,8 +627,8 @@
 			"typeVersion": 2,
 			"notes": "The one place that decides who gets which message, from the wording in Your settings.",
 			"position": [
-				2440,
-				150
+				720,
+				830
 			]
 		},
 		{
@@ -662,8 +662,8 @@
 			"typeVersion": 2.2,
 			"notes": "True: a page for an alert that has a runbook link.",
 			"position": [
-				2700,
-				150
+				970,
+				915
 			]
 		},
 		{
@@ -699,8 +699,8 @@
 			"onError": "continueRegularOutput",
 			"notes": "One message with a button that opens the runbook. Tried up to 3 times when the first message of a batch is refused (the idempotency key makes a repeat safe). If it is still refused the run goes on and the row records why.",
 			"position": [
-				2960,
-				50
+				1220,
+				830
 			],
 			"retryOnFail": true,
 			"maxTries": 3,
@@ -736,8 +736,8 @@
 			"onError": "continueRegularOutput",
 			"notes": "Every other message. Tried up to 3 times when the first message of a batch is refused (the idempotency key makes a repeat safe). If it is still refused the run goes on and the row records why.",
 			"position": [
-				2960,
-				250
+				1220,
+				1000
 			],
 			"retryOnFail": true,
 			"maxTries": 3,
@@ -751,8 +751,8 @@
 			"typeVersion": 3.2,
 			"notes": "Puts the answers of both send nodes back together.",
 			"position": [
-				3220,
-				150
+				1470,
+				915
 			]
 		},
 		{
@@ -765,8 +765,8 @@
 			"typeVersion": 2,
 			"notes": "Matches each answer with its message and keeps only the columns this run owns (a page writes the level, an acknowledgement writes who took it), so a slow run cannot undo another.",
 			"position": [
-				3560,
-				150
+				1740,
+				830
 			]
 		},
 		{
@@ -965,8 +965,8 @@
 			"typeVersion": 1.1,
 			"notes": "Writes the new level, the message id, the status where this run owns it, and any failure. Columns the run does not own are left as they are.",
 			"position": [
-				3820,
-				150
+				1960,
+				830
 			]
 		},
 		{
@@ -979,8 +979,8 @@
 			"typeVersion": 2,
 			"notes": "Fails the run when any message was refused, naming the alert, the phone and the reason. This is what your Error workflow reacts to.",
 			"position": [
-				4080,
-				150
+				2180,
+				830
 			]
 		},
 		{
@@ -990,8 +990,8 @@
 			"type": "n8n-nodes-base.manualTrigger",
 			"typeVersion": 1,
 			"position": [
-				0,
-				800
+				60,
+				750
 			]
 		},
 		{
@@ -1084,14 +1084,14 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				260,
-				800
+				320,
+				750
 			]
 		},
 		{
 			"parameters": {
 				"content": "### How it works\nA WhatsApp page next to your paging tool. Your monitoring tool posts a JSON alert to a protected webhook.\n\nThe workflow pages on-call level 1 with the service, the severity, a 4 character code and, when the alert has a link, a runbook button. A reply such as \"OK 7K2F\" takes the alert and tells the other levels.\n\nIf nobody answers within ack_minutes the next level is paged, then one final message goes to everybody. A resolved alert closes it. WhatsApp is an extra channel, not a paging service.\n\n### Setup\n1. Install @turbo-notify/n8n-nodes-turbo-notify (tested with 1.5.15).\n2. Create a Turbo Notify API credential (scopes messages:send and events:read) and a Header Auth credential \"Alert access (Header Auth)\".\n3. Select the credentials on the Webhook, the Polling Trigger and both send nodes.\n4. Run the manual branch once.\n5. In Your settings type the on-call and owner numbers (none may be the phone linked to Turbo Notify).\n6. POST a JSON alert with a required alert_id to the Production URL over HTTPS, then activate.\n\n### Customization\nTexts, severities and times are in Your settings. On a small plan, slow the one-minute timer down.",
-				"height": 570,
+				"height": 575,
 				"width": 560
 			},
 			"id": "86046ca1-047c-4cd0-aaf8-cfb5fb49659a",
@@ -1099,15 +1099,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-880,
-				-110
+				0,
+				0
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Three ways in\n\nAn alert from your monitoring tool, a reply from your on-call people, and a timer every minute.",
-				"height": 711,
-				"width": 300,
+				"height": 655,
+				"width": 380,
 				"color": 7
 			},
 			"id": "6ff67daf-71a8-4c77-a113-83d7a34e93d2",
@@ -1115,31 +1115,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-100,
-				-139
-			]
-		},
-		{
-			"parameters": {
-				"content": "**Replace the phone numbers before you activate.** While one is a placeholder the workflow stops and pages nobody.",
-				"height": 281,
-				"width": 300,
-				"color": 3
-			},
-			"id": "d29cfeee-f8a2-4ccf-a45f-43cadaf46979",
-			"name": "Warning: phone numbers",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				460,
-				91
+				660,
+				0
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Your settings\n\nEvery value you change lives in this node.",
-				"height": 118,
-				"width": 300,
+				"height": 390,
+				"width": 480,
 				"color": 7
 			},
 			"id": "649fb797-53f5-40f6-b8fe-8b06cc34f610",
@@ -1147,15 +1131,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				460,
-				-47
+				1090,
+				150
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Check, then route\n\nStops on a placeholder, then sends an alert one way and replies or the timer the other.",
-				"height": 304,
-				"width": 460,
+				"height": 390,
+				"width": 500,
 				"color": 7
 			},
 			"id": "23e09913-bf7e-4cd0-a59f-247b53ba8e0c",
@@ -1163,15 +1147,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				970,
-				68
+				1620,
+				150
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Decide what is needed\n\nA new alert opens or closes an incident, a reply takes one, and the timer finds the alert nobody took.",
-				"height": 604,
-				"width": 720,
+				"height": 485,
+				"width": 660,
 				"color": 7
 			},
 			"id": "b74ab88c-6a30-462f-aa23-04b4e5ce2b67",
@@ -1179,15 +1163,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1530,
-				-132
+				2170,
+				0
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Write and send\n\nOne place writes every message. A refused send never stops the others.",
 				"height": 485,
-				"width": 980,
+				"width": 970,
 				"color": 7
 			},
 			"id": "f6bc1eed-6992-40db-ab5c-95e244c58c29",
@@ -1195,15 +1179,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				2390,
-				-63
+				660,
+				705
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Record and report\n\nEach alert row keeps the message id or the failure. The run fails if nobody could be paged.",
-				"height": 285,
-				"width": 720,
+				"height": 315,
+				"width": 660,
 				"color": 7
 			},
 			"id": "d84ad9bd-b5fb-4c67-a85a-cd6c75ae240d",
@@ -1211,15 +1195,15 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				3510,
-				37
+				1680,
+				705
 			]
 		},
 		{
 			"parameters": {
 				"content": "## Run once: create the table\n\nCreates oncall_alerts when it is missing. Safe to run again.",
-				"height": 285,
-				"width": 460,
+				"height": 315,
+				"width": 480,
 				"color": 7
 			},
 			"id": "4c47cd9e-ea91-4831-abbf-a6295ab45cfd",
@@ -1227,8 +1211,24 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-50,
-				687
+				0,
+				625
+			]
+		},
+		{
+			"parameters": {
+				"content": "**Replace the phone numbers before you activate.** While one is a placeholder the workflow stops and pages nobody.",
+				"height": 255,
+				"width": 250,
+				"color": 3
+			},
+			"id": "d29cfeee-f8a2-4ccf-a45f-43cadaf46979",
+			"name": "Warning: phone numbers",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1130,
+				255
 			]
 		}
 	],
