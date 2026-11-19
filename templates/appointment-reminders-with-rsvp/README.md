@@ -233,12 +233,14 @@ Tested end to end in **n8n 2.45.5** (image `n8nio/n8n:2.45.5`, 2026-11-17) with 
 events and errors as the public contract). **No message was sent to WhatsApp in this run.**
 
 SHA-256 of the tested `workflow.json`:
-`ef2053f8115b98a75940279c0112b29c0b987501e87b30ad474834ce6bf93b5b`
+`7ba4a57e21f90c9554587ae5ab1e94aaed94ca1a2200af20285dcb77cab009cb`
+
+Canvas relaid out 2026-11-19 after n8n returned the template a second time over the sticky notes: only node positions and the size of the notes changed (a clean left-to-right layout, every node inside one section, no overlapping sections, the warning exactly over the node it concerns, the overview at the top left); node logic, names, connections and note texts are unchanged (verified by comparing the two files without positions and sizes). Mock scenario rerun on this file: 398 assertions, 0 failed, the same 32 steps (n8n 2.45.5, package build 1.5.16 of this module, about 6.4 minutes); the total differs from the 617 of the previous run (earlier records of this same logic also differ, 563 and 617), the step list is the same. The SHA-256 of the file as first submitted was `ef2053f8115b98a75940279c0112b29c0b987501e87b30ad474834ce6bf93b5b` (11-18, returned) and `workflow.png` was retaken from this layout.
 
 Notes reformatted 2026-11-18 after n8n review feedback on T1; node logic unchanged; mock scenario rerun: 617 assertions, 0 failed (n8n 2.45.5, package build 1.5.16 of this module). The previous SHA-256 of the file (before the notes were reformatted) was `016e80f748d67cc1065622d436da68d39e4fbcab6b6f5b0492cb7d5bd2585791`; the real API runs below were made on files that differ only in sticky notes or in the text noted there. `workflow.png` was retaken on 2026-11-18 in the n8n 2.45.5 editor and shows the reformatted notes.
 
 The exact `workflow.json` of this folder was imported into a fresh n8n instance, with no other change than the patch
-listed below, and the scenario `test/scenario.mjs` ran it: 617 assertions passed, 0 failed, 32 steps, about 7.5 minutes (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
+listed below, and the scenario `test/scenario.mjs` ran it (last run on the relaid file, see above: 398 assertions passed, 0 failed, 32 steps, about 6.4 minutes; the run before it had 617 assertions in about 7.5 minutes) (the Polling Trigger ticks once a minute). The workflow time zone was `America/Sao_Paulo`, so the form's
 14:30 was checked to be stored as 17:30 UTC. 26 working nodes, 11 sticky notes (37 in all).
 
 | Branch | What ran | What it proved |
