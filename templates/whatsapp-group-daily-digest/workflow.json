@@ -149,8 +149,8 @@
 			"notes": "watch_groups: the groups to digest, separated by commas. Use the id (grp_...) of each group: a name can be changed, or shared by two groups, and one entry that cannot be found makes the run fail after the other groups got their digest. Replace the sample: the workflow stops while it is there. The number must already be a member of each group\ndelivery: owner (default) sends the digest to owner_phone. group posts it in the group (Business plan or higher, and everybody in the group reads it). members sends it to members_phones one by one\nowner_phone: your own number, with + and country code, and a DIFFERENT phone from the number linked to Turbo Notify: a message to the linked number lands in a chat with yourself and makes no notification. Save the linked number as a contact and send it one message first. Gets the digests of owner, every manual digest and nothing else. Replace it: the workflow stops while it is a placeholder\nmembers_phones: only for delivery members. 1 to 5 numbers with + and country code, separated by commas. Each one counts as a contact of your plan\nnumber_alias: the WhatsApp number that is in the groups. main, or the alias or the num_ id of an extra number\ndigest_hour: the hour (0 to 23, in expected_timezone) from which the hourly run builds the digest. A run that was missed is caught up later the same day, once\nexpected_timezone: the time zone of digest_hour and of the times in the digest. The workflow time zone (Workflow settings, Timezone) must be the same, or the digest runs stop\nmin_messages: a group with fewer messages with real text (not only [image] or [audio]) in the last 24 hours gets no digest that day. A manual run ignores it. Put it back to 15 after a test\nkeep_days: stored messages older than this are deleted every hour. From 2 to 30. They are the chat content of your groups: keep them short-lived\nmax_chars_for_model: the most characters of chat sent to the AI (2000 to 200000, default 80000, about 20,000 tokens). More characters cost more at your model provider. When the day is longer the newest messages are kept and the digest says so\nmax_text_chars: longest text stored for one message. Longer messages are cut\nmax_digest_chars: longest AI summary accepted (300 to 3000). A longer answer is cut at a line break. The title and the notes come on top\nmost_active_count: how many of the most active people are named in the digest (0 to 5, 0 switches the line off)\nmention_most_active: false (default) or true. Only for delivery group: true tags the most active people as real @mentions, so their phones ring. With false they are named without a tag\nrun_now_group: used only by \"Run now for one group\": the name or the id of the group. It sends the digest to owner_phone, whatever delivery says. Pressing it twice on the same messages sends nothing the second time, even when the AI words it differently: Turbo Notify answers that the key was already used\nai_prompt: what the AI is told. {max_chars} becomes max_digest_chars. Keep the rules about invented facts, first names and copied dates and links\nmsg_title: first line of the digest. {group} {messages} {people}. \\n is a line break\nmsg_most_active: the line about the most active people. {names}\nmsg_omitted: added when the day was too long for the AI. {kept} {total}\nmsg_fallback: the first line of the plain digest used when the AI fails or its answer is refused\nmsg_links: heading above the links of the plain digest\nmsg_footer: last line of every digest. It tells readers that a machine wrote it. Keep a line like it",
 			"notesInFlow": true,
 			"position": [
-				560,
-				260
+				1310,
+				200
 			]
 		},
 		{
@@ -183,8 +183,8 @@
 			},
 			"notes": "Reads the events of your whole number every 10 minutes (private chats too), on every plan. Each poll that finds events is one n8n execution: lengthen the interval to save executions, but keep it well under the hours Turbo Notify keeps message text (1 by default). A quoted reply arrives as message.replied and what you type in the group yourself as message.sent. Messages that arrive while n8n is off are read at the next poll, as long as their text still exists.",
 			"position": [
-				0,
-				0
+				960,
+				125
 			]
 		},
 		{
@@ -205,8 +205,8 @@
 			"typeVersion": 1.2,
 			"notes": "Every hour (720 executions a month). From digest_hour to midnight it builds the digest of each group that has enough messages and none yet today. Before digest_hour it only deletes old messages. A cron such as 0 21-23 * * * saves executions.",
 			"position": [
-				0,
-				260
+				960,
+				295
 			]
 		},
 		{
@@ -217,8 +217,8 @@
 			"typeVersion": 1,
 			"notes": "Click Execute workflow here to build the digest of the group in run_now_group. It goes to owner_phone only.",
 			"position": [
-				0,
-				520
+				960,
+				465
 			]
 		},
 		{
@@ -248,8 +248,8 @@
 			"alwaysOutputData": true,
 			"notes": "Reads the groups the number is in, once per run, to turn names into ids. Needs the groups:read scope. Works on every plan.",
 			"position": [
-				1020,
-				260
+				1550,
+				200
 			]
 		},
 		{
@@ -262,8 +262,8 @@
 			"typeVersion": 2,
 			"notes": "Stops the run while a setting is a placeholder or makes no sense. Then it hands on what started the run.",
 			"position": [
-				1280,
-				260
+				1790,
+				200
 			]
 		},
 		{
@@ -297,8 +297,8 @@
 			"typeVersion": 2.2,
 			"notes": "True: messages from the poll, to be stored. False: the hourly timer or the manual run, to build digests.",
 			"position": [
-				1540,
-				260
+				2030,
+				200
 			]
 		},
 		{
@@ -311,8 +311,8 @@
 			"typeVersion": 2,
 			"notes": "Keeps the messages of the groups you listed, from other people and the ones you type yourself. Private chats, other groups and everything sent through the API (this digest too) are dropped.",
 			"position": [
-				1960,
-				0
+				2300,
+				125
 			]
 		},
 		{
@@ -340,8 +340,8 @@
 			"onError": "continueRegularOutput",
 			"notes": "The event holds only the first 50 characters. This reads the full text, or the caption of a photo. If it fails the 50 characters are kept.",
 			"position": [
-				2220,
-				0
+				2520,
+				125
 			]
 		},
 		{
@@ -354,8 +354,8 @@
 			"typeVersion": 2,
 			"notes": "Cleans and cuts the text. An @number mention becomes @FirstName and a phone number becomes [number]. A message without text becomes a marker such as [image], an event or a place keeps its name. A message whose text expired is dropped.",
 			"position": [
-				2480,
-				0
+				2740,
+				125
 			]
 		},
 		{
@@ -493,8 +493,8 @@
 			"typeVersion": 1.1,
 			"notes": "One row per message id: a message read twice is stored once.",
 			"position": [
-				2740,
-				0
+				2960,
+				125
 			]
 		},
 		{
@@ -526,8 +526,8 @@
 			"alwaysOutputData": true,
 			"notes": "The cleanup runs first, even when the digest fails afterwards: stored chat older than keep_days is deleted, so the table does not hoard conversations.",
 			"position": [
-				1960,
-				520
+				820,
+				830
 			]
 		},
 		{
@@ -560,8 +560,8 @@
 			"executeOnce": true,
 			"notes": "Reads the messages of the last 24 hours, once per run.",
 			"position": [
-				2220,
-				520
+				1040,
+				830
 			]
 		},
 		{
@@ -585,8 +585,8 @@
 			"executeOnce": true,
 			"notes": "Reads which groups already had their digest today.",
 			"position": [
-				2480,
-				520
+				1260,
+				830
 			]
 		},
 		{
@@ -599,8 +599,8 @@
 			"typeVersion": 2,
 			"notes": "Picks the groups due today with enough messages, keeps the newest messages that fit max_chars_for_model and writes what the AI reads. A group that cannot be found does not stop the others.",
 			"position": [
-				2740,
-				520
+				1480,
+				830
 			]
 		},
 		{
@@ -624,8 +624,8 @@
 			"onError": "continueRegularOutput",
 			"notes": "Asks the model for the digest of one group. If the model fails the run goes on with the plain digest.",
 			"position": [
-				3000,
-				520
+				1750,
+				830
 			]
 		},
 		{
@@ -652,8 +652,8 @@
 			},
 			"notes": "Swap it for any chat model node. OpenAI needs an API account with billing. Other OpenAI compatible providers need Use Responses API off.",
 			"position": [
-				3020,
-				780
+				1794,
+				1020
 			]
 		},
 		{
@@ -666,8 +666,8 @@
 			"typeVersion": 2,
 			"notes": "Refuses a summary that is empty or leaks a phone number or e-mail and uses the plain digest instead. Writes one message per recipient.",
 			"position": [
-				3340,
-				520
+				2280,
+				830
 			]
 		},
 		{
@@ -699,8 +699,8 @@
 			"onError": "continueRegularOutput",
 			"notes": "Sends to a phone, or to the group when delivery is group. The key is built from the group and the day, so a repeat never sends twice. A refusal is recorded.",
 			"position": [
-				3600,
-				520
+				2500,
+				830
 			]
 		},
 		{
@@ -713,8 +713,8 @@
 			"typeVersion": 2,
 			"notes": "Matches each answer with its message and builds one row per digest.",
 			"position": [
-				3860,
-				520
+				2720,
+				830
 			]
 		},
 		{
@@ -872,8 +872,8 @@
 			"typeVersion": 1.1,
 			"notes": "The marker that stops a second digest for the same group on the same day.",
 			"position": [
-				4120,
-				520
+				2940,
+				830
 			]
 		},
 		{
@@ -886,8 +886,8 @@
 			"typeVersion": 2,
 			"notes": "Fails the run when a digest was refused or a group of watch_groups was not found, naming the group and the recipient. This is what your Error workflow reacts to.",
 			"position": [
-				4380,
-				520
+				3160,
+				830
 			]
 		},
 		{
@@ -898,8 +898,8 @@
 			"typeVersion": 1,
 			"notes": "Click Execute workflow here once. Running it again changes nothing.",
 			"position": [
-				0,
-				1100
+				60,
+				670
 			]
 		},
 		{
@@ -960,8 +960,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				260,
-				1100
+				280,
+				670
 			]
 		},
 		{
@@ -1030,8 +1030,8 @@
 			"type": "n8n-nodes-base.dataTable",
 			"typeVersion": 1.1,
 			"position": [
-				520,
-				1100
+				500,
+				670
 			]
 		},
 		{
@@ -1040,13 +1040,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-780,
-				-140
+				0,
+				0
 			],
 			"parameters": {
 				"content": "### How it works\nFor a busy WhatsApp group of a team, school or community.\n\nWhile active, the workflow stores the text of the groups you list in a Data Table, because Turbo Notify keeps message text 1 hour by default on every plan. Every hour from digest_hour, a group with enough messages gets an AI digest of the last 24 hours: topics, decisions, open questions, dates and links. The answer is checked, and a plain digest replaces a bad one.\n\nIt goes to you, once per group per day. One button builds a digest now.\n\n### Setup\n1. Install [@turbo-notify/n8n-nodes-turbo-notify](https://www.npmjs.com/package/@turbo-notify/n8n-nodes-turbo-notify) (tested 1.5.15).\n2. Create a Turbo Notify API credential (scopes events:read, messages:read, messages:send, groups:read) and a chat model credential. Other OpenAI compatible providers need Use Responses API off.\n3. Run the manual branch once to create the tables.\n4. In Your settings replace watch_groups (the number must already be a member) and owner_phone (another phone than the number linked to Turbo Notify).\n5. Activate, write a few messages, then press Run now.\n\n### Customization\nPrompt, texts and limits are in Your settings. n8n Cloud counts executions: the poll runs every 10 minutes and the timer every hour, so lengthen them on a small plan.",
 				"width": 560,
-				"height": 500
+				"height": 495
 			}
 		},
 		{
@@ -1055,30 +1055,14 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-100,
-				-151
+				760,
+				0
 			],
 			"parameters": {
 				"content": "## Three ways in\n\nNew messages from the poll, an hourly timer for the digest, and a button for one digest now.",
-				"width": 300,
-				"height": 843,
+				"width": 380,
+				"height": 655,
 				"color": 7
-			}
-		},
-		{
-			"id": "c6dd0bba-bd69-40f1-ae3c-9acb65a05426",
-			"name": "Warning: watch_groups and owner_phone",
-			"type": "n8n-nodes-base.stickyNote",
-			"typeVersion": 1,
-			"position": [
-				460,
-				151
-			],
-			"parameters": {
-				"content": "**Replace watch_groups and owner_phone before you activate.** Until then the workflow stores and sends nothing.",
-				"width": 300,
-				"height": 281,
-				"color": 3
 			}
 		},
 		{
@@ -1087,13 +1071,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				970,
-				147
+				1190,
+				0
 			],
 			"parameters": {
 				"content": "## Check and route\n\nReads the groups once, checks the settings, then sends messages one way and digests the other.",
-				"width": 720,
-				"height": 285,
+				"width": 1000,
+				"height": 390,
 				"color": 7
 			}
 		},
@@ -1103,13 +1087,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1910,
-				-113
+				2240,
+				0
 			],
 			"parameters": {
 				"content": "## Store each message\n\nYour groups only, with the full text, saved once per message id.",
-				"width": 980,
-				"height": 285,
+				"width": 880,
+				"height": 315,
 				"color": 7
 			}
 		},
@@ -1119,13 +1103,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				1910,
-				407
+				760,
+				705
 			],
 			"parameters": {
 				"content": "## Clean up, read and plan\n\nDeletes old messages, reads the day and prepares each group that is due.",
-				"width": 980,
-				"height": 285,
+				"width": 880,
+				"height": 315,
 				"color": 7
 			}
 		},
@@ -1135,13 +1119,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				2950,
-				407
+				1690,
+				705
 			],
 			"parameters": {
 				"content": "## Write with AI\n\nThe model writes the digest. A checked plain digest replaces a bad answer.",
-				"width": 540,
-				"height": 545,
+				"width": 480,
+				"height": 505,
 				"color": 7
 			}
 		},
@@ -1151,13 +1135,13 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				3550,
-				407
+				2220,
+				705
 			],
 			"parameters": {
 				"content": "## Deliver and record\n\nOnce per group per day. A refused send is written down and fails the run.",
-				"width": 980,
-				"height": 285,
+				"width": 1100,
+				"height": 315,
 				"color": 7
 			}
 		},
@@ -1167,14 +1151,30 @@
 			"type": "n8n-nodes-base.stickyNote",
 			"typeVersion": 1,
 			"position": [
-				-50,
-				987
+				0,
+				545
 			],
 			"parameters": {
 				"content": "## Create the tables\n\nRun it once. It creates group_messages and digests if they are missing.",
-				"width": 720,
-				"height": 285,
+				"width": 660,
+				"height": 315,
 				"color": 7
+			}
+		},
+		{
+			"id": "c6dd0bba-bd69-40f1-ae3c-9acb65a05426",
+			"name": "Warning: watch_groups and owner_phone",
+			"type": "n8n-nodes-base.stickyNote",
+			"typeVersion": 1,
+			"position": [
+				1235,
+				105
+			],
+			"parameters": {
+				"content": "**Replace watch_groups and owner_phone before you activate.** Until then the workflow stores and sends nothing.",
+				"width": 250,
+				"height": 255,
+				"color": 3
 			}
 		}
 	],
