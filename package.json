@@ -1,9 +1,9 @@
 {
 	"name": "@turbo-notify/n8n-nodes-turbo-notify",
-	"version": "1.5.16",
-	"description": "Send and receive WhatsApp messages, read contacts and groups, and react to events with Turbo Notify.",
+	"version": "1.5.17",
+	"description": "Send WhatsApp messages from your own number in n8n: appointment reminders, order notices, customer replies and files. Start a workflow when a message arrives, check delivery and read groups. Also works as a tool for an n8n AI Agent.",
 	"license": "MIT",
-	"homepage": "https://docs.turbonotify.com",
+	"homepage": "https://docs.turbonotify.com/en/automation/n8n/",
 	"keywords": [
 		"n8n-community-node-package",
 		"n8n",

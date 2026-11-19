@@ -10,14 +10,14 @@ import { USER_AGENT } from '../nodes/TurboNotify/transport/version';
 export class TurboNotifyApi implements ICredentialType {
 	name = 'turboNotifyApi';
 
-	displayName = 'Turbo Notify API';
+	displayName = 'WhatsApp by Turbo Notify API';
 
 	icon: Icon = {
 		light: 'file:../nodes/TurboNotify/turboNotify.svg',
 		dark: 'file:../nodes/TurboNotify/turboNotify.svg',
 	};
 
-	documentationUrl = 'https://docs.turbonotify.com/en/guides/n8n/';
+	documentationUrl = 'https://docs.turbonotify.com/en/automation/n8n/';
 
 	properties: INodeProperties[] = [
 		{

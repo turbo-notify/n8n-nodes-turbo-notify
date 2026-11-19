@@ -12,13 +12,15 @@ export const numberDescription: INodeProperties[] = [
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Get a number with its connection status',
+				description:
+					'Check the connection status of a WhatsApp number you linked',
 				action: 'Get a number',
 			},
 			{
 				name: 'Get Many',
 				value: 'getMany',
-				description: 'Get the numbers of the organization, main and extra',
+				description:
+					'List the WhatsApp numbers of your organization, main and extra, with their connection status',
 				action: 'Get many numbers',
 			},
 		],

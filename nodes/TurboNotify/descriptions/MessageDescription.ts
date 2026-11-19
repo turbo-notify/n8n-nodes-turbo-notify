@@ -34,98 +34,113 @@ export const messageDescription: INodeProperties[] = [
 			{
 				name: 'Delete',
 				value: 'delete',
-				description: 'Delete a message you sent, for everyone in the chat',
+				description:
+					'Delete a WhatsApp message you sent, for everyone in the chat',
 				action: 'Delete a message',
 			},
 			{
 				name: 'Edit Caption',
 				value: 'editCaption',
 				description:
-					'Change the caption of an image, video or document within 15 minutes of sending',
+					'Change the caption of a WhatsApp image, video or document you sent, within 15 minutes of sending',
 				action: 'Edit a message caption',
 			},
 			{
 				name: 'Edit Text',
 				value: 'editText',
-				description: 'Change the text of a message within 15 minutes of sending',
+				description:
+					'Change the text of a WhatsApp message you sent, within 15 minutes of sending',
 				action: 'Edit a text message',
 			},
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Get a message with its content and status',
+				description:
+					'Get one WhatsApp message with its content and delivery status',
 				action: 'Get a message',
 			},
 			{
 				name: 'Get Many',
 				value: 'getMany',
-				description: 'Get the messages of a number, newest first',
+				description:
+					'Read the WhatsApp messages sent and received on a number, newest first',
 				action: 'Get many messages',
 			},
 			{
 				name: 'Get Quota',
 				value: 'getQuota',
-				description: 'Get how many messages a number can still send in this billing cycle',
+				description:
+					'Check how many WhatsApp messages a number can still send in this billing cycle',
 				action: 'Get the message quota',
 			},
 			{
 				name: 'Get Status',
 				value: 'getStatus',
-				description: 'Get how far a message has gone: pending, sent, delivered, read or failed',
+				description:
+					'Check whether a WhatsApp message you sent is pending, sent, delivered, read or failed',
 				action: 'Get a message status',
 			},
 			{
 				name: 'React',
 				value: 'react',
-				description: 'Add or remove an emoji reaction on a message',
+				description:
+					'Add or remove an emoji reaction on a WhatsApp message',
 				action: 'React to a message',
 			},
 			{
 				name: 'Reply',
 				value: 'reply',
-				description: 'Reply to an earlier message, quoting it',
+				description:
+					'Answer an earlier WhatsApp message, quoting it in the chat',
 				action: 'Reply to a message',
 			},
 			{
 				name: 'Send Calendar Event',
 				value: 'sendCalendarEvent',
-				description: 'Send a calendar event invitation',
+				description:
+					'Send a WhatsApp calendar invitation the guest answers with Going, Maybe or Not going',
 				action: 'Send a calendar event message',
 			},
 			{
 				name: 'Send Contact Card',
 				value: 'sendContactCard',
-				description: 'Send a contact card the recipient can save',
+				description:
+					'Send a contact card on WhatsApp that the recipient can save',
 				action: 'Send a contact card message',
 			},
 			{
 				name: 'Send Link Button',
 				value: 'sendLinkButton',
-				description: 'Send a message with a button that opens a link',
+				description:
+					'Send a WhatsApp message with a button that opens a link, such as order tracking',
 				action: 'Send a link button message',
 			},
 			{
 				name: 'Send Location',
 				value: 'sendLocation',
-				description: 'Send a map location',
+				description:
+					'Send a map location on WhatsApp, such as a store address or a meeting point',
 				action: 'Send a location message',
 			},
 			{
 				name: 'Send Media',
 				value: 'sendMedia',
-				description: 'Send an image, video, audio, document or sticker from a web address',
+				description:
+					'Send an image, video, audio file, document or sticker on WhatsApp from a web address',
 				action: 'Send a media message',
 			},
 			{
 				name: 'Send Text',
 				value: 'sendText',
-				description: 'Send a text message',
+				description:
+					'Send a WhatsApp text message from your own number, to a phone number, a contact or a group',
 				action: 'Send a text message',
 			},
 			{
 				name: 'Send Typing Indicator',
 				value: 'sendTypingIndicator',
-				description: 'Show typing in a chat while your workflow prepares the answer',
+				description:
+					'Show the typing indicator in a WhatsApp chat while your workflow prepares the answer',
 				action: 'Send a typing indicator',
 			},
 		],

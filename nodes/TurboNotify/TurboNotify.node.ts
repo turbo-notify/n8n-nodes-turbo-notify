@@ -21,7 +21,7 @@ export class TurboNotify implements INodeType {
 		subtitle:
 			'={{ $parameter["operation"].replace(/([A-Z])/g, " $1").toLowerCase() + ": " + $parameter["resource"] }}',
 		description:
-			'Send WhatsApp messages and read contacts, groups, numbers and events with Turbo Notify',
+			'Send WhatsApp reminders, notices and replies from your own number, and read chats, groups and delivery status',
 		defaults: { name: 'WhatsApp by Turbo Notify' },
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],

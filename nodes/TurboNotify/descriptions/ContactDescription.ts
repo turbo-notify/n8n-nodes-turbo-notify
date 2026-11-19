@@ -9,11 +9,12 @@ export const contactDescription: INodeProperties[] = [
 		noDataExpression: true,
 		displayOptions: { show: { resource: ['contact'] } },
 		options: [
-			{ name: 'Get', value: 'get', description: 'Get a contact', action: 'Get a contact' },
+			{ name: 'Get', value: 'get', description: 'Get one contact of your WhatsApp number, with name and phone', action: 'Get a contact' },
 			{
 				name: 'Get Many',
 				value: 'getMany',
-				description: 'Get the contacts of a number',
+				description:
+					'List the people who wrote to your WhatsApp number or that you messaged',
 				action: 'Get many contacts',
 			},
 		],

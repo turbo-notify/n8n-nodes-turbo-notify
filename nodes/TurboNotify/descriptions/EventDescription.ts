@@ -14,7 +14,7 @@ export const eventDescription: INodeProperties[] = [
 				name: 'Get Many',
 				value: 'getMany',
 				description:
-					'Get what happened on your numbers, newest first. Use it to catch up on events a workflow missed.',
+					'Get what happened on your WhatsApp numbers (messages received, delivered or read, numbers disconnected), newest first. Use it to catch up on events a workflow missed.',
 				action: 'Get many events',
 			},
 		],

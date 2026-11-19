@@ -213,3 +213,57 @@ describe('the nodes are found by searching for WhatsApp', () => {
 		});
 	});
 });
+
+describe('the texts a stranger reads say WhatsApp (ADR 2026-11-19)', () => {
+	const { TurboNotify } = require('../nodes/TurboNotify/TurboNotify.node');
+	const { TurboNotifyTrigger } = require('../nodes/TurboNotifyTrigger/TurboNotifyTrigger.node');
+	const {
+		TurboNotifyPollingTrigger,
+	} = require('../nodes/TurboNotifyPollingTrigger/TurboNotifyPollingTrigger.node');
+	const { TurboNotifyApi } = require('../credentials/TurboNotifyApi.credentials');
+
+	const operations = properties
+		.filter((p) => p.name === 'operation')
+		.flatMap((p) => p.options ?? [])
+		.map((o) => ({ value: o.value, action: o.action, description: o.description }));
+
+	// The `action` text is not asserted: n8n's linter lowercases "WhatsApp" in it (sentence case), and the
+	// node panel shows the actions under the app name "WhatsApp by Turbo Notify". The `description` is
+	// what n8n.io/integrations and the operation dropdown show, so that is what carries the word.
+	it('every operation description says WhatsApp', () => {
+		expect(operations.length).toBeGreaterThanOrEqual(22);
+		for (const o of operations) {
+			expect({ value: o.value, description: /WhatsApp/.test(o.description ?? '') }).toEqual({
+				value: o.value,
+				description: true,
+			});
+		}
+	});
+
+	it('no operation description keeps the old wording that never said WhatsApp', () => {
+		const stale = [
+			'Send a text message',
+			'Get a contact',
+			'Get the contacts of a number',
+			'Get a number with its connection status',
+			'Get the messages of a number, newest first',
+		];
+		const texts = operations.map((o) => o.description);
+		for (const text of stale) expect(texts).not.toContain(text);
+	});
+
+	it('the node descriptions, the labels and the credential say WhatsApp', () => {
+		for (const node of [TurboNotify, TurboNotifyTrigger, TurboNotifyPollingTrigger]) {
+			const { description, displayName } = new node().description;
+			expect(displayName).toMatch(/WhatsApp/);
+			expect(description).toMatch(/WhatsApp/);
+		}
+		expect(new TurboNotifyApi().displayName).toMatch(/WhatsApp/);
+	});
+
+	it('the node descriptions do not open with the product name', () => {
+		for (const node of [TurboNotify, TurboNotifyTrigger, TurboNotifyPollingTrigger]) {
+			expect(new node().description.description).not.toMatch(/^Turbo Notify/);
+		}
+	});
+});

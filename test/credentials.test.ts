@@ -5,7 +5,7 @@ describe('TurboNotifyApi credential', () => {
 
 	it('has the name the nodes reference', () => {
 		expect(credential.name).toBe('turboNotifyApi');
-		expect(credential.displayName).toBe('Turbo Notify API');
+		expect(credential.displayName).toBe('WhatsApp by Turbo Notify API');
 	});
 
 	it('stores the API key as a password field and a default Base URL', () => {

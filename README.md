@@ -1,6 +1,6 @@
 # @turbo-notify/n8n-nodes-turbo-notify
 
-Turbo Notify connects a WhatsApp number to your account and gives you an API for it. This package adds Turbo Notify to n8n:
+Send WhatsApp messages from n8n with your own number, and start a workflow when one arrives: appointment reminders, order notices, customer replies, delivery checks and group digests. This package adds the Turbo Notify service to n8n:
 
 - **WhatsApp by Turbo Notify** node: send text, images, video, audio, documents, stickers, locations, contact cards, calendar events and link buttons; reply, react, edit and delete messages; show typing; check delivery status; read messages, contacts, groups, numbers and events. It also works as a tool for an AI Agent.
 - **WhatsApp by Turbo Notify Trigger** node: starts a workflow the moment something happens (a message arrives, a message is delivered or read, a number disconnects, a quota runs low). It is a webhook, so it is instant.
@@ -54,7 +54,7 @@ Before you use the node you need a Turbo Notify account with your WhatsApp numbe
 
 1. Sign in to the [dashboard](https://dashboard.turbonotify.com). Under **Numbers**, connect your main number if you have not yet: with the phone at hand, choose **QR code** or **Pairing code** and enter it in WhatsApp under **Linked devices**. Without a connected number every send is refused with `number_not_connected`.
 2. Under **API keys**, create a key. Use the template **AI agent (MCP)**. The name refers to the MCP server, but the scopes it selects are exactly the ones this package uses: `messages:send`, `messages:read`, `contacts:read`, `groups:read`, `numbers:read` and `events:read`. A workflow that only sends can use the **Transactional notifications** template instead. **Full access** also works, but gives the workflow more than it needs. The key value is shown once: copy it.
-3. In n8n, create a **Turbo Notify API** credential and paste the key into **API Key**. Leave **Base URL** as it is. Select **Save**: n8n tests the key by calling `GET /v1/usage`, which works with any valid key.
+3. In n8n, create a **WhatsApp by Turbo Notify API** credential and paste the key into **API Key**. Leave **Base URL** as it is. Select **Save**: n8n tests the key by calling `GET /v1/usage`, which works with any valid key.
 
 **Webhook Signing Secret** is only for the instant trigger: see [WhatsApp by Turbo Notify Trigger](#whatsapp-by-turbo-notify-trigger-instant).
 

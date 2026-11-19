@@ -7,12 +7,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://docs.turbonotify.com/en/guides/n8n/"
+				"url": "https://docs.turbonotify.com/en/automation/n8n/"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://docs.turbonotify.com/en/guides/n8n/"
+				"url": "https://docs.turbonotify.com/en/automation/n8n/"
 			}
 		]
 	}

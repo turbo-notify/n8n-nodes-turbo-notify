@@ -43,7 +43,7 @@
 		},
 		{
 			"parameters": {
-				"content": "**Before you run this**\n1. Create the Turbo Notify API credential: https://docs.turbonotify.com/en/guides/n8n/\n2. Replace the phone number with your own: country code, with a +.\n3. Select **Test workflow**. The answer says `pending`, which means Turbo Notify accepted the message.\n\nA new number sends 50 messages on its first day.",
+				"content": "**Before you run this**\n1. Create the Turbo Notify API credential: https://docs.turbonotify.com/en/automation/n8n/\n2. Replace the phone number with your own: country code, with a +.\n3. Select **Test workflow**. The answer says `pending`, which means Turbo Notify accepted the message.\n\nA new number sends 50 messages on its first day.",
 				"height": 230,
 				"width": 520
 			},

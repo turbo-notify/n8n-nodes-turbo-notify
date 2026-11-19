@@ -92,7 +92,7 @@ export const EVENT_OPTIONS: INodePropertyOptions[] = [
 	{
 		name: 'Message Delivered',
 		value: 'message.delivered',
-		description: 'A message you sent reached the recipient',
+		description: 'A WhatsApp message you sent reached the recipient',
 	},
 	{
 		name: 'Message Edit Failed',
@@ -127,12 +127,12 @@ export const EVENT_OPTIONS: INodePropertyOptions[] = [
 	{
 		name: 'Message Read',
 		value: 'message.read',
-		description: 'The recipient read a message you sent',
+		description: 'The recipient read a WhatsApp message you sent',
 	},
 	{
 		name: 'Message Received',
 		value: 'message.received',
-		description: 'A message arrived from a contact',
+		description: 'A WhatsApp message arrived from a contact',
 	},
 	{
 		name: 'Message Replied',

@@ -9,11 +9,12 @@ export const groupDescription: INodeProperties[] = [
 		noDataExpression: true,
 		displayOptions: { show: { resource: ['group'] } },
 		options: [
-			{ name: 'Get', value: 'get', description: 'Get a WhatsApp group', action: 'Get a group' },
+			{ name: 'Get', value: 'get', description: 'Get one WhatsApp group your number belongs to', action: 'Get a group' },
 			{
 				name: 'Get Many',
 				value: 'getMany',
-				description: 'Get the WhatsApp groups of a number',
+				description:
+					'List the WhatsApp groups your number is in, to send to a group or read its messages',
 				action: 'Get many groups',
 			},
 		],

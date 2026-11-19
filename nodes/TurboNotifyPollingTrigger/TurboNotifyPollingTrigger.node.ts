@@ -39,7 +39,7 @@ export class TurboNotifyPollingTrigger implements INodeType {
 		subtitle:
 			'={{ Array.isArray($parameter["events"]) && !$parameter["events"].includes("*") ? $parameter["events"].join(", ") : "any event" }}',
 		description:
-			'Starts a workflow when Turbo Notify records a WhatsApp event, checking at the interval you set, on every plan',
+			'Start a workflow when a WhatsApp message arrives or something else happens on your number, checking at the interval you set. Works on every plan',
 		defaults: { name: 'WhatsApp by Turbo Notify Polling Trigger' },
 		polling: true,
 		inputs: [],

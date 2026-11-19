@@ -53,7 +53,8 @@ export class TurboNotifyTrigger implements INodeType {
 		// n8n groups this trigger with the WhatsApp by Turbo Notify node (the name without "Trigger" is the same) and
 		// gives the group the trigger's description: the node panel for "WhatsApp by Turbo Notify" shows this text above
 		// the list of actions. So it describes the whole app, and a test keeps it that way.
-		description: 'Send, track and receive WhatsApp messages from your workflows',
+		description:
+			'Send reminders, notices and replies on WhatsApp from your own number, and start workflows when a message arrives',
 		defaults: { name: 'WhatsApp by Turbo Notify Trigger' },
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],

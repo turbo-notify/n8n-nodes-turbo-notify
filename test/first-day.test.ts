@@ -51,7 +51,7 @@ describe('what a new user needs to know before the first send', () => {
 	});
 
 	it('points the credential and every node at the same page', () => {
-		expect(credential.documentationUrl).toBe('https://docs.turbonotify.com/en/guides/n8n/');
+		expect(credential.documentationUrl).toBe('https://docs.turbonotify.com/en/automation/n8n/');
 	});
 
 	it('names where the API key is created', () => {
@@ -164,13 +164,15 @@ describe('the node panel', () => {
 	it('shows the app description, not a sentence about the trigger', () => {
 		// n8n gives the grouped Turbo Notify node the description of the trigger whose name matches it.
 		const { description } = new TurboNotifyTrigger().description;
-		expect(description).toBe('Send, track and receive WhatsApp messages from your workflows');
+		expect(description).toBe(
+			'Send reminders, notices and replies on WhatsApp from your own number, and start workflows when a message arrives',
+		);
 		expect(description).not.toMatch(/^Starts/);
 	});
 
 	it('keeps the polling trigger as its own entry with its own description', () => {
 		const { description, name } = new TurboNotifyPollingTrigger().description;
 		expect(name).toBe('turboNotifyPollingTrigger');
-		expect(description).toMatch(/^Starts a workflow/);
+		expect(description).toMatch(/^Start a workflow/);
 	});
 });
